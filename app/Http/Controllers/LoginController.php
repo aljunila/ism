@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,9 +33,11 @@ class LoginController extends Controller
         ];
 
         $username = $request->input('username');
-        $password = sha1($request->input('password'));
-        $data = User::where('username',$username)->where('password', $password)->first();
-        if($data){ 
+        $password = $request->input('password');
+        $data = User::where('username', $username)->first();
+
+        try {
+            if ($data && Hash::check($password, $data->password)) {
                 if($data->id_previllage!=1) {
                     $cek = Karyawan::where('id', $data->id_karyawan)
                                     ->where('karyawan.status', 'A')
@@ -66,10 +68,13 @@ class LoginController extends Controller
                     Session::put('login',TRUE);
                     return redirect('/dashboard');
                 }
-        } else { 
+            } else { 
                 $messages = ['Username atau password tidak sesuai'];
                 return redirect()->back()->withErrors($messages);
             }
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['Username atau password tidak sesuai']);
+        }
     }
 
     public function logout(){
@@ -115,5 +120,61 @@ class LoginController extends Controller
             });
 
         return response()->json($menus);
+    }
+
+     public function password(Request $request)
+    {
+        $id = Session::get('userid');
+        $old_password = $request->input('old_password');
+        $new_password = $request->input('new_password');
+
+        $cek = User::findOrFail($id);
+        if (!Hash::check($old_password, $cek->password)) {
+            return response()->json(['success' => false, 'message' => 'Password lama salah']);
+        }
+        $cek->password = Hash::make($new_password);
+        $cek->save();
+        return response()->json(['success' => true, 'message' => 'Password berhasil diubah. Silahkan login kembali dengan password baru']);
+    }
+
+    public function getMenu()
+    {
+        $previllage = Session::get('previllage');
+        $id = Session::get('id_karyawan');
+
+        if ($previllage == 1) {
+            $menus = Menu::where('status', 'A')
+                ->orderBy('no', 'ASC')
+                ->get();
+        } else {
+            $menus = DB::table('akses')
+                ->leftJoin('menu', 'menu.id', '=', 'akses.id_menu')
+                ->where('menu.status', 'A')
+                ->where('akses.id_karyawan', $id)
+                ->orderBy('no', 'ASC')
+                ->select('menu.*')
+                ->get();
+            $dashboard = Menu::where('kode', 'dashboard')->first();
+            if ($dashboard && !$menus->contains('id', $dashboard->id)) {
+                $menus->prepend($dashboard);
+            }
+        }
+
+        $tree = $this->buildTree($menus);
+
+        return response()->json($tree);
+    }
+
+    private function buildTree($menus, $parentId = 0)
+    {
+        $branch = [];
+        foreach ($menus as $menu) {
+            if ($menu->id_parent == $parentId) {
+                $children = $this->buildTree($menus, $menu->id);
+                $menu->children = $children;
+                $branch[] = $menu;
+            }
+        }
+        return $branch;
     }
 }

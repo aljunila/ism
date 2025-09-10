@@ -21,11 +21,12 @@ Route::get('/', function () {
 });
 
 Route::get('login', [LoginController::class, 'login'])->name('login');
-Route::post('/login/login', [AuthController::class, 'login']);
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/login/password', [LoginController::class, 'password']);
 Route::get('/get-menu/parents', [LoginController::class, 'getParents']);
 Route::get('/get-menu/{id}', [LoginController::class, 'getChildren']);
+Route::get('/getMenu', [LoginController::class, 'getMenu']);
 
 Route::get('/dashboard', [DashboardController::class, 'show'])->name('show')->middleware('auth');
 Route::post('/upload-image', [UploadController::class, 'upload'])->name('upload.image');

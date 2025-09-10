@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
 use App\Models\Perusahaan;
@@ -102,7 +102,7 @@ class KaryawanController extends Controller
                     $akun = User::create([
                     'nama' => $request->input('nama'),
                     'username' => $request->input('username'),
-                    'password' => sha1($request->input('password')),
+                    'password' => Hash::make($request->input('password')),
                     'id_previllage' => $request->input('id_previllage'),
                     'id_perusahaan' => $request->input('id_perusahaan'),
                     'id_kapal' => $request->input('id_kapal'),
@@ -204,20 +204,6 @@ class KaryawanController extends Controller
 
             $save = Karyawan::find($id)->update(['tanda_tangan' => $nama_file]); 
             return response()->json($save);
-        }
-    }
-
-    public function password(Request $request, $id)
-    {
-        $old_password = sha1($request->input('old_password'));
-        $new_password = sha1($request->input('new_password'));
-
-        $cek = User::findOrFail($id);
-        if($cek->password!=$old_password){
-            return response()->json(['success' => false]);
-        } else {
-            $update = User::where('id', $id)->update(['password' => $new_password]);
-            return response()->json(['success' => true]);
         }
     }
 }

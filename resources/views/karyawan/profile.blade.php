@@ -93,40 +93,7 @@
             });
         });
 
-         $('#change-pass').on('click', function(e){
-            e.preventDefault(); // cegah submit biasa
-            let id_user = $('#id_user').val();
-            console.log($('#old_password').val());            
-
-            $.ajax({
-                url: "/karyawan/password/" + id_user,
-                method: "POST",
-                data: {
-                    'old_password': $('#old_password').val(),
-                    'new_password': $('#new_password').val()
-                },
-                processData: false,
-                contentType: false,
-                success: function(response){
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message ?? 'Data berhasil disimpan',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            $('#FormPassword').modal('hide');
-                        });
-                },
-                error: function(xhr){
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Password lama tidak sesuai'
-                    });
-                }
-            });
-        });
+         
     </script>
 @endsection
 @section('content')
@@ -374,42 +341,6 @@
                     <div class="modal-footer">
                         <input type="hidden" name="id_karyawan" id="id_karyawan" value="{{$show->id}}">
                         <button type="submit" class="btn btn-primary" id="upload_ttd">Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade text-start" id="FormPassword" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel33">Ubah Password</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="form_password" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-1 row">
-                            <div class="col-sm-3">
-                                <label class="col-form-label" for="first-name">Password Lama</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <input type="password" class="form-control" id="old_password" name="old_password" required>
-                            </div>
-                        </div>
-                        <div class="mb-1 row">
-                            <div class="col-sm-3">
-                                <label class="col-form-label" for="first-name">Password Baru</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <input type="password" class="form-control" id="new_password" name="new_password" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="text" name="id_user" id="id_user" value="{{$show->user}}">
-                        <button type="button" class="btn btn-primary" id="change-pass">Simpan</button>
                     </div>
                 </form>
             </div>

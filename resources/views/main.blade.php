@@ -101,6 +101,7 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">
                         <a class="dropdown-item" href="/karyawan/profil"><i class="me-50" data-feather="user"></i> Profile</a>
+                        <a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#ChangePassword" ><i data-feather='key'></i> Ubah Password</a>
                         <a class="dropdown-item" href="{{ url('/logout') }}"><i class="me-50" data-feather="power"></i> Logout</a>
                     </div>
                 </li>
@@ -122,98 +123,79 @@
             </ul>
         </div>
         <div class="shadow-bottom"></div>
-        <div class="main-menu-content">
-            <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-                <li class="@if($active=='dashboard') active @endif"><a class="d-flex align-items-center" href="/dashboard"><i data-feather="home"></i><span class="menu-item text-truncate" data-i18n="eCommerce">Dashboard</span></a>
-                </li>
-                <li class=" navigation-header"><span data-i18n="Apps &amp; Pages">DATA &amp; MASTER</span><i data-feather="more-horizontal"></i>
-                </li> 
-                <?php
-                    $previllage = Session::get('previllage');
-                    $id = Session::get('id_karyawan');
-                    if(($previllage)==1){
-                        $cek = App\Models\Menu::where('status', 'A')
-                            ->where('id_parent', 0)
-                            ->orderBy('no', 'ASC')->get(); 
+            <div class="main-menu-content">
+            @php
+                use App\Models\Menu;
+                use Illuminate\Support\Facades\DB;
+                $previllage = Session::get('previllage');
+                $id = Session::get('id_karyawan');
+
+                // fungsi recursive
+                function getMenu($parentId = 0, $previllage, $id) {
+                    if ($previllage == 1) {
+                        return Menu::where('status', 'A')
+                                    ->where('id_parent', $parentId)
+                                    ->orderBy('no', 'ASC')
+                                    ->get();
                     } else {
-                        $cek = DB::table('akses')
-                                ->leftjoin('menu', 'menu.id', '=', 'akses.id_menu')
-                                ->where('menu.status', 'A')
-                                ->where('menu.id_parent', 0)
-                                ->where('akses.id_karyawan', $id)
-                                ->orderBy('no', 'ASC')->get(); 
+                        return DB::table('akses')
+                            ->leftJoin('menu', 'menu.id', '=', 'akses.id_menu')
+                            ->where('menu.status', 'A')
+                            ->where('menu.id_parent', $parentId)
+                            ->where('akses.id_karyawan', $id)
+                            ->orderBy('no', 'ASC')
+                            ->get();
                     }
-                ?>
-                @foreach($cek as $menu)
-                    <?php
-                        if(($previllage)==1){
-                            $getparent = App\Models\Menu::where('status', 'A')
-                                        ->where('id_parent', $menu->id)
-                                        ->orderBy('no', 'ASC')->get(); 
-                        } else {
-                            $getparent = DB::table('akses')
-                                ->leftjoin('menu', 'menu.id', '=', 'akses.id_menu')
-                                ->where('menu.status', 'A')
-                                ->where('akses.id_karyawan', $id)
-                                ->where('menu.id_parent', $menu->id)
-                                ->orderBy('no', 'ASC')->get(); 
-                        }
-                            $count=count($getparent);
-                            if($active==$menu->kode){
-                                $class = 'active';
-                            } else {
-                                $class='';
-                            }
-                    ?>
-                    @if($count>=1)
-                        <li class="{{$class}}"><a class="d-flex align-items-center" href="{{ $menu->link }}">{!! $menu->icon !!}<span class="menu-item text-truncate" data-i18n="Profile">{{ $menu->nama }}</span></a>
+                }
+
+                $menus = getMenu(0, $previllage, $id);
+            @endphp
+            <ul class="navigation navigation-main" data-menu="menu-navigation">
+                @foreach($menus as $menu)
+                    @php
+                        $children = getMenu($menu->id, $previllage, $id);
+                        $hasChild = count($children) > 0;
+                        $isActive = ($active == $menu->kode) ? 'active' : '';
+                    @endphp
+
+                    <li class="{{ $isActive }}">
+                        <a href="{{ $hasChild ? '#' : $menu->link }}">
+                            {!! $menu->icon !!} <span>{{ $menu->nama }}</span>
+                        </a>
+
+                        @if($hasChild)
                             <ul>
-                                @foreach($getparent as $child)
-                                    <?php if(($previllage)==1){
-                                                $getgc = App\Models\Menu::where('status', 'A')
-                                                            ->where('id_parent', $child->id)
-                                                            ->orderBy('no', 'ASC')->get(); 
-                                            } else {
-                                                $getgc = DB::table('akses')
-                                                    ->leftjoin('menu', 'menu.id', '=', 'akses.id_menu')
-                                                    ->where('menu.status', 'A')
-                                                    ->where('akses.id_karyawan', $id)
-                                                    ->where('menu.id_parent', $child->id)
-                                                    ->orderBy('no', 'ASC')->get(); 
-                                            }
-                                            $countgc=count($getgc);
-                                            if($active==$child->kode) {
-                                                $c = 'active';
-                                            } else {
-                                                $c='';
-                                            } ?>
-                                    @if($countgc>=1)
-                                    <li class="{{$c}}"><a class="d-flex align-items-center" href="{{ $child->link }}">{!! $child->icon !!}<span class="menu-item text-truncate" data-i18n="Profile">{{ $child->nama }}</span></a>
-                                        <ul>
-                                            @foreach($getgc as $gc)
-                                                <?php if($active==$gc->kode) {
-                                                            $cg = 'active';
-                                                        } else {
-                                                            $cg='';
-                                                        } ?>
-                                                <li class="{{$cg}}"><a class="d-flex align-items-center" href="{{ $gc->link }}">{!! $gc->icon !!}<span class="menu-item text-truncate" data-i18n="Profile">{{ $gc->nama }}</span></a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                @foreach($children as $child)
+                                    @php
+                                        $subChildren = getMenu($child->id, $previllage, $id);
+                                        $subHasChild = count($subChildren) > 0;
+                                        $isChildActive = ($active == $child->kode) ? 'active' : '';
+                                    @endphp
+
+                                    <li class="{{ $isChildActive }}">
+                                        <a href="{{ $subHasChild ? '#' : $child->link }}">
+                                            {!! $child->icon !!} <span>{{ $child->nama }}</span>
+                                        </a>
+
+                                        @if($subHasChild)
+                                            <ul>
+                                                @foreach($subChildren as $gc)
+                                                    <li class="{{ $active == $gc->kode ? 'active' : '' }}">
+                                                        <a href="{{ $gc->link }}">
+                                                            {!! $gc->icon !!} <span>{{ $gc->nama }}</span>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                     </li>
-                                    @else
-                                    <li class="{{$c}}"><a class="d-flex align-items-center" href="{{ $child->link }}">{!! $child->icon !!}<span class="menu-item text-truncate" data-i18n="Profile">{{ $child->nama }}</span></a>
-                                    </li>
-                                    @endif
                                 @endforeach
                             </ul>
-                        </li>
-                    @else 
-                    <li class={{$class}}><a class="d-flex align-items-center" href="{{ $menu->link }}">{!! $menu->icon !!}<span class="menu-item text-truncate" data-i18n="Profile">{{ $menu->nama }}</span></a>
-                        </li>    
-                    @endif
+                        @endif
+                    </li>
                 @endforeach
             </ul>
+            </div>
         </div>
     </div>
     <!-- END: Main Menu-->
@@ -239,6 +221,40 @@
     <div class="sidenav-overlay"></div>
     <div class="drag-target"></div>
 
+    <div class="modal fade text-start" id="ChangePassword" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel33">Ubah Password</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form_password" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Password Lama</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="password" class="form-control" id="old_password" name="old_password" required>
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Password Baru</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="change-pass">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- BEGIN: Footer-->
     <footer class="footer footer-static footer-light">
         <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="" target="_blank">PT. Aman Lintas Samudra</a></p>
@@ -272,6 +288,122 @@
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
+        });
+
+       $(document).ready(function () {
+            $.ajax({
+                url: "getMenu",
+                method: "GET",
+                success: function (menus) {
+                    let html = renderMenu(menus);
+                    $("#sidebarMenu").html(html);
+                    setActiveMenu();
+                }
+            });
+
+            $("#sidebarMenu").html(renderMenu(menus));
+    setActiveMenu();
+
+    // 🔹 Fungsi render recursive
+    function renderMenu(menus, level = 0) {
+        let html = "";
+        menus.forEach(menu => {
+            let hasChildren = menu.children && menu.children.length > 0;
+            let baseClass = "flex items-center py-2 px-3 rounded-md transition duration-150 ease-in-out cursor-pointer";
+            let inactiveClass = "text-gray-700 hover:bg-gray-100";
+
+            if (hasChildren) {
+                html += `
+                    <li>
+                        <a class="${baseClass} ${inactiveClass} parent-menu">
+                            ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
+                            <span class="ml-auto">▸</span>
+                        </a>
+                        <ul class="ml-4 hidden border-l border-gray-200 space-y-1 pl-2">
+                            ${renderMenu(menu.children, level + 1)}
+                        </ul>
+                    </li>
+                `;
+            } else {
+                html += `
+                    <li>
+                        <a href="${menu.link}" 
+                           class="${baseClass} ${inactiveClass}" 
+                           data-link="${menu.link}">
+                            ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
+                        </a>
+                    </li>
+                `;
+            }
+        });
+        return html;
+    }
+
+    // 🔹 Set menu aktif
+    function setActiveMenu() {
+        let current = window.location.pathname;
+
+        $("#sidebarMenu a[data-link]").each(function () {
+            if ($(this).attr("href") === current) {
+                $(this).addClass("bg-indigo-600 text-white font-semibold");
+                $(this).parents("ul").removeClass("hidden").addClass("block");
+                $(this).parents("li").children(".parent-menu")
+                       .addClass("text-indigo-700 font-bold")
+                       .find("span:last").text("▾");
+            }
+        });
+    }
+
+    // 🔹 Toggle submenu kalau parent diklik
+    $(document).on("click", ".parent-menu", function (e) {
+        e.preventDefault();
+        let submenu = $(this).next("ul");
+        submenu.toggleClass("hidden block");
+        $(this).find("span:last").text(submenu.hasClass("hidden") ? "▸" : "▾");
+    });
+        });
+        
+
+
+        $('#change-pass').on('click', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let id_user = $('#id_user').val();
+            console.log($('#old_password').val());            
+
+            $.ajax({
+                url: "/login/password",
+                method: "POST",
+                data: {
+                    'old_password': $('#old_password').val(),
+                    'new_password': $('#new_password').val()
+                },
+                success: function(response){
+                    if(response.success){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = "{{ url('/logout') }}";
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message
+                        });
+                    }
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan server'
+                    });
+                }
+            });
         });
     </script>
     

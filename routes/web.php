@@ -15,6 +15,8 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ProsedurController;
 use App\Http\Controllers\RefrensiDocController;
 use App\Http\Controllers\AturanController;
+use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\NotulenController;
 
 Route::get('/', function () {
     return view('login/show');
@@ -131,3 +133,34 @@ Route::get('/aturan/edit/{id}', [AturanController::class, 'edit'])->middleware('
 Route::post('/aturan/update/{id}', [AturanController::class, 'update']);
 Route::post('/aturan/delete/{id}', [AturanController::class, 'delete']);
 Route::get('/aturan/pdf/{id}', [AturanController::class, 'aturanPdf'])->name('aturan.pdf')->middleware('auth');
+
+Route::get('/el0302', [ChecklistController::class, 'el0302'])->name('el0302')->middleware('auth');
+Route::post('/checklist/data', [ChecklistController::class, 'getData'])->middleware('auth');
+Route::get('/checklist/add/{kode}', [ChecklistController::class, 'add' ])->middleware('auth');
+Route::post('/checklist/store', [ChecklistController::class, 'store'])->name('store');
+Route::get('/checklist/profil/{id}', [ChecklistController::class, 'profil'])->middleware('auth');
+Route::get('/checklist/edit/{id}', [ChecklistController::class, 'edit'])->middleware('auth');
+Route::post('/checklist/update/{id}', [ChecklistController::class, 'update']);
+Route::post('/checklist/delete/{id}', [ChecklistController::class, 'delete']);
+Route::get('/el0303', [ChecklistController::class, 'el0303'])->name('el0303')->middleware('auth');
+Route::get('/el0304', [ChecklistController::class, 'el0304'])->name('el0304')->middleware('auth');
+Route::get('/el0305', [ChecklistController::class, 'el0305'])->name('el0305')->middleware('auth');
+Route::get('/checklist/pdf/{id}', [ChecklistController::class, 'pdf'])->name('checklist.pdf')->middleware('auth');
+Route::get('/checklist/item/{kode}', [ChecklistController::class, 'item' ])->middleware('auth');
+Route::post('/checklist/dataitem', [ChecklistController::class, 'getItem'])->middleware('auth');
+
+Route::post('/form/intruksi', [ChecklistController::class, 'saveform'])->middleware('auth');
+Route::post('/checklist/storeitem', [ChecklistController::class, 'storeitem'])->middleware('auth');
+Route::get('/checklist/edititem/{id}', [ChecklistController::class, 'edititem'])->middleware('auth');
+Route::post('/checklist/updateitem/{id}', [ChecklistController::class, 'updateitem']);
+Route::post('/checklist/deleteitem/{id}', [ChecklistController::class, 'deleteitem']);
+
+Route::get('/el0301', [NotulenController::class, 'show'])->name('notulen')->middleware('auth');
+Route::get('/notulen/data', [NotulenController::class, 'getData'])->middleware('auth');
+Route::get('/notulen/add', [NotulenController::class, 'add' ])->middleware('auth');
+Route::post('notulen/store', [NotulenController::class, 'store']);
+Route::get('/notulen/profil/{id}', [NotulenController::class, 'profil'])->middleware('auth');
+Route::get('/notulen/edit/{id}', [NotulenController::class, 'edit'])->middleware('auth');
+Route::post('/notulen/update/{id}', [NotulenController::class, 'update']);
+Route::post('/notulen/delete/{id}', [NotulenController::class, 'delete']);
+Route::get('/notulen/pdf/{id}', [NotulenController::class, 'notulenPdf'])->name('notulen.pdf')->middleware('auth');

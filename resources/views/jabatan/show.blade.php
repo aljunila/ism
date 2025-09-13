@@ -109,6 +109,7 @@ $('#tambah_data').click(function(){
         }
     });
 })
+
 $(document).on('click', '.edit-btn', function(){
      var id = $(this).attr('data-id');
     $.ajax({

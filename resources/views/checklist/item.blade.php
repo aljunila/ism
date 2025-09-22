@@ -62,13 +62,11 @@
                         data: 'id',
                         render: function(data, type, row){
                             return `
-                                <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning edit-btn" 
-                                    title="Edit" data-id="${data}">
-                                    <i data-feather="edit"></i>
+                                <button type="button" class="btn btn-sm btn-warning edit-btn" 
+                                    title="Edit" data-id="${data}">Edit
                                 </button>
-                                <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-danger delete-btn" 
-                                    title="Hapus" data-id="${data}">
-                                    <i data-feather="trash-2"></i>
+                                <button type="button" class="btn btn-sm btn-danger delete-btn" 
+                                    title="Hapus" data-id="${data}">Hapus
                                 </button>
                             `;
                         }
@@ -242,7 +240,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Setting Form: {{$form->nama}}</h4>
-                    <a type="button" class="btn btn-success btn-sm" href="/checklist/add/{{$form->kode}}"><i data-feather='arrow-left'></i>Kembali</a>
+                    <a type="button" class="btn btn-success btn-sm" href="/{{$form->kode}}"><i data-feather='arrow-left'></i>Kembali</a>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -299,9 +297,9 @@
                             <table id="table" class="table table-bordered table-striped" width="100%">
                                 <thead>
                                     <tr>
-                                    <th>No.</th>
-                                    <th>Item Checklist</th>
-                                    <th>Aksi</th>
+                                    <th width="5%">No.</th>
+                                    <th width="70%">Item Checklist</th>
+                                    <th width="25%">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>

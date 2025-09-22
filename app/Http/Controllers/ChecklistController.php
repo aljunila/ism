@@ -5,13 +5,14 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\ChecklistItem;
 use App\Models\ChecklistData;
+use App\Models\ChecklistGanti;
 use App\Models\ChecklistDataDetail;
 use App\Models\Karyawan;
 use App\Models\KodeForm;
 use App\Models\Kapal;
 use Alert;
 use Session;
-Use Carbon\Carbon;
+\Carbon\Carbon::setLocale('id');
 use Str;
 use DB;
 
@@ -68,6 +69,7 @@ class ChecklistController extends Controller
         foreach ($checked as $id => $value) {
            $item = ChecklistDataDetail::insert([
                 'uid' => Str::uuid()->toString(),
+                'kode' => $save->kode,
                 'checklist_data_id' => $save->id,
                 'checklist_item_id' => $id,
                 'value' => $value,
@@ -89,7 +91,7 @@ class ChecklistController extends Controller
         $data['form'] = KodeForm::where('kode', $show->kode)->first();
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
         $data['kapal'] = Kapal::where('status','A')->get();
-        $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->get();
+        $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->where('kode', $show->kode)->get();
         $data['active'] = $show->kode;
         $data['show'] = $show;
         return view('checklist.edit',$data);
@@ -97,7 +99,8 @@ class ChecklistController extends Controller
 
     public function update(Request $request, $id)
     {
-      $post = ChecklistData::where('id',$id)->update([
+        $kode = $request->input('kode');
+        $post = ChecklistData::where('id',$id)->update([
           'id_karyawan' => $request->input('id_karyawan'),
           'date' => $request->input('date'),
           'id_kapal' => $request->input('id_kapal'),
@@ -106,11 +109,12 @@ class ChecklistController extends Controller
           'changed_by' => Session::get('userid'),
         ]);  
         
-        ChecklistDataDetail::where('checklist_data_id', $id)->delete();
+        ChecklistDataDetail::where('checklist_data_id', $id)->where('kode', $kode)->delete();
         $checked = $request->input('item', []);
         foreach ($checked as $iditem => $value) {
            $item = ChecklistDataDetail::insert([
                 'uid' => Str::uuid()->toString(),
+                'kode' => $kode,
                 'checklist_data_id' => $id,
                 'checklist_item_id' => $iditem,
                 'value' => $value,
@@ -230,5 +234,237 @@ class ChecklistController extends Controller
     {
        $post = ChecklistItem::where('id',$id)->update(['status' => 'D']);
         return response()->json(['success' => true]);
+    }
+
+    public function el0307()
+    {
+        $data['active'] = "el0307";
+        $data['form'] = KodeForm::where('kode', 'el0307')->first();
+        return view('checklist.ganti', $data);
+    }
+
+    public function el0311()
+    {
+        $data['active'] = "el0311";
+        $data['form'] = KodeForm::where('kode', 'el0311')->first();
+        return view('checklist.ganti', $data);
+    }
+
+    public function el0312()
+    {
+        $data['active'] = "el0312";
+        $data['form'] = KodeForm::where('kode', 'el0312')->first();
+        return view('checklist.ganti', $data);
+    }
+
+    public function getGanti(Request $request)
+    {
+        $daftar = DB::table('checklist_penggantian as a')
+                ->leftjoin('karyawan as b', 'b.id', '=', 'a.id_dari')
+                ->leftjoin('karyawan as c', 'c.id', '=', 'a.id_kepada')
+                ->leftjoin('kapal as d', 'd.id', '=', 'a.id_kapal')
+                ->select('a.*', 'b.nama as dari', 'c.nama as kepada', 'd.nama as kapal')
+                ->where('a.kode', $request->input('kode'))
+                ->where('a.status','A')
+                ->get();
+
+        return response()->json([
+            'data' => $daftar
+        ]);
+    }
+
+    public function addganti($kode)
+    {
+        $data['form'] = KodeForm::where('kode', $kode)->first();
+        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        $data['kapal'] = Kapal::where('status','A')->get();
+        $data['checklist'] = ChecklistItem::where('kode', $kode)->where('status', 'A')->get();
+        $data['active'] = $kode;
+        return view('checklist.addganti',$data);
+    }
+
+    public function storeganti(Request $request)
+    {
+        $created = Session::get('userid');
+        $date = date('Y-m-d H:i:s');
+
+        $save = ChecklistGanti::create([
+          'uid' => Str::uuid()->toString(),
+          'kode' => $request->input('kode'),
+          'id_dari' => $request->input('id_dari'),
+          'id_kepada' => $request->input('id_kepada'),
+          'date' => $request->input('date'),
+          'jam' => $request->input('jam'),
+          'id_kapal' => $request->input('id_kapal'),
+          'pelabuhan' => $request->input('pelabuhan'),
+          'note' => $request->input('note'),
+          'status' => 'A',
+          'created_by' => $created,
+          'created_date' => $date
+        ]);
+
+        $items = $request->input('item'); 
+        $kets  = $request->input('ket');
+        foreach ($items as $id => $value) {
+        $keterangan = $kets[$id] ?? null;
+           $item = ChecklistDataDetail::insert([
+                'uid' => Str::uuid()->toString(),
+                'kode' => $save->kode,
+                'checklist_data_id' => $save->id,
+                'checklist_item_id' => $id,
+                'value' => $value,
+                'ket' => $keterangan,
+                'status' => 'A',
+                'created_by' => $created,
+                'created_date' => $date
+            ]);
+        }
+        if($item) {
+            return response()->json(['success' => true]);
+        } else {
+             return response()->json(['success' => false]);
+        }
+    }
+
+    public function editganti($uid)
+    {
+        $show =  ChecklistGanti::where('uid', $uid)->first();
+        $data['form'] = KodeForm::where('kode', $show->kode)->first();
+        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        $data['kapal'] = Kapal::where('status','A')->get();
+        $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->where('kode', $show->kode)->get();
+        $data['active'] = $show->kode;
+        $data['show'] = $show;
+        return view('checklist.editganti',$data);
+    }
+
+    public function updateganti(Request $request, $id)
+    {
+        $kode = $request->input('kode');
+      $post = ChecklistGanti::where('id',$id)->update([
+          'id_dari' => $request->input('id_dari'),
+          'id_kepada' => $request->input('id_kepada'),
+          'date' => $request->input('date'),
+          'jam' => $request->input('jam'),
+          'id_kapal' => $request->input('id_kapal'),
+          'pelabuhan' => $request->input('pelabuhan'),
+          'note' => $request->input('note'),
+          'changed_by' => Session::get('userid'),
+        ]);  
+        
+        ChecklistDataDetail::where('checklist_data_id', $id)->where('kode', $kode)->delete();
+        $items = $request->input('item'); 
+        $kets  = $request->input('ket');
+        foreach ($items as $iditem => $value) {
+        $keterangan = $kets[$iditem] ?? null;
+           $item = ChecklistDataDetail::insert([
+                'uid' => Str::uuid()->toString(),
+                'kode' => $kode,
+                'checklist_data_id' => $id,
+                'checklist_item_id' => $iditem,
+                'value' => $value,
+                'ket' => $keterangan,
+                'status' => 'A',
+                'created_by' => Session::get('userid'),
+                'created_date' => date('Y-m-d')
+            ]);
+        }
+      return response()->json(['success' => true]);
+    }
+
+    public function deleteganti($id)
+    {
+       $post = ChecklistGanti::where('id',$id)->update(['status' => 'D']);
+        return response()->json(['success' => true]);
+    }
+
+     public function gantipdf($uid) {
+        $show =  ChecklistGanti::where('uid', $uid)->first();
+        $data['form'] = KodeForm::where('kode', $show->kode)->first();
+        $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->where('kode', $show->kode)->get();
+        $data['show'] = $show;
+        $pdf = Pdf::loadView('checklist.gantipdf', $data)
+                ->setPaper('a3', 'portrait');
+
+        return $pdf->download($data['form']->ket.' '.$show->date.'.pdf');
+    }
+
+    public function getKaryawan($id_kapal)
+    {
+        $karyawan = DB::table('karyawan as a')
+                    ->join('user as b', 'b.id_karyawan', '=', 'a.id', 'left')
+                    ->select('a.id', 'a.nama')
+                    ->where('b.id_kapal', $id_kapal)->where('a.status','A')->where('a.resign', 'N')
+                    ->get();
+        return response()->json($karyawan);
+    }
+
+    public function el0308()
+    {
+        $data['active'] = "el0308";
+        $data['form'] = KodeForm::where('kode', 'el0308')->first();
+        return view('checklist.nahkoda', $data);
+    }
+
+    public function el0309()
+    {
+        $data['active'] = "el0309";
+        $data['form'] = KodeForm::where('kode', 'el0309')->first();
+        $data['item'] = DB::table('checklist_item as a')
+                        ->leftjoin('checklist_data_detail as b', 'a.id', '=', 'b.checklist_item_id', 'left')
+                        ->select('a.*', 'b.value', 'b.ket')
+                        ->where('a.kode', 'el0308')->where('a.status', 'A')->get();
+        return view('checklist.nahkoda', $data);
+    }
+
+    public function getChecklist(Request $request) {
+        $id   = $request->input('id');  
+        $kode = $request->input('kode');
+        $data = DB::table('checklist_item as a')
+                    ->leftJoin('checklist_data_detail as b', function($join) use ($id) {
+                        $join->on('a.id', '=', 'b.checklist_item_id')
+                            ->on('a.kode', '=', 'b.kode')
+                            ->where('b.checklist_data_id', '=', $id);
+                    })
+                    ->select('a.*', 'b.value', 'b.ket', 'b.checklist_data_id')
+                    ->where('a.kode', $kode)
+                    ->where('a.status', 'A')
+                    ->orderBy('a.id', 'ASC')
+                    ->get();
+        return response()->json(['data' => $data]);
+    }
+
+    function save(Request $request) {
+        $id = $request->input('id');
+        $kode = $request->input('kode');
+        $items = $request->input('item'); 
+        $kets  = $request->input('ket');
+
+        ChecklistDataDetail::where('checklist_data_id', $id)->where('kode', $kode)->delete();
+        foreach ($items as $iditem => $value) {
+        $keterangan = $kets[$iditem] ?? null;
+           $item = ChecklistDataDetail::insert([
+                'uid' => Str::uuid()->toString(),
+                'kode' => $kode,
+                'checklist_data_id' => $id,
+                'checklist_item_id' => $iditem,
+                'value' => $value,
+                'ket' => $keterangan,
+                'status' => 'A',
+                'created_by' => Session::get('userid'),
+                'created_date' => date('Y-m-d')
+            ]);
+        }
+    }
+
+    public function nahkodapdf($uid, $kode) {
+        $show =  ChecklistGanti::where('uid', $uid)->first();
+        $data['form'] = KodeForm::where('kode', $kode)->first();
+        $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->where('kode', $kode)->get();
+        $data['show'] = $show;
+        $pdf = Pdf::loadView('checklist.nahkodapdf', $data)
+                ->setPaper('a3', 'portrait');
+
+        return $pdf->download($data['form']->ket.' '.$show->date.'.pdf');
     }
 }

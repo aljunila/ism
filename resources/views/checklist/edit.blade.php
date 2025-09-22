@@ -145,8 +145,8 @@
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
                                                 <td>{{$ck->get_item()->item}}</td>
-                                                <td><input type="radio" class="form-check-input" name="item[{{$ck->id}}]" value="1" @checked ($ck->value == 1)></td>
-                                                <td><input type="radio" class="form-check-input" name="item[{{$ck->id}}]" value="0" @checked ($ck->value == 0)></td>
+                                                <td><input type="radio" class="form-check-input" name="item[{{$ck->checklist_item_id}}]" value="1" @checked ($ck->value == 1)></td>
+                                                <td><input type="radio" class="form-check-input" name="item[{{$ck->checklist_item_id}}]" value="0" @checked ($ck->value == 0)></td>
                                             </tr>
                                             @endforeach
                                         </table>

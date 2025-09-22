@@ -11,7 +11,7 @@
     <meta name="author" content="PIXINVENT">
     <title>TFM - Trimas Ferries Management</title>
     <link rel="apple-touch-icon" href="{{ url('/vuexy/app-assets/images/ico/apple-icon-120.png')}}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ url('/img/logo-als.jpg')}}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url('/img/trimas.png')}}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600" rel="stylesheet">
 
     <!-- BEGIN: Vendor CSS-->
@@ -57,10 +57,8 @@
                         <div class="card mb-0">
                             <div class="card-body">
                                 <a href="index.html" class="brand-logo">
-                                    <img src="{{ url('/img/logo-als.jpg')}}" alt="" width="50%">
+                                    <img src="{{ url('/img/trimas.png')}}" alt="" width="50%">
                                 </a>
-
-                                <center><h4 class="card-title mb-1">Trimas Ferries Management</h4>
                                 <p class="card-text mb-2">Silahkan masukkan email dan password Anda</p></center>
 
                                 <form class="auth-login-form mt-2" action="{{ route('actionlogin') }}" method="POST">

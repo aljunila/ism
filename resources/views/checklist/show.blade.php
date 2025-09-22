@@ -50,7 +50,13 @@
                 orderable: false,
                 searchable: false
             },
-            { data: 'date'},
+            { data: 'date',
+                render: function(data) {
+                    if (!data) return '';
+                    let parts = data.split(' ')[0].split('-'); 
+                    return parts[2] + '-' + parts[1] + '-' + parts[0]; 
+                }
+            },
             { data: 'nama' },
             { data: 'jabatan' },
             { data: 'kapal' },

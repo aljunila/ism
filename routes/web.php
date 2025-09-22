@@ -17,6 +17,8 @@ use App\Http\Controllers\RefrensiDocController;
 use App\Http\Controllers\AturanController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\NotulenController;
+use App\Http\Controllers\DaftarHadirController;
+use App\Http\Controllers\GantiKKMController;
 
 Route::get('/', function () {
     return view('login/show');
@@ -47,11 +49,6 @@ Route::post('ppdb/save', [PendaftaranController::class, 'saveppdb']);
 Route::get('/cp', [PendaftaranController::class, 'cp'])->name('cp')->middleware('auth');
 Route::get('/cp/delete/{id}', [PendaftaranController::class, 'cpdel'])->name('cpdel');
 
-Route::get('/siswa/profil/{id}', [SiswaController::class, 'profil'])->middleware('auth');
-Route::get('/siswa/edit/{id}', [SiswaController::class, 'edit'])->middleware('auth');
-Route::post('/siswa/update/{id}', [SiswaController::class, 'update']);
-Route::get('/siswa/delete/{id}', [SiswaController::class, 'delete']);
-
 Route::get('/perusahaan', [PerusahaanController::class, 'show'])->name('perusahaan')->middleware('auth');
 Route::get('/perusahaan/add', [PerusahaanController::class, 'add' ])->middleware('auth');
 Route::post('perusahaan/create', [PerusahaanController::class, 'store']);
@@ -73,7 +70,6 @@ Route::get('/jabatan', [JabatanController::class, 'show'])->name('jabatan')->mid
 Route::get('/jabatan/data', [JabatanController::class, 'getData'])->middleware('auth');
 Route::get('/jabatan/add', [JabatanController::class, 'add' ])->middleware('auth');
 Route::post('jabatan/store', [JabatanController::class, 'store'])->name('jabatan.store');
-Route::get('/jabatan/profil/{id}', [JabatanController::class, 'profil'])->middleware('auth');
 Route::get('/jabatan/edit/{id}', [JabatanController::class, 'edit'])->middleware('auth');
 Route::post('/jabatan/update/{id}', [JabatanController::class, 'update']);
 Route::post('/jabatan/delete/{id}', [JabatanController::class, 'delete']);
@@ -105,7 +101,6 @@ Route::get('/prosedur', [ProsedurController::class, 'show'])->name('prosedur')->
 Route::get('/prosedur/data', [ProsedurController::class, 'getData'])->middleware('auth');
 Route::get('/prosedur/add', [ProsedurController::class, 'add' ])->middleware('auth');
 Route::post('prosedur/store', [ProsedurController::class, 'store']);
-Route::get('/prosedur/profil/{id}', [ProsedurController::class, 'profil'])->middleware('auth');
 Route::get('/prosedur/edit/{id}', [ProsedurController::class, 'edit'])->middleware('auth');
 Route::post('/prosedur/update/{id}', [ProsedurController::class, 'update']);
 Route::post('/prosedur/delete/{id}', [ProsedurController::class, 'delete']);
@@ -115,7 +110,6 @@ Route::get('/el0101', [RefrensiDocController::class, 'el0101'])->name('el0101')-
 Route::post('/refrensi/data', [RefrensiDocController::class, 'getData'])->middleware('auth');
 Route::get('/refrensi/add', [RefrensiDocController::class, 'add' ])->middleware('auth');
 Route::post('/refrensi/store', [RefrensiDocController::class, 'store'])->name('store');
-Route::get('/refrensi/profil/{id}', [RefrensiDocController::class, 'profil'])->middleware('auth');
 Route::get('/refrensi/edit/{id}', [RefrensiDocController::class, 'edit'])->middleware('auth');
 Route::post('/refrensi/update/{id}', [RefrensiDocController::class, 'update']);
 Route::post('/refrensi/delete/{id}', [RefrensiDocController::class, 'delete']);
@@ -128,7 +122,6 @@ Route::get('/elemen2', [AturanController::class, 'show'])->name('aturan')->middl
 Route::get('/aturan/data', [AturanController::class, 'getData'])->middleware('auth');
 Route::get('/aturan/add', [AturanController::class, 'add' ])->middleware('auth');
 Route::post('aturan/store', [AturanController::class, 'store']);
-Route::get('/aturan/profil/{id}', [AturanController::class, 'profil'])->middleware('auth');
 Route::get('/aturan/edit/{id}', [AturanController::class, 'edit'])->middleware('auth');
 Route::post('/aturan/update/{id}', [AturanController::class, 'update']);
 Route::post('/aturan/delete/{id}', [AturanController::class, 'delete']);
@@ -138,7 +131,6 @@ Route::get('/el0302', [ChecklistController::class, 'el0302'])->name('el0302')->m
 Route::post('/checklist/data', [ChecklistController::class, 'getData'])->middleware('auth');
 Route::get('/checklist/add/{kode}', [ChecklistController::class, 'add' ])->middleware('auth');
 Route::post('/checklist/store', [ChecklistController::class, 'store'])->name('store');
-Route::get('/checklist/profil/{id}', [ChecklistController::class, 'profil'])->middleware('auth');
 Route::get('/checklist/edit/{id}', [ChecklistController::class, 'edit'])->middleware('auth');
 Route::post('/checklist/update/{id}', [ChecklistController::class, 'update']);
 Route::post('/checklist/delete/{id}', [ChecklistController::class, 'delete']);
@@ -148,6 +140,24 @@ Route::get('/el0305', [ChecklistController::class, 'el0305'])->name('el0305')->m
 Route::get('/checklist/pdf/{id}', [ChecklistController::class, 'pdf'])->name('checklist.pdf')->middleware('auth');
 Route::get('/checklist/item/{kode}', [ChecklistController::class, 'item' ])->middleware('auth');
 Route::post('/checklist/dataitem', [ChecklistController::class, 'getItem'])->middleware('auth');
+
+Route::get('/el0307', [ChecklistController::class, 'el0307'])->name('el0307')->middleware('auth');
+Route::get('/el0311', [ChecklistController::class, 'el0311'])->name('el0311')->middleware('auth');
+Route::get('/el0312', [ChecklistController::class, 'el0312'])->name('el0312')->middleware('auth');
+Route::post('/checklist/listGanti', [ChecklistController::class, 'getGanti'])->middleware('auth');
+Route::get('/checklist/addganti/{kode}', [ChecklistController::class, 'addganti' ])->middleware('auth');
+Route::post('/checklist/storeganti', [ChecklistController::class, 'storeganti'])->name('storeganti');
+Route::get('/checklist/editganti/{id}', [ChecklistController::class, 'editganti'])->middleware('auth');
+Route::post('/checklist/updateganti/{id}', [ChecklistController::class, 'updateganti']);
+Route::post('/checklist/deleteganti/{id}', [ChecklistController::class, 'deleteganti']);
+Route::get('/checklist/gantipdf/{id}', [ChecklistController::class, 'gantipdf'])->name('checklist.gantipdf')->middleware('auth');
+Route::get('/get-karyawan/{id_kapal}', [ChecklistController::class, 'getKaryawan']);
+
+Route::get('/el0308', [ChecklistController::class, 'el0308'])->name('el0308')->middleware('auth');
+Route::get('/el0309', [ChecklistController::class, 'el0309'])->name('el0309')->middleware('auth');
+Route::post('/checklist/getChecklist', [ChecklistController::class, 'getChecklist'])->middleware('auth');
+Route::post('/checklist/save', [ChecklistController::class, 'save'])->name('save');
+Route::get('/checklist/nahkodapdf/{uid}/{kode}', [ChecklistController::class, 'nahkodapdf'])->name('checklist.nahkodapdf')->middleware('auth');
 
 Route::post('/form/intruksi', [ChecklistController::class, 'saveform'])->middleware('auth');
 Route::post('/checklist/storeitem', [ChecklistController::class, 'storeitem'])->middleware('auth');
@@ -159,8 +169,26 @@ Route::get('/el0301', [NotulenController::class, 'show'])->name('notulen')->midd
 Route::get('/notulen/data', [NotulenController::class, 'getData'])->middleware('auth');
 Route::get('/notulen/add', [NotulenController::class, 'add' ])->middleware('auth');
 Route::post('notulen/store', [NotulenController::class, 'store']);
-Route::get('/notulen/profil/{id}', [NotulenController::class, 'profil'])->middleware('auth');
 Route::get('/notulen/edit/{id}', [NotulenController::class, 'edit'])->middleware('auth');
 Route::post('/notulen/update/{id}', [NotulenController::class, 'update']);
 Route::post('/notulen/delete/{id}', [NotulenController::class, 'delete']);
 Route::get('/notulen/pdf/{id}', [NotulenController::class, 'notulenPdf'])->name('notulen.pdf')->middleware('auth');
+
+Route::get('/el0306', [DaftarHadirController::class, 'el0306'])->name('el0306')->middleware('auth');
+Route::post('/hadir/data', [DaftarHadirController::class, 'getData'])->middleware('auth');
+Route::get('/hadir/add/{kode}', [DaftarHadirController::class, 'add' ])->middleware('auth');
+Route::post('hadir/store', [DaftarHadirController::class, 'store']);
+Route::get('/hadir/edit/{id}', [DaftarHadirController::class, 'edit'])->middleware('auth');
+Route::post('/hadir/update/{id}', [DaftarHadirController::class, 'update']);
+Route::post('/hadir/delete/{id}', [DaftarHadirController::class, 'delete']);
+Route::get('/hadir/pdf/{id}', [DaftarHadirController::class, 'hadirPdf'])->name('hadir.pdf')->middleware('auth');
+Route::post('/hadir/KaryawanHadir', [DaftarHadirController::class, 'KaryawanHadir'])->middleware('auth');
+Route::post('/hadir/deletedetail/{id}', [DaftarHadirController::class, 'deletedetail']);
+
+Route::get('/el0310', [GantiKKMController::class, 'show'])->name('kkm')->middleware('auth');
+Route::get('/kkm/data', [GantiKKMController::class, 'getData'])->middleware('auth');
+Route::get('/kkm/add', [GantiKKMController::class, 'add' ])->middleware('auth');
+Route::post('kkm/store', [GantiKKMController::class, 'store'])->name('kkm.store');
+Route::get('/kkm/edit/{id}', [GantiKKMController::class, 'edit'])->middleware('auth');
+Route::post('/kkm/update/{id}', [GantiKKMController::class, 'update']);
+Route::post('/kkm/delete/{id}', [GantiKKMController::class, 'delete']);

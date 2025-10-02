@@ -4,8 +4,6 @@ use Illuminate\Support\Facades\Route;
 // use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\PendaftaranController;
-use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\KapalController;
 use App\Http\Controllers\JabatanController;
@@ -28,26 +26,13 @@ Route::get('login', [LoginController::class, 'login'])->name('login');
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::post('/login/password', [LoginController::class, 'password']);
-Route::get('/get-menu/parents', [LoginController::class, 'getParents']);
-Route::get('/get-menu/{id}', [LoginController::class, 'getChildren']);
+// Route::get('/get-menu/parents', [LoginController::class, 'getParents']);
+// Route::get('/get-menu/{id}', [LoginController::class, 'getChildren']);
 Route::get('/getMenu', [LoginController::class, 'getMenu']);
-
+Route::get('/buatakun', [LoginController::class, 'buatakun']);
+Route::post('/carinik', [LoginController::class, 'carinik']);
 Route::get('/dashboard', [DashboardController::class, 'show'])->name('show')->middleware('auth');
 Route::post('/upload-image', [UploadController::class, 'upload'])->name('upload.image');
-
-Route::get('/pendaftaran', [PendaftaranController::class, 'show'])->name('pendaftaran')->middleware('auth');
-Route::get('/pendaftaran/add', [PendaftaranController::class, 'add' ])->middleware('auth');
-Route::post('pendaftaran/create', [PendaftaranController::class, 'store']);
-Route::get('/pendaftaran/edit/{id}', [PendaftaranController::class, 'edit'])->middleware('auth');
-Route::post('/pendaftaran/update/{id}', [PendaftaranController::class, 'update']);
-Route::post('/pendaftaran/delete/{id}', [PendaftaranController::class, 'delete']);
-Route::get('/pendaftaran/bill/{id}', [PendaftaranController::class, 'bill'])->middleware('auth');
-Route::post('pendaftaran/addbill', [PendaftaranController::class, 'addbill']);
-Route::post('/pendaftaran/deletebill/{id}', [PendaftaranController::class, 'deletebill']);
-Route::get('/ppdb/{id}', [PendaftaranController::class, 'ppdb'])->name('ppdb');
-Route::post('ppdb/save', [PendaftaranController::class, 'saveppdb']);
-Route::get('/cp', [PendaftaranController::class, 'cp'])->name('cp')->middleware('auth');
-Route::get('/cp/delete/{id}', [PendaftaranController::class, 'cpdel'])->name('cpdel');
 
 Route::get('/perusahaan', [PerusahaanController::class, 'show'])->name('perusahaan')->middleware('auth');
 Route::get('/perusahaan/add', [PerusahaanController::class, 'add' ])->middleware('auth');
@@ -105,6 +90,20 @@ Route::get('/prosedur/edit/{id}', [ProsedurController::class, 'edit'])->middlewa
 Route::post('/prosedur/update/{id}', [ProsedurController::class, 'update']);
 Route::post('/prosedur/delete/{id}', [ProsedurController::class, 'delete']);
 Route::get('/prosedur/pdf/{id}', [ProsedurController::class, 'prosedurPdf'])->name('prosedur.pdf')->middleware('auth');
+Route::get('/prosedur/pdfdownload/{id}', [ProsedurController::class, 'pdfdownload'])->name('prosedur.pdf')->middleware('auth');
+Route::get('/prosedur/view', [ProsedurController::class, 'view'])->name('view')->middleware('auth');
+Route::get('/view-file/{filename}', function ($filename) {
+    $path = public_path('file_prosedur/' . $filename);
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path, [
+        'Content-Type' => mime_content_type($path),
+        'Content-Disposition' => 'inline; filename="'.$filename.'"'
+    ]);
+});
 
 Route::get('/el0101', [RefrensiDocController::class, 'el0101'])->name('el0101')->middleware('auth');
 Route::post('/refrensi/data', [RefrensiDocController::class, 'getData'])->middleware('auth');
@@ -174,6 +173,17 @@ Route::post('/notulen/update/{id}', [NotulenController::class, 'update']);
 Route::post('/notulen/delete/{id}', [NotulenController::class, 'delete']);
 Route::get('/notulen/pdf/{id}', [NotulenController::class, 'notulenPdf'])->name('notulen.pdf')->middleware('auth');
 
+Route::get('/el0404', [NotulenController::class, 'el0404'])->name('el0404')->middleware('auth');
+Route::get('/el0402', [NotulenController::class, 'el0402'])->name('el0402')->middleware('auth');
+Route::get('/el0403', [NotulenController::class, 'el0403'])->name('el0403')->middleware('auth');
+Route::post('/notulen/GetAgenda', [NotulenController::class, 'GetAgenda'])->middleware('auth');
+Route::post('/notulen/data4', [NotulenController::class, 'getData4'])->middleware('auth');
+Route::get('/notulen/add4/{kode}', [NotulenController::class, 'add4' ])->middleware('auth');
+Route::get('/notulen/edit4/{id}', [NotulenController::class, 'edit4'])->middleware('auth');
+Route::post('/notulen/deleteagenda/{id}', [NotulenController::class, 'deleteagenda']);
+Route::get('/notulen/pdf4/{id}', [NotulenController::class, 'Pdf'])->name('notulen.pdf4')->middleware('auth');
+Route::get('/notulen/hadir/{id}', [NotulenController::class, 'hadir'])->middleware('auth');
+
 Route::get('/el0306', [DaftarHadirController::class, 'el0306'])->name('el0306')->middleware('auth');
 Route::post('/hadir/data', [DaftarHadirController::class, 'getData'])->middleware('auth');
 Route::get('/hadir/add/{kode}', [DaftarHadirController::class, 'add' ])->middleware('auth');
@@ -192,3 +202,4 @@ Route::post('kkm/store', [GantiKKMController::class, 'store'])->name('kkm.store'
 Route::get('/kkm/edit/{id}', [GantiKKMController::class, 'edit'])->middleware('auth');
 Route::post('/kkm/update/{id}', [GantiKKMController::class, 'update']);
 Route::post('/kkm/delete/{id}', [GantiKKMController::class, 'delete']);
+Route::get('/kkm/pdf/{id}', [GantiKKMController::class, 'pdf'])->name('kkm.pdf')->middleware('auth');

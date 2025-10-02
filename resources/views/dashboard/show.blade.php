@@ -20,7 +20,7 @@
                                 <div class="card-header">
                                     <h4 class="card-title">Statistics</h4>
                                     <div class="d-flex align-items-center">
-                                        <p class="card-text font-small-2 me-25 mb-0">Updated 1 month ago</p>
+                                        <p class="card-text font-small-2 me-25 mb-0">Updated Today</p>
                                     </div>
                                 </div>
                                 <div class="card-body statistics-body">
@@ -29,12 +29,12 @@
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-primary me-2">
                                                     <div class="avatar-content">
-                                                        <i data-feather="trending-up" class="avatar-icon"></i>
+                                                        <i data-feather="home" class="avatar-icon"></i>
                                                     </div>
                                                 </div>
                                                 <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">230k</h4>
-                                                    <p class="card-text font-small-3 mb-0">Sales</p>
+                                                    <h4 class="fw-bolder mb-0">{{$perusahaan}}</h4>
+                                                    <p class="card-text font-small-3 mb-0">Perusahaan</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -42,12 +42,12 @@
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-info me-2">
                                                     <div class="avatar-content">
-                                                        <i data-feather="user" class="avatar-icon"></i>
+                                                        <i data-feather="anchor" class="avatar-icon"></i>
                                                     </div>
                                                 </div>
                                                 <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">8.549k</h4>
-                                                    <p class="card-text font-small-3 mb-0">Customers</p>
+                                                    <h4 class="fw-bolder mb-0">{{$kapal}}</h4>
+                                                    <p class="card-text font-small-3 mb-0">Kapal</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -55,12 +55,12 @@
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-danger me-2">
                                                     <div class="avatar-content">
-                                                        <i data-feather="box" class="avatar-icon"></i>
+                                                        <i data-feather="user" class="avatar-icon"></i>
                                                     </div>
                                                 </div>
                                                 <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">1.423k</h4>
-                                                    <p class="card-text font-small-3 mb-0">Products</p>
+                                                    <h4 class="fw-bolder mb-0">{{$karyawan}}</h4>
+                                                    <p class="card-text font-small-3 mb-0">Karyawan</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -68,12 +68,12 @@
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-success me-2">
                                                     <div class="avatar-content">
-                                                        <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                        <i data-feather="user-check" class="avatar-icon"></i>
                                                     </div>
                                                 </div>
                                                 <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">$9745</h4>
-                                                    <p class="card-text font-small-3 mb-0">Revenue</p>
+                                                    <h4 class="fw-bolder mb-0">{{$user}}</h4>
+                                                    <p class="card-text font-small-3 mb-0">User Aktif</p>
                                                 </div>
                                             </div>
                                         </div>

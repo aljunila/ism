@@ -61,7 +61,7 @@
                     } else if(row.file) {
                         let link = "{{ asset('file_prosedur') }}";
                         return `
-                        <a href="${link}/${row.file}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
+                        <a href="/view-file/${row.file}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
                                 <i data-feather='file'></i>
                             </a>
                         `;
@@ -124,11 +124,23 @@
                     $("#table").DataTable().ajax.reload();
                 },
                 error: function(err){
-                    Swal.fire({
-                        icon: "error",
-                        title: "Gagal!",
-                        text: "Data gagal dihapus"
-                    });
+                    if (err.status === 422) {
+                        let msg = err.responseJSON?.errors?.file
+                            ? err.responseJSON.errors.file[0]
+                            : 'File tidak valid atau gagal diupload';
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "File tidak mendukung. Gunakan file PDF!",
+                            text: msg
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal!",
+                            text: "Data gagal dihapus"
+                        });
+                    }
                 }
             });
         }

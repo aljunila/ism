@@ -8,7 +8,7 @@ class Notulen extends Model
 {
     public $timestamps = false;
     protected $table = 'notulen';
-    protected $fillable = ['id', 'uid', 'tanggal', 'tempat', 'hal', 'materi', 'id_nahkoda', 'id_notulen', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'kode', 'tanggal', 'tempat', 'hal', 'materi', 'id_nahkoda', 'id_notulen', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
      public function get_nahkoda()
     {

@@ -65,12 +65,20 @@
                 </td>
                 <td>
                     Diarsipkan oleh<br>
+                    @if($show->get_prepered()->tanda_tangan)
                     <img src="file://{{ public_path('ttd_karyawan/' . $show->get_prepered()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
                     {{$show->get_prepered()->nama}}
                 </td>
                 <td>
                     Diberlakukan oleh<br>
+                    @if($show->get_enforced()->tanda_tangan)
                     <img src="file://{{ public_path('ttd_karyawan/' . $show->get_enforced()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
                     {{$show->get_enforced()->nama}}
                 </td>
             </tr>

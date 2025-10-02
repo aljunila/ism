@@ -128,6 +128,6 @@ class RefrensiDocController extends Controller
         $pdf = Pdf::loadView('refrensi.pdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->download('Form '.$kode.'.pdf');
+        return $pdf->stream('Form '.$kode.'.pdf');
     }
 }

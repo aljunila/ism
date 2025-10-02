@@ -130,7 +130,7 @@ class DaftarHadirController extends Controller
         if($show->kode=='el0306'){
             $judul = $show->kode.' '.$show->get_kapal()->nama.'.pdf';
         }
-        return $pdf->download($judul);
+        return $pdf->stream($judul);
     }
 
     public function KaryawanHadir(Request $request) {

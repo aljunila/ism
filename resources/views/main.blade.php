@@ -26,7 +26,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/components.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/themes/dark-layout.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/themes/bordered-layout.css')}}">
-    <script src="https://cdn.tiny.cloud/1/kk3dzyiek4uhy82bodtbqgh5f26brsw2xxin668j9rs34va1/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="{{ asset('js/tinymce/tinymce.min.js') }}"></script>
 
     <!-- BEGIN: Page CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/core/menu/menu-types/vertical-menu.css')}}">
@@ -36,46 +36,49 @@
     <link rel="stylesheet" type="text/css" href="{{ url('/assets/css/style.css')}}">
     <!-- END: Custom CSS-->
     @yield('scriptheader')
+    
     <script>
-        tinymce.init({
-        selector: 'textarea.tinymce',
-        plugins: 'image code',
-        toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | image code',
-        automatic_uploads: true,
-        images_upload_url: "{{ route('upload.image') }}",
-        file_picker_types: 'image',
-
-        relative_urls: false,
-        remove_script_host: false,
-        convert_urls: true,
-
+    tinymce.init({
+        selector: '.tinymce',
         setup: function (editor) {
             editor.on('change', function () {
-                tinymce.triggerSave(); // supaya textarea ter-update
+                tinymce.triggerSave();
             });
         },
-        images_upload_handler: function (blobInfo, success, failure) {
-            let formData = new FormData();
-            formData.append('file', blobInfo.blob(), blobInfo.filename());
+        license_key: 'gpl',
+        plugins: 'image code link lists',
+        toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
 
-            fetch("{{ route('upload.image') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result && result.location) {
-                    success(result.location);
-                } else {
-                    failure('Upload gagal');
-                }
-            })
-            .catch(() => failure('Server error'));
+        automatic_uploads: true,
+        file_picker_types: 'image',
+        relative_urls: false,
+        remove_script_host: false,
+        images_upload_handler: (blobInfo, progress) => {
+            return new Promise((resolve, reject) => {
+                let formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                fetch('{{ route("upload.image") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.location) {
+                        resolve(data.location); 
+                    } else {
+                        reject('Upload gagal');
+                    }
+                })
+                .catch(() => {
+                    reject('Error upload server');
+                });
+            });
         }
-        });
+    });
     </script>
 </head>
 <!-- END: Head-->
@@ -135,12 +138,20 @@
                     if ($previllage == 1) {
                         return Menu::where('status', 'A')
                                     ->where('id_parent', $parentId)
+                                    ->where('menu.menu_user', 'N')
+                                    ->orderBy('no', 'ASC')
+                                    ->get();
+                    } else if ($previllage == 4) {
+                        return Menu::where('status', 'A')
+                                    ->where('id_parent', $parentId)
+                                    ->where('menu.menu_user', 'Y')
                                     ->orderBy('no', 'ASC')
                                     ->get();
                     } else {
                         return DB::table('akses')
                             ->leftJoin('menu', 'menu.id', '=', 'akses.id_menu')
                             ->where('menu.status', 'A')
+                            ->where('menu.menu_user', 'N')
                             ->where('menu.id_parent', $parentId)
                             ->where('akses.id_karyawan', $id)
                             ->orderBy('no', 'ASC')

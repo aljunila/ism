@@ -78,6 +78,8 @@ class KaryawanController extends Controller
                 'nama' => $request->input('nama'),
                 'nik' => $request->input('nik'),
                 'id_jabatan' => $request->input('id_jabatan'),
+                'id_perusahaan' => $request->input('id_perusahaan'),
+                'id_kapal' => $request->input('id_kapal'),
                 'status' => 'A',
                 'resign' => 'N',
                 'created_by' => Session::get('userid'),

@@ -30,7 +30,7 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <!-- AdminLTE App -->
 <script>
-let table;kkm
+let table;
  $(function () {
     table = $("#table").DataTable({
         processing: true,
@@ -52,6 +52,16 @@ let table;kkm
             },
             { data: 'nomer' },
             { data: 'lama' },
+            { 
+                data: null, 
+                render: function (data, type, row) {
+                        return `
+                        <a href="/kkm/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                                <i data-feather='printer'></i>
+                            </a>
+                        `;
+                }
+            },
             { 
                 data: 'id',
                 render: function(data, type, row){
@@ -79,7 +89,7 @@ let table;kkm
         let formData = new FormData(this);
 
         $.ajax({
-            url: '/kkm/save',
+            url: '/kkm/store',
             method: "POST",
             data: formData,
             processData: false,
@@ -92,7 +102,8 @@ let table;kkm
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        $('#FormIsi').modal('hide');
+                        $('#FormTambah').modal('hide');
+                        $("#table").DataTable().ajax.reload();
                     });
             },
             error: function(xhr){
@@ -117,6 +128,7 @@ $(document).on('click', '.edit-btn', function(){
          console.log(data);
         $('#id').val(data.id);
         $('#id_kepada').val(data.id_kepada);
+        $('#nomer').val(data.nomer);
         $('#tanggal').val(data.tanggal);
         $('#jam').val(data.jam);
         $('#id_lama').val(data.id_lama);
@@ -190,7 +202,8 @@ $(document).on("click", ".delete-btn", function(){
                         <th width="15%">Tanggal</th>
                         <th width="20%">Nomer</th>
                         <th width="40%">KKM</th>
-                        <th width="20%">Aksi</th>
+                        <th width="10%">PDF</th>
+                        <th width="10%">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -306,7 +319,7 @@ $(document).on("click", ".delete-btn", function(){
                     </div>
                 </div>    
                 <div class="modal-footer">
-                    <input type="text" class="form-control" name="id">
+                    <input type="text" class="form-control" name="id" id="id">
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>

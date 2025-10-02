@@ -10,7 +10,7 @@ class Menu extends Model
     // use HasFactory;
     public $timestamps = false;
     protected $table = 'menu';
-    protected $fillable = ['id', 'nama', 'kode', 'link', 'icon', 'id_parent', 'no', 'status'];
+    protected $fillable = ['id', 'nama', 'kode', 'link', 'icon', 'id_parent', 'no', 'menu_user', 'status'];
 
     public function children()
     {

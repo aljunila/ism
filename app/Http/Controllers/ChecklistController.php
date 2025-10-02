@@ -169,7 +169,7 @@ class ChecklistController extends Controller
         $pdf = Pdf::loadView('checklist.pdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->download($data['form']->ket.' '.$nama.'.pdf');
+        return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }
 
     public function item($kode)
@@ -386,7 +386,7 @@ class ChecklistController extends Controller
         $pdf = Pdf::loadView('checklist.gantipdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->download($data['form']->ket.' '.$show->date.'.pdf');
+        return $pdf->stream($data['form']->ket.' '.$show->date.'.pdf');
     }
 
     public function getKaryawan($id_kapal)
@@ -465,6 +465,6 @@ class ChecklistController extends Controller
         $pdf = Pdf::loadView('checklist.nahkodapdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->download($data['form']->ket.' '.$show->date.'.pdf');
+        return $pdf->stream($data['form']->ket.' '.$show->date.'.pdf');
     }
 }

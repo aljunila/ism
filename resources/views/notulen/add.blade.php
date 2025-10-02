@@ -142,6 +142,7 @@
                             </div>
                         </div>
                         <div class="col-sm-9 offset-sm-3">
+                            <input type="text" class="form-control" id="kode" name="kode" value="el0301">
                             <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>
                             <button type="reset" class="btn btn-outline-secondary">Reset</button>
                         </div>

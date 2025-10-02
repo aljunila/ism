@@ -92,6 +92,6 @@ class AturanController extends Controller
         $pdf = Pdf::loadView('aturan.pdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->download('Form'.$show->kode.'.pdf');
+        return $pdf->stream('Form'.$show->kode.'.pdf');
     }
 }

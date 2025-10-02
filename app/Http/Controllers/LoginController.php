@@ -151,6 +151,7 @@ class LoginController extends Controller
                 ->leftJoin('menu', 'menu.id', '=', 'akses.id_menu')
                 ->where('menu.status', 'A')
                 ->where('akses.id_karyawan', $id)
+                ->where('menu_user', 'N')
                 ->orderBy('no', 'ASC')
                 ->select('menu.*')
                 ->get();
@@ -176,5 +177,28 @@ class LoginController extends Controller
             }
         }
         return $branch;
+    }
+
+    public function buatakun() {
+        return view('login.buatakun');
+    }
+
+    public function carinik(Request $request) {
+        $nik = $request->input('nik');
+        $get = DB::table('karyawan')
+                ->leftjoin('user', 'karyawan.id', 'user.id_karyawan')
+                ->leftjoin('perusahaan','perusahaan.id', 'karyawan.id_perusahaan')
+                ->select('user.username', 'karyawan.nama', 'perusahaan.nama as perusahaan')
+                ->where('nik', $nik)
+                ->first();
+        if($get) {
+            return response()->json(['data' => $get]);
+        } else {
+            return response()->json([
+                'error' => true,
+                'message' => 'NIK tidak ditemukan'
+            ], 404);
+        }
+        
     }
 }

@@ -59,7 +59,7 @@ class ProsedurController extends Controller
 
         if($request->hasFile('file')) {
             $request->validate([
-            'file' => 'required|file|mimes:doc,docx,pdf|max:20480',
+            'file' => 'required|file|mimes:pdf|max:20480',
             ]);
             $file = $request->file('file');
             $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
@@ -125,6 +125,49 @@ class ProsedurController extends Controller
         $pdf = Pdf::loadView('prosedur.pdf', $data)
                 ->setPaper([0, 0, 612, 900], 'portrait');
 
+        return $pdf->stream($show->kode .'-'.$show->judul.'.pdf');
+    }
+
+    public function pdfdownload($uid) {
+        $show = Prosedur::where('uid', $uid)->first();
+        $data['cover'] = preg_replace_callback(
+            '/<img[^>]+src="([^">]+)"/i',
+            function ($matches) {
+                $url = $matches[1];
+                if (str_contains($url, '/storage/')) {
+                    // ambil path setelah /storage/
+                    $path = str_replace(asset('storage') . '/', '', $url);
+                    return '<img src="file://' . public_path('storage/' . $path) . '"';
+                }
+                return $matches[0];
+            },
+            $show->cover
+        );
+
+        $data['isi'] = preg_replace_callback(
+            '/<img[^>]+src="([^">]+)"/i',
+            function ($matches) {
+                $url = $matches[1];
+                if (str_contains($url, '/storage/')) {
+                    // ambil path setelah /storage/
+                    $path = str_replace(asset('storage') . '/', '', $url);
+                    return '<img src="file://' . public_path('storage/' . $path) . '"';
+                }
+                return $matches[0];
+            },
+            $show->isi
+        );
+        $data['show'] = $show;
+        $pdf = Pdf::loadView('prosedur.pdf', $data)
+                ->setPaper([0, 0, 612, 900], 'portrait');
+
         return $pdf->download($show->kode .'-'.$show->judul.'.pdf');
+    }
+
+    public function view()
+    {
+        $data['show'] = Prosedur::where('status','A')->get();
+        $data['active'] = "prosedur";
+        return view('prosedur.view', $data);
     }
 }

@@ -150,15 +150,7 @@
                                     <label class="col-form-label" for="first-name">Username</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                </div>
-                            </div>
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Password</label>
-                                </div>
-                                <div class="col-sm-9">
-                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <input type="text" class="form-control" id="username" name="username">
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -166,7 +158,7 @@
                                     <label class="col-form-label" for="first-name">Level Akses</label>
                                 </div>
                                 <div class="col-sm-9">
-                                     <select name="id_previllage" id="id_previllage"  class="form-control" required>
+                                     <select name="id_previllage" id="id_previllage"  class="form-control">
                                     @foreach($previllage as $p)
                                         <option value="{{$p->id}}">{{$p->nama}}</option>
                                     @endforeach

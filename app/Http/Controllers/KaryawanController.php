@@ -21,22 +21,20 @@ class KaryawanController extends Controller
     public function show()
     {
         $data['active'] = "karyawan";
+        $data['perusahaan'] = Perusahaan::get();
         $data['kapal'] = Kapal::where('status', 'A')->get();
         return view('karyawan.show', $data);
     }
 
     public function getData(Request $request)
     {
-        if(Session::get('previllage')==3){
-            $cek = User::where('id', Session::get('userid'))->first();
-            $kapal = $cek->id_kapal;
-        } else {
-            $kapal = $request->input('id_kapal');
-        }
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal');
+
         $karyawan = DB::table('karyawan')
                 ->leftJoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')
-                ->leftJoin('user', 'user.id_karyawan', '=', 'karyawan.id')
-                ->leftJoin('kapal', 'kapal.id', '=', 'user.id_kapal')
+                ->leftJoin('perusahaan', 'perusahaan.id', '=', 'karyawan.id_perusahaan')
+                ->leftJoin('kapal', 'kapal.id', '=', 'karyawan.id_kapal')
                 ->select(
                     'karyawan.id',
                     'karyawan.uid',
@@ -47,6 +45,9 @@ class KaryawanController extends Controller
                 )
                 ->where('karyawan.resign', 'N')
                 ->where('karyawan.status','A')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('perusahaan.id', $perusahaan);
+                })
                 ->when($kapal, function($query, $kapal) {
                     return $query->where('kapal.id', $kapal);
                 })

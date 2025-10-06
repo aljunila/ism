@@ -21,7 +21,7 @@
     <script src="{{ url('/vuexy/app-assets/js/scripts/forms/pickers/form-pickers.js')}}"></script>
     <!-- END: Page JS-->
 <script>
-   $(document).ready(function() {
+$(document).ready(function() {
     // === Parent → semua children ===
     $(document).on("change", ".check-parent", function() {
         let isChecked = this.checked;
@@ -48,7 +48,7 @@
         }
     }); 
 
-   $("#btnSave").click(function() {
+    $("#btnSave").click(function() {
         let checked = [];
         $("input[type=checkbox]:checked").each(function() {
             checked.push($(this).data("id"));
@@ -59,6 +59,7 @@
             method: "POST",
             data: {
                 id: $('#id').val(),
+                id_previllage: $('#id_previllage').val(),
                 _token: "{{ csrf_token() }}",
                 checked: checked
             },
@@ -81,15 +82,15 @@
     });
 });
 
-$('#id_previllage').change(function(){
-    let idp = $('#id_previllage').val()
+    $('#id_previllage').change(function(){
+        let idp = $('#id_previllage').val()
 
-    if(idp==1) {
-        $('#akses').hide()
-    } else {
-        $('#akses').show()
-    }
-})
+        if(idp==1) {
+            $('#akses').hide()
+        } else {
+            $('#akses').show()
+        }
+    })
 </script>
 
 @endsection

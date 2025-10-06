@@ -30,18 +30,18 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <!-- AdminLTE App -->
 <script>
-    $('#id_kapal').on('change', function () {
-        $("#table").DataTable().ajax.reload();
-    });
+    let table;
+ 
   $(function () {
-		$('#table').DataTable({  
+	table = $('#table').DataTable({  
         processing: true,
         searchable: true,
-        serverSide: true,
+        serverSide: false,
         ajax:{
             url: "/karyawan/data",
             type: "POST",
             data: function(d){
+                d.id_perusahaan= $('#id_perusahaan').val(),
                 d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
@@ -78,6 +78,10 @@
         ]
     });
   });
+     
+    $('#id_kapal').on('change', function () {
+         table.ajax.reload();
+    });
 
   $(document).on("click", ".delete-btn", function(){
     let id = $(this).data("id");
@@ -107,7 +111,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    $("#table").DataTable().ajax.reload();
+                   table.ajax.reload();
                 },
                 error: function(err){
                     Swal.fire({
@@ -149,7 +153,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    $("#table").DataTable().ajax.reload();
+                    table.ajax.reload();
                 },
                 error: function(err){
                     Swal.fire({
@@ -162,6 +166,27 @@
         }
     });
   });
+
+    $(document).on('change', '#id_perusahaan', function() {
+        var perusahaanID = $(this).val();
+        if (perusahaanID) {
+            $.ajax({
+                url: '/get-kapal/' + perusahaanID,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                    $.each(data, function(key, value) {
+                        $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                    });
+                    table.ajax.reload();
+                }
+            });
+        } else {
+            $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+            table.ajax.reload();
+        }
+    });
 </script>
 @endsection
 @section('content')
@@ -171,16 +196,7 @@
                 <div class="card">
                     <div class="card-header border-bottom">
                         <div class="col-sm-12"><h4 class="card-title">Daftar Karyawan</h4></div>
-                        <div class="col-sm-4">
-                        @if(Session::get('previllage')!=3)
-                            <select name="id_kapal" id="id_kapal" class="form-control">
-                                <option value="">Semua Kapal</option>
-                                @foreach($kapal as $k)
-                                    <option value="{{$k->id}}">{{$k->nama}}</option>
-                                @endforeach
-                            </select>
-                        @endif
-                        </div>
+                        @include('filter')
                         <a href="/karyawan/add" class="btn btn-primary btn-sm">Tambah Data</a>
                     </div>
                     <div class="card-body">

@@ -20,11 +20,19 @@ class KapalController extends Controller
         return view('kapal.show', $data);
     }
 
-    public function getData() {
+    public function getData(Request $request) {
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal');
         $get = DB::table('kapal')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'kapal.pemilik')
                 ->select('kapal.*', 'perusahaan.nama as perusahaan')
                 ->where('kapal.status', 'A')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('perusahaan.id', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('kapal.id', $kapal);
+                })
                 ->get();
         return response()->json(['data' => $get]);
     }
@@ -109,5 +117,15 @@ class KapalController extends Controller
         $data['show'] = $show;
         $data['active'] = "kapal";
         return view('kapal.profile',$data);
+    }
+
+    public function getKapal($id_perusahaan)
+    {
+        $kapal = DB::table('kapal as a')
+                    ->join('perusahaan as b', 'b.id', '=', 'a.pemilik', 'left')
+                    ->select('a.id', 'a.nama')
+                    ->where('a.pemilik', $id_perusahaan)->where('a.status','A')
+                    ->get();
+        return response()->json($kapal);
     }
 }

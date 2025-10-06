@@ -10,7 +10,7 @@
     <meta name="keywords" content="admin template, Vuexy admin template, dashboard template, flat admin template, responsive admin template, web app">
     <meta name="author" content="PIXINVENT">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>ISM - PT Aman Lintas Samudra</title>
+    <title>TFM - Trimas Ferries Management</title>
     <link rel="apple-touch-icon" href="../../../app-assets/images/ico/apple-icon-120.png">
     <link rel="shortcut icon" type="image/x-icon" href="{{url('/img/trimas.png')}}">
     <!-- <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600" rel="stylesheet"> -->
@@ -120,7 +120,7 @@
             <ul class="nav navbar-nav flex-row">
                 <li class="nav-item me-auto"><a class="navbar-brand" href="../../../html/ltr/vertical-menu-template/index.html"><span class="brand-logo">
                             </span>
-                        <h2 class="brand-text">ISM</h2>
+                        <h2 class="brand-text">TFM</h2>
                     </a></li>
                 <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pe-0"><i class="d-block d-xl-none text-red toggle-icon font-medium-4" data-feather="x"></i><i class="d-none d-xl-block collapse-toggle-icon font-medium-4  text-red" data-feather="disc" data-ticon="disc"></i></a></li>
             </ul>
@@ -268,7 +268,7 @@
     </div>
     <!-- BEGIN: Footer-->
     <footer class="footer footer-static footer-light">
-        <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="" target="_blank">PT. Aman Lintas Samudra</a></p>
+        <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="https://trimas-ferry.co.id" target="_blank">PT. Tri Sakti Lautan Mas</a></p>
     </footer>
     <button class="btn btn-primary btn-icon scroll-top" type="button"><i data-feather="arrow-up"></i></button>
     <!-- END: Footer-->

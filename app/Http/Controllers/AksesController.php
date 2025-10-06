@@ -48,13 +48,13 @@ class AksesController extends Controller
         $data['show'] = $show;
         $data['active'] = "akses";
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
-        $menu = Menu::orderBy('no')->get();
+        $menu = Menu::where('menu_user', 'N')->orderBy('no')->get();
         $tree = $this->buildTree($menu);
         $data['tree'] = $tree;
         $data['checkedMenuIds'] = Akses::where('id_karyawan', $show->id)
         ->pluck('id_menu')
         ->toArray();
-        $data['menu'] = Menu::orderBy('id', 'ASC')->get();
+        $data['menu'] = Menu::where('menu_user', 'N')->orderBy('id', 'ASC')->get();
         return view('akses.edit', $data);
     }
 
@@ -79,6 +79,8 @@ class AksesController extends Controller
 
     public function saveChecked(Request $request)
     {
+
+        $post = User::where('id_karyawan',$request->input('id'))->update(['id_previllage' => $request->input('id_previllage'), 'changed_by' => Session::get('userid')]);
         Akses::where('id_karyawan', $request->input('id'))->delete();
         $checked = $request->input('checked', []);
 

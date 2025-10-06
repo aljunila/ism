@@ -53,6 +53,25 @@
                 }
             });
         });
+
+        $(document).on('change', '#id_perusahaan', function() {
+            var perusahaanID = $(this).val();
+            if (perusahaanID) {
+                $.ajax({
+                    url: '/get-kapal/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#id_kapal').empty().append('<option value="">Office</option>');           
+                        $.each(data, function(key, value) {
+                            $('#id_kapal').append('<option value="'+ value.id +'">Kapal '+ value.nama +'</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+            }
+        });
     </script>
 @endsection
 
@@ -112,6 +131,7 @@
                                 </div>
                                 <div class="col-sm-9">
                                     <select name="id_perusahaan" id="id_perusahaan"  class="form-control">
+                                        <option value="">Pilih Perusahaan</option>
                                     @foreach($perusahaan as $p)
                                         <option value="{{$p->id}}">{{$p->nama}}</option>
                                     @endforeach
@@ -120,14 +140,11 @@
                             </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Ditempatkan di kapal</label>
+                                    <label class="col-form-label" for="first-name">Ditempatkan di</label>
                                 </div>
                                 <div class="col-sm-9">
                                     <select name="id_kapal" id="id_kapal"  class="form-control">
-                                        <option value="">Tidak</option>
-                                    @foreach($kapal as $k)
-                                        <option value="{{$k->id}}">{{$k->nama}}</option>
-                                    @endforeach
+                                        <option value="">Office</option>
                                     </select>
                                 </div>
                             </div>

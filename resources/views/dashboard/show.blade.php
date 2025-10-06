@@ -15,6 +15,8 @@
 <section id="dashboard-ecommerce">
                     <div class="row match-height">
                         <!-- Statistics Card -->
+                        aaa {{$pre}}
+                        @if(Session::get('previllage')!=4)
                         <div class="col-12">
                             <div class="card card-statistics">
                                 <div class="card-header">
@@ -25,6 +27,7 @@
                                 </div>
                                 <div class="card-body statistics-body">
                                     <div class="row">
+                                        @if(!empty($perusahaan))
                                         <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-primary me-2">
@@ -38,6 +41,8 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
+                                        @if(!empty($kapal))
                                         <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-info me-2">
@@ -51,6 +56,8 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
+                                        @if(!empty($karyawan))
                                         <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-sm-0">
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-danger me-2">
@@ -64,6 +71,8 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
+                                        @if(!empty($user))
                                         <div class="col-xl-3 col-sm-6 col-12">
                                             <div class="d-flex flex-row">
                                                 <div class="avatar bg-light-success me-2">
@@ -77,10 +86,12 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        @endif
                         <!--/ Statistics Card -->
                     </div>
 

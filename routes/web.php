@@ -43,13 +43,14 @@ Route::post('/perusahaan/update/{id}', [PerusahaanController::class, 'update']);
 Route::get('/perusahaan/delete/{id}', [PerusahaanController::class, 'delete']);
 
 Route::get('/kapal', [KapalController::class, 'show'])->name('kapal')->middleware('auth');
-Route::get('/kapal/data', [KapalController::class, 'getData'])->middleware('auth');
+Route::post('/kapal/data', [KapalController::class, 'getData'])->middleware('auth');
 Route::get('/kapal/add', [KapalController::class, 'add' ])->middleware('auth');
 Route::post('kapal/store', [KapalController::class, 'store']);
 Route::get('/kapal/profil/{id}', [KapalController::class, 'profil'])->middleware('auth');
 Route::get('/kapal/edit/{id}', [KapalController::class, 'edit'])->middleware('auth');
 Route::post('/kapal/update/{id}', [KapalController::class, 'update']);
 Route::get('/kapal/delete/{id}', [KapalController::class, 'delete']);
+Route::get('/get-kapal/{id_perusahaan}', [KapalController::class, 'getKapal']);
 
 Route::get('/jabatan', [JabatanController::class, 'show'])->name('jabatan')->middleware('auth');
 Route::get('/jabatan/data', [JabatanController::class, 'getData'])->middleware('auth');

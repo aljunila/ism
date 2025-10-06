@@ -50,6 +50,8 @@ class LoginController extends Controller
                         Session::put('userid',$data->id);
                         Session::put('previllage',$data->id_previllage);
                         Session::put('id_karyawan',$data->id_karyawan);
+                        Session::put('id_perusahaan',$data->id_perusahaan);
+                        Session::put('id_kapal',$data->id_kapal);
                         Session::put('pic',$data->pic);
                         Session::put('login',TRUE);
                         return redirect('/dashboard');

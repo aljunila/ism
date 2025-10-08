@@ -26,6 +26,7 @@ Route::get('login', [LoginController::class, 'login'])->name('login');
 Route::post('actionlogin', [LoginController::class, 'actionlogin'])->name('actionlogin');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::post('/login/password', [LoginController::class, 'password']);
+Route::post('/login/storeuser', [LoginController::class, 'storeuser']);
 // Route::get('/get-menu/parents', [LoginController::class, 'getParents']);
 // Route::get('/get-menu/{id}', [LoginController::class, 'getChildren']);
 Route::get('/getMenu', [LoginController::class, 'getMenu']);
@@ -84,7 +85,7 @@ Route::post('/akses/delete/{id}', [AksesController::class, 'delete']);
 Route::post('/akses/save', [AksesController::class, 'saveChecked'])->name('akses.save');
 
 Route::get('/prosedur', [ProsedurController::class, 'show'])->name('prosedur')->middleware('auth');
-Route::get('/prosedur/data', [ProsedurController::class, 'getData'])->middleware('auth');
+Route::post('/prosedur/data', [ProsedurController::class, 'getData'])->middleware('auth');
 Route::get('/prosedur/add', [ProsedurController::class, 'add' ])->middleware('auth');
 Route::post('prosedur/store', [ProsedurController::class, 'store']);
 Route::get('/prosedur/edit/{id}', [ProsedurController::class, 'edit'])->middleware('auth');
@@ -93,18 +94,10 @@ Route::post('/prosedur/delete/{id}', [ProsedurController::class, 'delete']);
 Route::get('/prosedur/pdf/{id}', [ProsedurController::class, 'prosedurPdf'])->name('prosedur.pdf')->middleware('auth');
 Route::get('/prosedur/pdfdownload/{id}', [ProsedurController::class, 'pdfdownload'])->name('prosedur.pdf')->middleware('auth');
 Route::get('/prosedur/view', [ProsedurController::class, 'view'])->name('view')->middleware('auth');
-Route::get('/view-file/{filename}', function ($filename) {
-    $path = public_path('file_prosedur/' . $filename);
-
-    if (!file_exists($path)) {
-        abort(404);
-    }
-
-    return response()->file($path, [
-        'Content-Type' => mime_content_type($path),
-        'Content-Disposition' => 'inline; filename="'.$filename.'"'
-    ]);
-});
+Route::get('/view-file/{uid}', [ProsedurController::class, 'view_file'])->name('view_file')->middleware('auth');
+Route::get('/download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file')->middleware('auth');
+Route::get('/prosedur/viewuser', [ProsedurController::class, 'viewuser'])->middleware('auth');
+Route::post('/prosedur/viewdetail', [ProsedurController::class, 'viewdetail'])->middleware('auth');
 
 Route::get('/el0101', [RefrensiDocController::class, 'el0101'])->name('el0101')->middleware('auth');
 Route::post('/refrensi/data', [RefrensiDocController::class, 'getData'])->middleware('auth');

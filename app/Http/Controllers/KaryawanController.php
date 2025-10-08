@@ -76,7 +76,7 @@ class KaryawanController extends Controller
         } else {
             $save = Karyawan::create([
                 'uid' => Str::uuid()->toString(),
-                'nama' => $request->input('nama'),
+                'nama' => strtoupper($request->input('nama')),
                 'nik' => $request->input('nik'),
                 'id_jabatan' => $request->input('id_jabatan'),
                 'id_perusahaan' => $request->input('id_perusahaan'),
@@ -103,9 +103,9 @@ class KaryawanController extends Controller
 
             if($request->input('username')){
                     $akun = User::create([
-                    'nama' => $request->input('nama'),
+                    'nama' => strtoupper($request->input('nama')),
                     'username' => $request->input('username'),
-                    'password' => Hash::make($request->input('password')),
+                    'password' => Hash::make('123456'),
                     'id_previllage' => $request->input('id_previllage'),
                     'id_perusahaan' => $request->input('id_perusahaan'),
                     'id_kapal' => $request->input('id_kapal'),
@@ -134,9 +134,11 @@ class KaryawanController extends Controller
     public function update(Request $request, $id)
     {
       $post = Karyawan::find($id)->update([
-        'nama' => $request->input('nama'),
+        'nama' => strtoupper($request->input('nama')),
         'nik' => $request->input('nik'),
         'id_jabatan' => $request->input('id_jabatan'),
+        'id_perusahaan' => $request->input('id_perusahaan'),
+        'id_kapal' => $request->input('id_kapal'),
         'changed_by' => Session::get('userid'),
       ]);  
 

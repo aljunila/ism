@@ -59,19 +59,8 @@
                                 <a href="index.html" class="brand-logo">
                                     <img src="{{ url('/img/trimas.png')}}" alt="" width="50%">
                                 </a>
-                                <p class="card-text mb-2">Silahkan masukkan NIK Anda</p></center>
-
-                                <form class="auth-login-form mt-2" action="{{ route('actionlogin') }}" method="POST">
-                                @csrf
-                                    @if ($errors->any())
-                                        <div class="alert alert-danger">
-                                            <ul>
-                                                @foreach ($errors->all() as $error)
-                                                    <li>{{ $error }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
+                                <div id="search">
+                                    <h4 class="card-text mb-2">Silahkan masukkan NIK Anda</h4></center>
                                     <div class="mb-1">
                                         <div class="d-flex justify-content-between">
                                             <label class="form-label" for="login-password">NIK</label>
@@ -81,24 +70,59 @@
                                             <span class="input-group-text cursor-pointer"><i data-feather="search"></i></span>
                                         </div>
                                     </div>
-
-                                    <div class="mb-1">
-                                        <div class="d-flex justify-content-between">
-                                            <label class="form-label" for="login-password">Password</label>
-                                            <a href="auth-forgot-password-basic.html">
-                                                <small>Lupa Password?</small>
-                                            </a>
+                                    <button class="btn btn-primary w-100" tabindex="4" id="cari">Cari</button>
+                                </div>
+                                <div id="data">
+                                    <div id="keterangan"></div>
+                                    <div class="mb-1 row">
+                                        <div class="col-sm-4">
+                                            <p>Nama </p>
                                         </div>
-                                        <div class="input-group input-group-merge form-password-toggle">
-                                            <input type="password" class="form-control form-control-merge" name="password" required tabindex="2"/>
-                                            <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                                        <div class="col-sm-1">
+                                            :
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p id="nama"></p>
                                         </div>
                                     </div>
-                                    <p class="text-center mt-2">
-                                        <a href="/buatakun"><span>Belum punya akun?</span></a>
-                                    </p>
-                                    <button class="btn btn-primary w-100" tabindex="4" type="submit">Log in</button>
-                                </form>
+                                    <div class="mb-1 row">
+                                        <div class="col-sm-4">
+                                            <p>Perusahaan </p>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            :
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p id="perusahaan"></p>
+                                        </div>
+                                    </div>
+                                    <div id="usernameContainer">
+                                        <div class="alert alert-danger text-center alert-dismissible fade show" role="alert">
+                                            <strong>Silahkan isi password untuk membuat akun</strong><br>
+                                        </div>
+                                        <div class="mb-1">
+                                            <div class="d-flex justify-content-between">
+                                                <label class="form-label" for="login-password">Password</label>
+                                            </div>
+                                            <div class="input-group input-group-merge form-password-toggle">
+                                                <input type="password" class="form-control form-control-merge" name="password1" id="password1" required placeholder="Masukkan password"/>
+                                                <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                                                <input type="hidden" name="id" id="id">
+                                            </div>
+                                        </div>
+                                        <div class="mb-1">
+                                            <div class="d-flex justify-content-between">
+                                                <label class="form-label" for="login-password">Konfirmasi Password</label>
+                                            </div>
+                                            <div class="input-group input-group-merge form-password-toggle">
+                                                <input type="password" class="form-control form-control-merge" name="password2" id="password2" required placeholder="Masukkan ulang password"/>
+                                                <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary w-100" tabindex="4" id="save" type="button">Simpan</button>
+                                    </div>
+                                    <a href="/login" class="btn btn-primary w-100" tabindex="4" id="login" type="button"><span>Kembali ke Login</span></a>
+                                </div>
                             </div>
                         </div>
                         <!-- /Login basic -->
@@ -122,6 +146,7 @@
     <!-- BEGIN: Theme JS-->
     <script src="{{ url('/vuexy/app-assets/js/core/app-menu.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/js/core/app.js')}}"></script>
+    <script src="{{ url('/app-assets/js/sweetalert2.js')}}"></script>
     <!-- END: Theme JS-->
 
     <!-- BEGIN: Page JS-->
@@ -138,44 +163,126 @@
             }
         })
 
-$('#nik').on('keydown', function(e) {
-    if (e.key === "Enter" || e.keyCode === 13) {
-        e.preventDefault(); // biar form nggak auto-submit (kalau ada)
-        cariDataNik();
-    }
-});
-
-function cariDataNik() {
-    let nik = $('#nik').val();
-
-    if (!nik) {
-        Swal.fire({
-            icon: "warning",
-            title: "NIK belum diisi",
-            text: "Silakan masukkan NIK terlebih dahulu"
+        $(function() {
+            $('#search').show();
+            $('#data').hide();
         });
-        return;
-    }
 
-    $.ajax({
-        url: '/carinik', 
-        method: 'GET',
-        data: { nik: nik
-        },
-        success: function(res) {
-            console.log(res);
-            $('#daftar').show();
-        },
-        error: function(xhr) {
-            Swal.fire({
-                icon: "error",
-                title: "Tidak ditemukan",
-                text: xhr.responseJSON?.message || "Data NIK tidak ada"
+        $('#cari').on('click', function(e) {
+                cariDataNik();
+        });
+
+        function cariDataNik() {
+            let nik = $('#nik').val();
+
+            if (!nik) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "NIK belum diisi",
+                    text: "Silakan masukkan NIK terlebih dahulu"
+                });
+                return;
+            }
+
+            $.ajax({
+                url: '/carinik', 
+                method: 'POST',
+                data: { nik: nik,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(res) {
+                    // console.log(res);
+                    if (!res.data || Object.keys(res.data).length === 0) {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Data tidak ditemukan",
+                            text: "Pastikan NIK Anda terdaftar sebagai karyawan",
+                            confirmButtonText: "OK"
+                        });
+                        return; // hentikan eksekusi lanjut
+                    }
+                    $('#search').hide();
+                    $('#data').show();
+                    $('#nama').html(res.data.nama);
+                    $('#id').val(res.data.id);
+                    $('#perusahaan').html(res.data.perusahaan);
+
+                    let username = res.data.username;
+                    if (username === null || username === "") {
+                        $('#keterangan').html(`
+                        <div class="alert alert-danger text-center alert-dismissible fade show" role="alert">
+                            <strong>Anda belum memiliki akun!</strong><br>
+                        </div>
+                    `);                
+                        $('#usernameContainer').show();
+                        $('#login').hide();
+                        feather.replace();
+                    } else {
+                         $('#keterangan').html(`
+                        <div class="alert alert-success text-center alert-dismissible fade show" role="alert">
+                            <strong>Anda telah memiliki akun!<br>Silahkan LogIn menggunakan NIK Anda</strong><br>
+                        </div>
+                    `);      
+                        $('#usernameContainer').hide();
+                        $('#login').show();
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Data tidak ditemukan",
+                        text: "Pastikan NIK Anda terdaftar sebagai karyawan.",
+                        confirmButtonText: "OK"
+                    });
+                }
             });
         }
-    });
-}
 
+        $(document).on("click", "#save", function(){
+            let password1 = $('#password1').val();
+            let password2 = $('#password2').val();
+            let id = $('#id').val();
+            if (password1!=password2) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Oops...",
+                    text: "Password tidak sesuai"
+                });
+                return;
+            }
+            $.ajax({
+                url: "/login/storeuser",
+                type: "POST",
+                data: {
+                    password1: password1,
+                    password2: password2,
+                    id: id,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil!",
+                            text: response.message ?? "Akun berhasil dibuat. Silahkan login menggunakan NIK sebagai username dan password yang telah Anda buat",
+                            showConfirmButton: true,
+                            confirmButtonText: "OK"
+                        }).then((result) => {
+                            if (result.isConfirmed) {  
+                                window.location.href = "/login";
+                            }
+                        });
+                    
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error!",
+                        text: "Tidak dapat menyimpan data"
+                    });
+                    console.error(xhr.responseText);
+                }
+            });
+        });
     </script>
 </body>
 <!-- END: Body-->

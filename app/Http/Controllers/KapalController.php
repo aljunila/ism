@@ -22,16 +22,12 @@ class KapalController extends Controller
 
     public function getData(Request $request) {
         $perusahaan = $request->input('id_perusahaan');
-        $kapal = $request->input('id_kapal');
         $get = DB::table('kapal')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'kapal.pemilik')
                 ->select('kapal.*', 'perusahaan.nama as perusahaan')
                 ->where('kapal.status', 'A')
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('perusahaan.id', $perusahaan);
-                })
-                ->when($kapal, function($query, $kapal) {
-                    return $query->where('kapal.id', $kapal);
                 })
                 ->get();
         return response()->json(['data' => $get]);
@@ -50,7 +46,7 @@ class KapalController extends Controller
         $date = date('Y-m-d H:i:s');
         $save = Kapal::create([
           'uid' => Str::uuid()->toString(),
-          'nama' => $request->input('nama'),
+          'nama' => strtoupper($request->input('nama')),
           'pendaftaran' => $request->input('pendaftaran'),
           'no_siup' => $request->input('no_siup'),
           'no_akte' => $request->input('no_akte'),
@@ -101,7 +97,43 @@ class KapalController extends Controller
 
     public function update(Request $request, $id)
     {
-      $post = Kapal::find($id)->update($request->all());     
+      $post = Kapal::find($id)->update([
+          'nama' => strtoupper($request->input('nama')),
+          'pendaftaran' => $request->input('pendaftaran'),
+          'no_siup' => $request->input('no_siup'),
+          'no_akte' => $request->input('no_akte'),
+          'dikeluarkan_di' => $request->input('dikeluarkan_di'),
+          'selar' => $request->input('selar'),
+          'pemilik' => $request->input('pemilik'),
+          'call_sign' => $request->input('call_sign'),
+          'galangan' => $request->input('galangan'),
+          'konstruksi' => $request->input('konstruksi'),
+          'type' => $request->input('type'),
+          'loa' => $request->input('loa'),
+          'lbp' => $request->input('lbp'),
+          'lebar' => $request->input('lebar'),
+          'dalam' => $request->input('dalam'),
+          'summer_draft' => $request->input('summer_draft'),
+          'winter_draft' => $request->input('winter_draft'),
+          'draft_air_tawar' => $request->input('draft_air_tawar'),
+          'tropical_draft' => $request->input('tropical_draft'),
+          'isi_kotor' => $request->input('isi_kotor'),
+          'bobot_mati' => $request->input('bobot_mati'),
+          'nt' => $request->input('nt'),
+          'merk_mesin_induk' => $request->input('merk_mesin_induk'),
+          'tahun_mesin_induk' => $request->input('tahun_mesin_induk'),
+          'no_mesin_induk' => $request->input('no_mesin_induk'),
+          'merk_mesin_bantu' => $request->input('merk_mesin_bantu'),
+          'tahun_mesin_bantu' => $request->input('tahun_mesin_bantu'),
+          'no_mesin_bantu' => $request->input('no_mesin_bantu'),
+          'max_speed' => $request->input('max_speed'),
+          'normal_speed' => $request->input('normal_speed'),
+          'min_speed' => $request->input('min_speed'),
+          'bahan_bakar' => $request->input('bahan_bakar'),
+          'jml_butuh' => $request->input('jml_butuh'),
+          'status' => 'A',
+          'changed_by' => Session::get('userid'),
+      ]);     
       return redirect('/kapal')->with('success', 'Data berhasil diperbarui');
     }
 

@@ -413,7 +413,7 @@ class ChecklistController extends Controller
         $data['item'] = DB::table('checklist_item as a')
                         ->leftjoin('checklist_data_detail as b', 'a.id', '=', 'b.checklist_item_id', 'left')
                         ->select('a.*', 'b.value', 'b.ket')
-                        ->where('a.kode', 'el0308')->where('a.status', 'A')->get();
+                        ->where('a.kode', 'el0309')->where('a.status', 'A')->get();
         return view('checklist.nahkoda', $data);
     }
 

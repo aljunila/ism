@@ -40,7 +40,6 @@
             type: "POST",
             data: function(d){
                 d.id_perusahaan= $('#id_perusahaan').val(),
-                d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
         },
@@ -77,28 +76,7 @@
         });
     });
 
-    $(document).on('change', '#id_perusahaan', function() {
-        var perusahaanID = $(this).val();
-        if (perusahaanID) {
-            $.ajax({
-                url: '/get-kapal/' + perusahaanID,
-                type: "GET",
-                dataType: "json",
-                success: function(data) {
-                    $('#id_kapal').empty().append('<option value="">Semua</option>');           
-                    $.each(data, function(key, value) {
-                        $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
-                    });
-                    table.ajax.reload();
-                }
-            });
-        } else {
-            $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
-            table.ajax.reload();
-        }
-    });
-
-     $('#id_kapal').on('change', function () {
+     $('#id_perusahaan').on('change', function () {
          table.ajax.reload();
     });
 </script>
@@ -110,7 +88,7 @@
                 <div class="card">
                     <div class="card-header border-bottom">
                         <div class="col-sm-12"><h4 class="card-title">Daftar Kapal</h4></div>
-                        @include('filter')
+                        @include('perusahaan')
                         <a href="/kapal/add" class="btn btn-primary btn-sm">Tambah Data</a>
                     </div>
                     <div class="card-body">

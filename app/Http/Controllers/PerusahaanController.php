@@ -30,7 +30,7 @@ class PerusahaanController extends Controller
         $date = date('Y-m-d H:i:s');
         $save = Perusahaan::create([
           'uid' => Str::uuid()->toString(),
-          'nama' => $request->input('nama'),
+          'nama' => strtoupper($request->input('nama')),
           'alamat' => $request->input('alamat'),
           'email' => $request->input('email'),
           'telp' => $request->input('telp'),
@@ -48,7 +48,12 @@ class PerusahaanController extends Controller
 
     public function update(Request $request, $id)
     {
-      $post = Perusahaan::find($id)->update($request->all());     
+      $post = Perusahaan::find($id)->update([
+          'nama' => strtoupper($request->input('nama')),
+          'alamat' => $request->input('alamat'),
+          'email' => $request->input('email'),
+          'telp' => $request->input('telp'),
+      ]);     
       return redirect('/perusahaan')->with('success', 'Data berhasil diperbarui');
     }
 

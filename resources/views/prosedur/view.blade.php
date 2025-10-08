@@ -41,10 +41,10 @@
                         <h5 class="card-title">{{$value->kode}}</h5>
                         <p class="card-text">{{$value->judul}}</p>
                         @if($value->file)
-                            <a href="/view-file/{{$value->file}}" target="_blank" type="button" class="btn btn-success btn-sm">
+                            <a href="/view-file/{{$value->uid}}" target="_blank" type="button" class="btn btn-success btn-sm">
                                 <i data-feather='eye'></i> Lihat
                             </a>
-                            <a href="{{ asset('file_prosedur/' . $value->file) }}" download type="button" class="btn btn-danger btn-sm">
+                            <a href="/download_file/{{$value->uid}}" download type="button" class="btn btn-danger btn-sm">
                                 <i data-feather='download'></i> Download
                             </a>
                         @else

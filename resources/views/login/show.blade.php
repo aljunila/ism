@@ -59,7 +59,7 @@
                                 <a href="index.html" class="brand-logo">
                                     <img src="{{ url('/img/trimas.png')}}" alt="" width="50%">
                                 </a>
-                                <p class="card-text mb-2">Silahkan masukkan email dan password Anda</p></center>
+                                <p class="card-text mb-2">Silahkan masukkan Username dan Password Anda</p></center>
 
                                 <form class="auth-login-form mt-2" action="{{ route('actionlogin') }}" method="POST">
                                 @csrf
@@ -73,7 +73,7 @@
                                         </div>
                                     @endif
                                     <div class="mb-1">
-                                        <label for="login-email" class="form-label">Username</label>
+                                        <label for="login-email" class="form-label">Username (NIK / Email) </label>
                                         <input type="text" class="form-control" name="username" tabindex="1" autofocus required />
                                     </div>
 
@@ -92,7 +92,7 @@
                                     <p class="text-center mt-2">
                                         <a href="/buatakun"><span>Belum punya akun?</span></a>
                                     </p>
-                                    <button class="btn btn-primary w-100" tabindex="4" type="submit">Log in</button>
+                                    <button class="btn btn-primary w-100" tabindex="4" type="submit">Log In</button>
                                 </form>
                             </div>
                         </div>

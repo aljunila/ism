@@ -190,7 +190,7 @@ class LoginController extends Controller
         $get = DB::table('karyawan')
                 ->leftjoin('user', 'karyawan.id', 'user.id_karyawan')
                 ->leftjoin('perusahaan','perusahaan.id', 'karyawan.id_perusahaan')
-                ->select('user.username', 'karyawan.nama', 'perusahaan.nama as perusahaan')
+                ->select('user.username', 'karyawan.id', 'karyawan.nama', 'perusahaan.nama as perusahaan')
                 ->where('nik', $nik)
                 ->first();
         if($get) {
@@ -200,7 +200,22 @@ class LoginController extends Controller
                 'error' => true,
                 'message' => 'NIK tidak ditemukan'
             ], 404);
-        }
-        
+        }   
+    }
+
+    public function storeuser(Request $request) {
+        $get = Karyawan::where('id', $request->input('id'))->first();
+         $akun = User::create([
+                'nama' => $get->nama,
+                'username' => $get->nik,
+                'password' => Hash::make($request->input('password1')),
+                'id_previllage' => 4,
+                'id_perusahaan' => $get->id_perusahaan,
+                'id_kapal' => $get->id_kapal,
+                'id_karyawan'=> $get->id,
+                'status' => 'A',
+                'created_by' => Session::get('userid'),
+                'created_date' => date('Y-m-d H:i:s')
+                ]);
     }
 }

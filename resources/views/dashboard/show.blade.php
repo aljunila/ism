@@ -15,7 +15,6 @@
 <section id="dashboard-ecommerce">
                     <div class="row match-height">
                         <!-- Statistics Card -->
-                        aaa {{$pre}}
                         @if(Session::get('previllage')!=4)
                         <div class="col-12">
                             <div class="card card-statistics">

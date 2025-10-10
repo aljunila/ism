@@ -31,12 +31,13 @@
 <!-- AdminLTE App -->
 <script>
     let table;
+    let tableuser;
 
     $(function () {
 		table = $('#table').DataTable({  
         processing: true,
         searchable: true,
-         ajax:{
+        ajax:{
             url: "/prosedur/data",
             type: "POST",
             data: function(d){
@@ -86,7 +87,7 @@
                 render: function (data, type, row) {
                     return `
                         <div class="btn-group">
-                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                             <div class="dropdown-menu">
                                 <a href="/prosedur/edit/${row.uid}" class="dropdown-item">Edit</a>
                                 <a type="button" data-id="${row.id}" class="dropdown-item delete-btn">Hapus</a>
@@ -101,10 +102,18 @@
         }
     });
 
-    $('#tableuser').DataTable({  
+    tableuser = $('#tableuser').DataTable({  
         processing: true,
         searchable: true,
-        ajax: "{{ url('/prosedur/viewuser') }}",
+        ajax:{
+            url: "/prosedur/viewuser",
+            type: "POST",
+            data: function(d){
+                d.id_perusahaan= $('#id_perusahaan').val(),
+                d.id_kapal= $('#id_kapal').val(),
+                d._token= "{{ csrf_token() }}"
+            },
+        },
         columns: [
             { data: null, 
                 render: function (data, type, row, meta) {
@@ -166,24 +175,12 @@
                     });
                     table.ajax.reload();
                 },
-                error: function(err){
-                    if (err.status === 422) {
-                        let msg = err.responseJSON?.errors?.file
-                            ? err.responseJSON.errors.file[0]
-                            : 'File tidak valid atau gagal diupload';
-
-                        Swal.fire({
-                            icon: "error",
-                            title: "File tidak mendukung. Gunakan file PDF!",
-                            text: msg
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Gagal!",
-                            text: "Data gagal dihapus"
-                        });
-                    }
+                error: function(err){  
+                    Swal.fire({
+                        icon: "error",
+                        title: "Gagal!",
+                        text: "Data gagal dihapus"
+                    });
                 }
             });
         }
@@ -235,8 +232,31 @@
         });
     }
 
-    $('#id_perusahaan').on('change', function () {
-         table.ajax.reload();
+   $(document).on('change', '#id_perusahaan', function() {
+        var perusahaanID = $(this).val();
+        if (perusahaanID) {
+            $.ajax({
+                url: '/get-kapal/' + perusahaanID,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                    $.each(data, function(key, value) {
+                        $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                    });
+                    table.ajax.reload();
+                    tableuser.ajax.reload();
+                }
+            });
+        } else {
+            $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+            tableuser.ajax.reload();
+
+        }
+    });
+
+     $('#id_kapal').on('change', function () {
+         tableuser.ajax.reload();
     });
 </script>
 @endsection
@@ -254,16 +274,14 @@
                             <a class="nav-link" id="akses-tab" data-bs-toggle="tab" href="#profile" aria-controls="profile" role="tab" aria-selected="false">Frekuensi Akses Prosedur</a>
                         </li>
                     </ul>
+                    <div class="row">
+                        @include('filter')
+                        <div class="col-sm-4">
+                            <a href="/prosedur/add" class="btn btn-primary btn-sm float-right">Tambah Data</a>
+                        </div>
+                    </div>
                     <div class="tab-content">
                     <div class="tab-pane active" id="home" aria-labelledby="home-tab" role="tabpanel">
-                        <div class="card-header border-bottom">
-                            <div class="col-sm-10">
-                                @include('perusahaan')
-                            </div>
-                            <div class="col-sm-2">
-                                <a href="/prosedur/add" class="btn btn-primary btn-sm float-right">Tambah Data</a>
-                            </div>
-                        </div>
                         <table id="table" class="table table-bordered table-striped" width="100%">
                             <thead>
                                 <tr>

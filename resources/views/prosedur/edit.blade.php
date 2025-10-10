@@ -78,6 +78,23 @@
                     @csrf
                     <div class="row">
                         <div class="col-12">
+                            @if(Session::get('previllage')==1)
+                             <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Perusahaan</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                        <option value="">Pilih</option>
+                                    @foreach($perusahaan as $ph)
+                                        <option value="{{$ph->id}}" @selected ($ph->id == $show->id_perusahaan)>{{$ph->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            @else
+                            <input type="hidden" name="id_perusahaan" value="{{Session::get('id_perusahaan')}}">
+                            @endif
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
                                     <label class="col-form-label" for="first-name">Kode Prosedur</label>

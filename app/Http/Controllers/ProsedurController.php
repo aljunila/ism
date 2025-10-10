@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use App\Models\Perusahaan;
 use App\Models\Prosedur;
 use App\Models\Karyawan;
 use App\Models\ViewProsedur;
@@ -38,6 +39,7 @@ class ProsedurController extends Controller
     {
         $data['active'] = "prosedur";
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        $data['perusahaan'] = Perusahaan::get();
         return view('prosedur.add', $data);
     }
   
@@ -47,6 +49,7 @@ class ProsedurController extends Controller
         $date = date('Y-m-d H:i:s');
         $save = Prosedur::create([
           'uid' => Str::uuid()->toString(),
+          'id_perusahaan' => $request->input('id_perusahaan'),
           'kode' => $request->input('kode'),
           'judul' => $request->input('judul'),
           'no_dokumen' => $request->input('no_dokumen'),
@@ -82,6 +85,7 @@ class ProsedurController extends Controller
         $show = Prosedur::where('uid', $uid)->first();
         $data['show'] = $show;
         $data['active'] = "prosedur";
+        $data['perusahaan'] = Perusahaan::get();
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
         return view('prosedur.edit',$data);
     }
@@ -281,7 +285,10 @@ class ProsedurController extends Controller
         ]);
     }
 
-    public function viewuser() {
+    public function viewuser(Request $request) {
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal');
+
         $get = DB::table('karyawan as a')
                 ->leftJoin('user as b', 'a.id', '=', 'b.id_karyawan')
                 ->leftJoin('view_prosedur as c', 'b.id', '=', 'c.id_user')
@@ -294,6 +301,12 @@ class ProsedurController extends Controller
                 ->where('a.resign', 'N')
                 ->where('a.status', 'A')
                 ->whereNotNull('a.id_kapal')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('a.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('a.id_kapal', $kapal);
+                })
                 ->groupBy('b.id', 'a.nama', 'd.nama')
                 ->get();
         return response()->json(['data' => $get]);

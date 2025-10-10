@@ -103,7 +103,14 @@
                         <span class="avatar"><img src="{{url('/img/user.png')}}" alt="avatar" height="40" width="40"><span class="avatar-status-online"></span></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">
-                        <a class="dropdown-item" href="/karyawan/profil"><i class="me-50" data-feather="user"></i> Profile</a>
+                        @php
+                            use App\Models\Karyawan;
+                            $id =  Session::get('id_karyawan');
+                            $data = Karyawan::where('id',$id)->first();
+                        @endphp
+                        @if($data)
+                        <a class="dropdown-item" href="/karyawan/profil/{{$data->uid}}"><i class="me-50" data-feather="user"></i> Profile</a>
+                        @endif
                         <a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#ChangePassword" ><i data-feather='key'></i> Ubah Password</a>
                         <a class="dropdown-item" href="{{ url('/logout') }}"><i class="me-50" data-feather="power"></i> Logout</a>
                     </div>

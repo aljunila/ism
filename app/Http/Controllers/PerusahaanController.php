@@ -34,8 +34,10 @@ class PerusahaanController extends Controller
           'alamat' => $request->input('alamat'),
           'email' => $request->input('email'),
           'telp' => $request->input('telp'),
+          'npwp' => $request->input('npwp'),
+          'nib' => $request->input('nib'),
           ]);
-        return redirect()->route('perusahaan')->with('success', 'Data berhasil ditambahkan');
+        // return redirect()->route('perusahaan')->with('success', 'Data berhasil ditambahkan');
     }
 
     public function edit($uid)
@@ -53,13 +55,15 @@ class PerusahaanController extends Controller
           'alamat' => $request->input('alamat'),
           'email' => $request->input('email'),
           'telp' => $request->input('telp'),
+          'npwp' => $request->input('npwp'),
+          'nib' => $request->input('nib'),
       ]);     
-      return redirect('/perusahaan')->with('success', 'Data berhasil diperbarui');
+    //   return redirect('/perusahaan')->with('success', 'Data berhasil diperbarui');
     }
 
     public function delete($id)
     {
-       $post = Perusahaan::where('id',$id)->update(['status' => 'D']);
+       $post = Perusahaan::where('id',$id)->delete();
        return redirect('/perusahaan')->with('danger', 'Data berhasil dihapus');
     }
 }

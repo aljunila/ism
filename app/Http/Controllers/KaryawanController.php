@@ -10,6 +10,7 @@ use App\Models\Jabatan;
 use App\Models\Previllage;
 use App\Models\User;
 use App\Models\Akses;
+use App\Models\StatusPTKP;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -63,6 +64,7 @@ class KaryawanController extends Controller
         $data['perusahaan'] = Perusahaan::get();
         $data['kapal'] = Kapal::where('status', 'A')->get();
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
+        $data['ptkp'] = StatusPTKP::get();
         return view('karyawan.add', $data);
     }
   
@@ -78,6 +80,29 @@ class KaryawanController extends Controller
                 'uid' => Str::uuid()->toString(),
                 'nama' => strtoupper($request->input('nama')),
                 'nik' => $request->input('nik'),
+                'nip' => $request->input('nip'),
+                'jk' => $request->input('jk'),
+                'tmp_lahir' => $request->input('tmp_lahir'),
+                'tgl_lahir' => $request->input('tgl_lahir'),
+                'status_kawin' => $request->input('status_kawin'),
+                'agama' => $request->input('agama'),
+                'gol_darah' => $request->input('gol_darah'),
+                'pend' => $request->input('pend'),
+                'institusi_pend' => $request->input('institusi_pend'),
+                'jurusan' => $request->input('jurusan'),
+                'sertifikat' => $request->input('sertifikat'),
+                'telp' => $request->input('telp'),
+                'email' => $request->input('email'),
+                'alamat' => $request->input('alamat'),
+                'nama_bank' => $request->input('nama_bank'),
+                'no_rekening' => $request->input('no_rekening'),
+                'nama_rekening' => $request->input('nama_rekening'),
+                'npwp' => $request->input('npwp'),
+                'status_ptkp' => $request->input('status_ptkp'),
+                'bpjs_kes' => $request->input('bpjs_kes'),
+                'bpjs_tk' => $request->input('bpjs_tk'),
+                'tgl_mulai' => $request->input('tgl_mulai'),
+                'status_karyawan' => $request->input('status_karyawan'),
                 'id_jabatan' => $request->input('id_jabatan'),
                 'id_perusahaan' => $request->input('id_perusahaan'),
                 'id_kapal' => $request->input('id_kapal'),
@@ -128,19 +153,17 @@ class KaryawanController extends Controller
         $show = Karyawan::where('uid', $uid)->first();
         $data['show'] = $show;
         $data['active'] = "karyawan";
+        $data['jabatan'] = Jabatan::where('status', 'A')->get();
+        $data['perusahaan'] = Perusahaan::get();
+        $data['kapal'] = Kapal::where('status', 'A')->get();
+        $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
+        $data['ptkp'] = StatusPTKP::get();
         return view('karyawan.edit',$data);
     }
 
     public function update(Request $request, $id)
     {
-      $post = Karyawan::find($id)->update([
-        'nama' => strtoupper($request->input('nama')),
-        'nik' => $request->input('nik'),
-        'id_jabatan' => $request->input('id_jabatan'),
-        'id_perusahaan' => $request->input('id_perusahaan'),
-        'id_kapal' => $request->input('id_kapal'),
-        'changed_by' => Session::get('userid'),
-      ]);  
+      $post = Karyawan::find($id)->update($request->all());  
 
        $update = User::where('id_karyawan', $id)->update([
         'id_perusahaan' => $request->input('id_perusahaan'),
@@ -181,6 +204,7 @@ class KaryawanController extends Controller
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
         $data['menu'] = Akses::where('id_karyawan', $show->id)->get();
         $data['active'] = "karyawan";
+         $data['ptkp'] = StatusPTKP::get();
         return view('karyawan.profile',$data);
     }
 

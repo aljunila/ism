@@ -81,12 +81,12 @@
                             <td>
                                 <div class="btn-group">
                                             <button class="btn btn-flat-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton600" data-bs-toggle="dropdown" aria-expanded="false">
-                                                
+                                              <i data-feather='edit-3'></i>  
                                             </button>
                                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton600">
-                                                <a href="/perusahaan/profil/{{$each->uid}}" class="dropdown-item">Lihat Profil</a>
+                                                <!-- <a href="/perusahaan/profil/{{$each->uid}}" class="dropdown-item">Lihat Profil</a> -->
                                                 <a href="/perusahaan/edit/{{$each->uid}}" class="dropdown-item">Edit</a>
-                                                <a href="/perusahaan/delete/{{$each->uid}}" class="dropdown-item"> Hapus</a> 
+                                                <a href="/perusahaan/delete/{{$each->id}}" class="dropdown-item"> Hapus</a> 
                                             </div>
                                         </div>
                             </td> 

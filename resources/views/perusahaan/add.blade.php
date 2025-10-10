@@ -22,7 +22,39 @@
     <script src="{{ url('/vuexy/app-assets/js/scripts/forms/pickers/form-pickers.js')}}"></script>
     <!-- END: Page JS-->
 
+    <script>
+        $('#form_perusahaan').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
 
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "{{ url('/perusahaan/create') }}",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'Data berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = "{{ url('/perusahaan') }}";
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan data'
+                    });
+                }
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -43,16 +75,32 @@
                         </ul>
                     </div>
                     @endif
-                    <form action="{{ url('perusahaan/create') }}" method="POST" enctype="multipart/form-data">
+                    <form id="form_perusahaan" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
-                        <div class="col-8">
+                        <div class="col-12">
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Nama Perusahaan</label>
                                 </div>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" id="nama" name="nama" required>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">NPWP</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="number" class="form-control" id="npwp" name="npwp" required>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">NIB</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="number" class="form-control" id="nib" name="nib" required>
                                 </div>
                             </div>
                             <div class="mb-1 row">

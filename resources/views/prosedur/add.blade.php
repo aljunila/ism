@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/core/menu/menu-types/vertical-menu.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/plugins/forms/pickers/form-flat-pickr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/plugins/forms/pickers/form-pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/vendors/css/forms/select/select2.min.css')}}">
     <!-- END: Page CSS-->
 @endsection
 
@@ -19,6 +20,8 @@
     <!-- END: Page Vendor JS-->
     <!-- BEGIN: Page JS-->
     <script src="{{ url('/vuexy/app-assets/js/scripts/forms/pickers/form-pickers.js')}}"></script>
+    <script src="{{ url('/vuexy/app-assets/js/scripts/forms/form-select2.js')}}"></script>
+    <script src="{{ url('/vuexy/app-assets/vendors/js/forms/select/select2.full.min.js')}}"></script>
     <!-- END: Page JS-->
 
    <script>
@@ -78,6 +81,23 @@
                     @csrf
                     <div class="row">
                         <div class="col-12">
+                            @if(Session::get('previllage')==1)
+                             <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Perusahaan</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                    <option value="">Pilih</option>
+                                    @foreach($perusahaan as $ph)
+                                        <option value="{{$ph->id}}">{{$ph->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            @else
+                            <input type="hidden" name="id_perusahaan" value="{{Session::get('id_perusahaan')}}">
+                            @endif
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
                                     <label class="col-form-label" for="first-name">Kode Prosedur</label>
@@ -131,7 +151,7 @@
                                     <label class="col-form-label" for="first-name">Disiapkan Oleh</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <select name="prepered_by" id="prepered_by"  class="form-control" required>
+                                    <select name="prepered_by" id="select2-basic" class="select2 form-select" required>
                                     @foreach($karyawan as $k)
                                         <option value="{{$k->id}}">{{$k->nama}}</option>
                                     @endforeach

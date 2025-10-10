@@ -10,5 +10,5 @@ class Perusahaan extends Model
     // use HasFactory;
     public $timestamps = false;
     protected $table = 'perusahaan';
-    protected $fillable = ['id', 'uid', 'nama', 'alamat', 'email', 'telp', 'direktur', 'logo'];
+    protected $fillable = ['id', 'uid', 'nama', 'alamat', 'email', 'telp', 'direktur', 'npwp', 'nib', 'logo'];
 }

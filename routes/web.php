@@ -66,7 +66,7 @@ Route::post('/karyawan/data', [KaryawanController::class, 'getData'])->middlewar
 Route::get('/karyawan/add', [KaryawanController::class, 'add' ])->middleware('auth');
 Route::post('karyawan/store', [KaryawanController::class, 'store']);
 Route::get('/karyawan/profil/{id}', [KaryawanController::class, 'profil'])->middleware('auth');
-Route::get('/karyawan/edit/{id}', [KaryawanController::class, 'edit'])->middleware('auth');
+Route::get('/karyawan/edit/{uid}', [KaryawanController::class, 'edit'])->middleware('auth');
 Route::post('/karyawan/update/{id}', [KaryawanController::class, 'update']);
 Route::post('/karyawan/delete/{id}', [KaryawanController::class, 'delete']);
 Route::post('/karyawan/resign/{id}', [KaryawanController::class, 'resign']);
@@ -96,7 +96,7 @@ Route::get('/prosedur/pdfdownload/{id}', [ProsedurController::class, 'pdfdownloa
 Route::get('/prosedur/view', [ProsedurController::class, 'view'])->name('view')->middleware('auth');
 Route::get('/view-file/{uid}', [ProsedurController::class, 'view_file'])->name('view_file')->middleware('auth');
 Route::get('/download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file')->middleware('auth');
-Route::get('/prosedur/viewuser', [ProsedurController::class, 'viewuser'])->middleware('auth');
+Route::post('/prosedur/viewuser', [ProsedurController::class, 'viewuser'])->middleware('auth');
 Route::post('/prosedur/viewdetail', [ProsedurController::class, 'viewdetail'])->middleware('auth');
 
 Route::get('/el0101', [RefrensiDocController::class, 'el0101'])->name('el0101')->middleware('auth');

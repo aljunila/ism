@@ -48,7 +48,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Username sudah digunakan, silahkan ganti Username Anda'
+                        text: 'Gagal menyimpan data'
                     });
                 }
             });
@@ -97,14 +97,6 @@
                     @csrf
                     <div class="row">
                         <div class="col-8">
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">NIP</label>
-                                </div>
-                                <div class="col-sm-9">
-                                    <input type="number" class="form-control" id="nip" name="nip" required>
-                                </div>
-                            </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Nama Lengkap</label>
@@ -323,7 +315,7 @@
                                     <label class="col-form-label" for="first-name">Perusahaan</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control">
+                                    <select name="id_perusahaan" id="id_perusahaan" required class="form-control">
                                         <option value="">Pilih Perusahaan</option>
                                     @foreach($perusahaan as $p)
                                         <option value="{{$p->id}}">{{$p->nama}}</option>
@@ -339,7 +331,7 @@
                                     <label class="col-form-label" for="first-name">Ditempatkan di</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="id_kapal" id="id_kapal"  class="form-control">
+                                    <select name="id_kapal" id="id_kapal" required class="form-control">
                                         <option value="">Office</option>
                                     </select>
                                 </div>
@@ -362,7 +354,7 @@
                                     <label class="col-form-label" for="first-name">Tanggal Mulai Gabung</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="date" class="form-control" id="tgl_mulai" name="tgl_mulai">
+                                    <input type="date" class="form-control" id="tgl_mulai" name="tgl_mulai" required>
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -370,7 +362,7 @@
                                     <label class="col-form-label" for="first-name">Status Karyawan</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="status_karyawan" id="status_karyawan"  class="form-control">
+                                    <select name="status_karyawan" id="status_karyawan"  class="form-control" required>
                                         <option value="">Pilih</option>
                                         <option value="TP">Tetap Permanen</option>
                                         <option value="TC">Tetap Percobaan</option>

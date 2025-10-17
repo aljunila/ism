@@ -87,6 +87,14 @@
                             </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Kode Perusahaan</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="kode" name="kode" required value="{{$show->kode}}">
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">NPWP</label>
                                 </div>
                                 <div class="col-sm-9">
@@ -130,7 +138,7 @@
                                     <label class="col-form-label" for="first-name">Logo</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="file" class="form-control" id="file" name="file">
+                                    <input type="file" class="form-control" id="logo" name="logo">
                                 </div>
                             </div>
                         </div>

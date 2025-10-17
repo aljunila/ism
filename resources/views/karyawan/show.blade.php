@@ -56,7 +56,12 @@
             },
             { data: 'nama' },
             { data: 'nik' },
-            { data: 'kapal' },
+            { 
+                data: 'kapal',
+                render: function(data, type, row) {
+                    return data ? data : 'Office';
+                }
+            },
             { data: 'jabatan' },
             { 
                 data: null, 
@@ -65,7 +70,7 @@
                 render: function (data, type, row) {
                     return `
                         <div class="btn-group">
-                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                             <div class="dropdown-menu">
                                 <a href="/karyawan/profil/${row.uid}" class="dropdown-item">Profil</a>
                                 <a type="button" data-id="${row.id}" class="dropdown-item resign-btn">Resign</a>
@@ -75,7 +80,10 @@
                     `;
                 }
             }
-        ]
+        ],
+        drawCallback: function(settings) {
+            feather.replace(); // supaya icon feather muncul ulang
+        }
     });
   });
      
@@ -187,6 +195,26 @@
             table.ajax.reload();
         }
     });
+
+    $(document).on('click', '#download', function() {
+        $.ajax({
+            url: "/karyawan/export",
+            method: "POST",
+            xhrFields: { responseType: 'blob' },
+            data: {
+                id_perusahaan: $('#id_perusahaan').val(),
+                id_kapal: $('#id_kapal').val(),
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(data){
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(data);
+                link.download = "data_karyawan.xlsx";
+                link.click();
+            }
+        })
+    });
+
 </script>
 @endsection
 @section('content')
@@ -194,11 +222,15 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    <!-- <form action="/karyawan/export" method="POST" enctype="multipart/form-data">
+                    @csrf -->
                     <div class="card-header border-bottom">
                         <div class="col-sm-12"><h4 class="card-title">Daftar Karyawan</h4></div>
                         @include('filter')
-                        <a href="/karyawan/add" class="btn btn-primary btn-sm">Tambah Data</a>
+                        <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
+                        <a href="/karyawan/add" class="btn btn-primary btn-sm"><i data-feather='file-plus'></i> Tambah Data</a>
                     </div>
+                    <!-- </form> -->
                     <div class="card-body">
                     <table id="table" class="table table-bordered table-striped" width="100%">
                       <thead>

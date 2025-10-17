@@ -76,7 +76,7 @@
                 render: function (data, type, row) {
                     return `
                         <div class="btn-group">
-                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                             <div class="dropdown-menu">
                                 <a type="button" href="/checklist/editganti/${row.uid}" class="dropdown-item resign-btn">Edit</a>
                                 <a type="button" data-id="${row.id}" class="dropdown-item delete-btn">Hapus</a>
@@ -86,7 +86,7 @@
                 }
             }
         ],
-         drawCallback: function(settings) {
+        drawCallback: function(settings) {
             feather.replace(); // supaya icon feather muncul ulang
         }
     });

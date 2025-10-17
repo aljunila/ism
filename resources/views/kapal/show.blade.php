@@ -62,7 +62,7 @@
                     render: function (data, type, row) {
                         return `
                             <div class="btn-group">
-                                <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                                 <div class="dropdown-menu">
                                     <a href="/kapal/profil/${row.uid}" class="dropdown-item">Profil</a>
                                     <a type="button" href="/kapal/edit/${row.uid}" class="dropdown-item resign-btn">Edit</a>
@@ -72,12 +72,33 @@
                         `;
                     }
                 }
-            ]
+            ],
+            drawCallback: function(settings) {
+            feather.replace(); // supaya icon feather muncul ulang
+        }
         });
     });
 
      $('#id_perusahaan').on('change', function () {
          table.ajax.reload();
+    });
+
+    $(document).on('click', '#download', function() {
+        $.ajax({
+            url: "/kapal/export",
+            method: "POST",
+            xhrFields: { responseType: 'blob' },
+            data: {
+                id_perusahaan: $('#id_perusahaan').val(),
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(data){
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(data);
+                link.download = "data_kapal.xlsx";
+                link.click();
+            }
+        })
     });
 </script>
 @endsection
@@ -89,7 +110,11 @@
                     <div class="card-header border-bottom">
                         <div class="col-sm-12"><h4 class="card-title">Daftar Kapal</h4></div>
                         @include('perusahaan')
+                        <div class="col-sm-5"></div>
+                        <div class="col-sm-3">
+                        <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
                         <a href="/kapal/add" class="btn btn-primary btn-sm">Tambah Data</a>
+                        </div>
                     </div>
                     <div class="card-body">
                     <table id="table" class="table table-bordered table-striped" width="100%">

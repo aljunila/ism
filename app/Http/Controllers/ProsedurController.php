@@ -223,7 +223,7 @@ class ProsedurController extends Controller
 
     public function view_file($uid){
         $show = Prosedur::where('uid', $uid)->first();
-        if(Session::get('previllage')==4){
+        if(Session::get('id_kapal')!=0){
             $id_user = Session::get('userid');
             $id_prosedur = $show->id;
 
@@ -255,7 +255,7 @@ class ProsedurController extends Controller
 
     public function download_file($uid){
         $show = Prosedur::where('uid', $uid)->first();
-        if(Session::get('previllage')==4){
+        if(Session::get('id_kapal')!=0){
             $id_user = Session::get('userid');
             $id_prosedur = $show->id;
 

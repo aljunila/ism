@@ -93,7 +93,46 @@
             });
         });
 
-         
+        $(document).on('click', '.upload-btn', function(){
+            let id = $(this).attr('data-id');
+            let file = $(this).attr('data-file');
+            $('#id_file').val(id);
+            $('#file').html(file);
+            $('#FormUpload').modal('show');
+        });
+
+        $('#form_file').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let id = $('#id_file').val();
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "/karyawan/savefile/" + id,
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'File berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#FormUpload').modal('hide');
+                            window.location.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan file'
+                    });
+                }
+            });
+        });
     </script>
 @endsection
 @section('content')
@@ -106,6 +145,7 @@
                         <div class="d-flex align-items-center flex-column">
                             <div class="user-info text-center">
                                 <h4>{{$show->nama}}</h4>
+                                <a href="/karyawan/pdf/{{$show->uid}}" type ="button" target="_blank" class="btn btn-warning btn-sm me-1" id="pdf-btn"><i data-feather='download-cloud'></i>  Unduh Data</a>
                                 <!-- <span class="badge bg-light-secondary">Author</span> -->
                             </div>
                         </div>
@@ -170,7 +210,7 @@
                                         <tr>
                                             <td> Status Perkawinan</td>
                                             <td>:</td>
-                                            <td>{!! ($show->status_kawin) ? $show->status_kawin : '-' !!}</td>
+                                            <td>{{ ($show->status_kawin=='M') ? 'Menikah' : 'Lajang' }}</td>
                                         </tr>
                                         <tr>
                                             <td> Agama</td>
@@ -269,7 +309,7 @@
                                         <tr>
                                             <td> Perusahaan</td>
                                             <td>:</td>
-                                            <td>{!! ($show->perusahaan) ? $show->perusahaan : '-' !!}</td>
+                                            <td>{!! ($show->id_perusahaan) ? $show->get_perusahaan()->nama : '-' !!}</td>
                                         </tr>
                                         <tr>
                                             <td> Ditempatkan di</td>
@@ -279,7 +319,7 @@
                                         <tr>
                                             <td> Jabatan</td>
                                             <td>:</td>
-                                            <td>{!! ($show->jabatan) ? $show->jabatan : '-' !!}</td>
+                                            <td>{!! ($show->id_jabatan) ? $show->get_jabatan()->nama : '-' !!}</td>
                                         </tr>
                                         <tr>
                                             <td>Status Karyawan</td>
@@ -358,6 +398,33 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="fw-bolder border-bottom pb-50 mb-1">Berkas Penunjang</h5>
+                        <div class="table-responsive">
+                            <table class="table" width="100%">
+                                @foreach($file as $f)
+                                <tr>
+                                    <td width="70%">{{$f->nama}}</td>
+                                    <td width="5%">:</td>
+                                    <td width="25%">
+                                            <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
+                                                title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
+                                                <i data-feather='upload'></i>
+                                            </button>
+                                        @if(!empty($f->file))
+                                            <a type="button" href="{{ asset('file_upload/'.$f->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
+                                                title="Buka File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
+                                                <i data-feather='file'></i>
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </table>
+                        </div>
                 </div>
             </div>
         </div>
@@ -483,6 +550,31 @@
                         <button type="submit" class="btn btn-primary" id="upload_ttd">Simpan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-start" id="FormUpload" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <form id="form_file" enctype="multipart/form-data">
+                    @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title" id="file">Edit Data</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                        <label>Format file: PDF</label>
+                        <div class="mb-1">
+                            <input type="file" class="form-control" name="file" id="file"/>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id_file" id="id_file">
+                    <input type="hidden" name="id_karyawan" id="id_karyawan" value="{{$show->id}}">
+                    <button type="submit" class="btn btn-primary" id="save_file">Simpan</button>
+                </div>
+            </form>
             </div>
         </div>
     </div>

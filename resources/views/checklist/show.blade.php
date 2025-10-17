@@ -64,7 +64,7 @@
                 data: null, 
                 render: function (data, type, row) {
                         return `
-                        <a href="/checklist/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                        <a href="/checklist/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" target="_blank" title="Cetak PDF">
                                 <i data-feather='printer'></i>
                             </a>
                         `;
@@ -75,7 +75,7 @@
                 render: function (data, type, row) {
                     return `
                         <div class="btn-group">
-                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                             <div class="dropdown-menu">
                                 <a type="button" href="/checklist/edit/${row.uid}" class="dropdown-item resign-btn">Edit</a>
                                 <a type="button" data-id="${row.id}" class="dropdown-item delete-btn">Hapus</a>

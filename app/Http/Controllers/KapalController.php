@@ -1,15 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Perusahaan;
 use App\Models\Kapal;
+use App\Models\MasterFile;
+use App\Models\FileUpload;
 use Alert;
 use Session;
 Use Carbon\Carbon;
 use Str;
 use DB;
+use App\Exports\KapalExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KapalController extends Controller
 {
@@ -146,8 +151,18 @@ class KapalController extends Controller
     public function profil($uid)
     {
         $show = Kapal::where('uid',$uid)->first();
+        $id_kapal = $show->id;
         $data['show'] = $show;
         $data['active'] = "kapal";
+        $data['file'] = DB::table('master_file as a')
+                ->leftJoin('file_upload as b', function($join) use ($id_kapal) {
+                    $join->on('a.id', '=', 'b.id_file')
+                        ->where('b.id_kapal', $id_kapal); 
+                })
+                ->where('a.type', 'K')
+                ->where('a.status', 'A')
+                ->select('a.*', 'b.file')
+                ->get();
         return view('kapal.profile',$data);
     }
 
@@ -159,5 +174,51 @@ class KapalController extends Controller
                     ->where('a.pemilik', $id_perusahaan)->where('a.status','A')
                     ->get();
         return response()->json($kapal);
+    }
+
+    public function export(Request $request)
+    {
+        $id_perusahaan = $request->input('id_perusahaan');
+
+        return Excel::download(new KapalExport($id_perusahaan), 'data_kapal.xlsx');
+    }
+
+    public function savefile(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'nullable|file|mimes:pdf|max:20480',
+        ]);
+
+        $cek = FileUpload::where('id_file', $id)->where('id_kapal', $request->input('id_kapal'))->first();
+
+        if ($request->hasFile('file')) {
+            if ($cek) {
+                Storage::disk('public')->delete($cek->file);
+                $del = FileUpload::where('id', $cek->id)->delete();
+            }
+            // upload file baru
+            $file = $request->file('file');
+            $nama_file = time() . "_" . str_replace(" ", "_", $file->getClientOriginalName());
+            $file->move(public_path('file_upload'), $nama_file);
+
+            $save = FileUpload::insert([
+                'id_kapal' => $request->input('id_kapal'),
+                'id_file'  => $id,
+                'file' => $nama_file,
+                'status' => 'A',
+                'created_by' => Session::get('userid'),
+            ]); 
+            return response()->json($save);
+        }
+    }
+
+    public function pdf($uid) {
+        $show =  Kapal::where('uid', $uid)->first();
+        $nama = $show->nama;
+        $data['show'] = $show;
+        $pdf = Pdf::loadView('kapal.pdf', $data)
+                ->setPaper('a3', 'portrait');
+
+        return $pdf->stream($nama.'.pdf');
     }
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\NotulenController;
 use App\Http\Controllers\DaftarHadirController;
 use App\Http\Controllers\GantiKKMController;
+use App\Http\Controllers\FileController;
 
 Route::get('/', function () {
     return view('login/show');
@@ -41,7 +42,11 @@ Route::post('perusahaan/create', [PerusahaanController::class, 'store']);
 Route::get('/perusahaan/profil/{id}', [PerusahaanController::class, 'profil'])->middleware('auth');
 Route::get('/perusahaan/edit/{id}', [PerusahaanController::class, 'edit'])->middleware('auth');
 Route::post('/perusahaan/update/{id}', [PerusahaanController::class, 'update']);
-Route::get('/perusahaan/delete/{id}', [PerusahaanController::class, 'delete']);
+Route::post('/perusahaan/delete/{id}', [PerusahaanController::class, 'delete']);
+Route::get('/perusahaan/export', [PerusahaanController::class, 'export'])->middleware('auth');
+Route::get('/perusahaan/profil/{id}', [PerusahaanController::class, 'profil'])->middleware('auth');
+Route::post('/perusahaan/savefile/{id}', [PerusahaanController::class, 'savefile'])->middleware('auth');
+Route::get('/perusahaan/pdf/{id}', [PerusahaanController::class, 'pdf'])->name('perusahaan.pdf')->middleware('auth');
 
 Route::get('/kapal', [KapalController::class, 'show'])->name('kapal')->middleware('auth');
 Route::post('/kapal/data', [KapalController::class, 'getData'])->middleware('auth');
@@ -52,6 +57,9 @@ Route::get('/kapal/edit/{id}', [KapalController::class, 'edit'])->middleware('au
 Route::post('/kapal/update/{id}', [KapalController::class, 'update']);
 Route::get('/kapal/delete/{id}', [KapalController::class, 'delete']);
 Route::get('/get-kapal/{id_perusahaan}', [KapalController::class, 'getKapal']);
+Route::post('/kapal/export', [KapalController::class, 'export'])->middleware('auth');
+Route::post('/kapal/savefile/{id}', [KapalController::class, 'savefile']);
+Route::get('/kapal/pdf/{id}', [KapalController::class, 'pdf'])->name('kapal.pdf')->middleware('auth');
 
 Route::get('/jabatan', [JabatanController::class, 'show'])->name('jabatan')->middleware('auth');
 Route::get('/jabatan/data', [JabatanController::class, 'getData'])->middleware('auth');
@@ -67,11 +75,14 @@ Route::get('/karyawan/add', [KaryawanController::class, 'add' ])->middleware('au
 Route::post('karyawan/store', [KaryawanController::class, 'store']);
 Route::get('/karyawan/profil/{id}', [KaryawanController::class, 'profil'])->middleware('auth');
 Route::get('/karyawan/edit/{uid}', [KaryawanController::class, 'edit'])->middleware('auth');
-Route::post('/karyawan/update/{id}', [KaryawanController::class, 'update']);
-Route::post('/karyawan/delete/{id}', [KaryawanController::class, 'delete']);
-Route::post('/karyawan/resign/{id}', [KaryawanController::class, 'resign']);
-Route::post('/karyawan/updatettd/{id}', [KaryawanController::class, 'updatettd']);
-Route::post('/karyawan/password/{id}', [KaryawanController::class, 'password']);
+Route::post('/karyawan/update/{id}', [KaryawanController::class, 'update'])->middleware('auth');
+Route::post('/karyawan/delete/{id}', [KaryawanController::class, 'delete'])->middleware('auth');
+Route::post('/karyawan/resign/{id}', [KaryawanController::class, 'resign'])->middleware('auth');
+Route::post('/karyawan/updatettd/{id}', [KaryawanController::class, 'updatettd'])->middleware('auth');
+Route::post('/karyawan/password/{id}', [KaryawanController::class, 'password'])->middleware('auth');
+Route::post('/karyawan/export', [KaryawanController::class, 'export'])->middleware('auth');
+Route::post('/karyawan/savefile/{id}', [KaryawanController::class, 'savefile'])->middleware('auth');
+Route::get('/karyawan/pdf/{id}', [KaryawanController::class, 'pdf'])->name('karyawan.pdf')->middleware('auth');
 
 Route::get('/akses', [AksesController::class, 'show'])->name('akses')->middleware('auth');
 Route::get('/akses/data', [AksesController::class, 'getData'])->middleware('auth');
@@ -197,3 +208,11 @@ Route::get('/kkm/edit/{id}', [GantiKKMController::class, 'edit'])->middleware('a
 Route::post('/kkm/update/{id}', [GantiKKMController::class, 'update']);
 Route::post('/kkm/delete/{id}', [GantiKKMController::class, 'delete']);
 Route::get('/kkm/pdf/{id}', [GantiKKMController::class, 'pdf'])->name('kkm.pdf')->middleware('auth');
+
+Route::get('/file', [FileController::class, 'show'])->name('file')->middleware('auth');
+Route::post('/file/data', [FileController::class, 'getData'])->middleware('auth');
+Route::get('/file/add', [FileController::class, 'add' ])->middleware('auth');
+Route::post('file/store', [FileController::class, 'store'])->name('file.store');
+Route::get('/file/edit/{id}', [FileController::class, 'edit'])->middleware('auth');
+Route::post('/file/update/{id}', [FileController::class, 'update']);
+Route::post('/file/delete/{id}', [FileController::class, 'delete']);

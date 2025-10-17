@@ -64,14 +64,14 @@
                 render: function (data, type, row) {
                     if(row.cover){
                         return `
-                        <a href="/prosedur/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                        <a href="/prosedur/pdf/${row.uid}" type="button" target="_blank" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
                                 <i data-feather='printer'></i>
                             </a>
                         `;
                     } else if(row.file) {
                         let link = "{{ asset('file_prosedur') }}";
                         return `
-                        <a href="/view-file/${row.file}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
+                        <a href="/view-file/${row.uid}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
                                 <i data-feather='file'></i>
                             </a>
                         `;

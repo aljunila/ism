@@ -309,7 +309,7 @@
                                         <tr>
                                             <td> Perusahaan</td>
                                             <td>:</td>
-                                            <td>{!! ($show->id_perusahaan) ? $show->get_perusahaan()->nama : '-' !!}</td>
+                                            <td>{!! ($show->id_perusahaan) ? $show->perusahaan : '-' !!}</td>
                                         </tr>
                                         <tr>
                                             <td> Ditempatkan di</td>
@@ -319,7 +319,7 @@
                                         <tr>
                                             <td> Jabatan</td>
                                             <td>:</td>
-                                            <td>{!! ($show->id_jabatan) ? $show->get_jabatan()->nama : '-' !!}</td>
+                                            <td>{!! ($show->id_jabatan) ? $show->jabatan : '-' !!}</td>
                                         </tr>
                                         <tr>
                                             <td>Status Karyawan</td>

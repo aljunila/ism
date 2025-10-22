@@ -47,6 +47,7 @@ class KaryawanController extends Controller
                     'karyawan.uid',
                     'karyawan.nama',
                     'karyawan.nik',
+                    'karyawan.nip',
                     'kapal.nama as kapal',
                     'jabatan.nama as jabatan'
                 )

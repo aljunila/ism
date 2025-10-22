@@ -54,7 +54,12 @@
                 orderable: false,
                 searchable: false
             },
-            { data: 'nama' },
+            { 
+                data: 'nama',
+                render: function(data, type, row) {
+                    return `${row.nama}<br>${row.nip}`;
+                }
+            },
             { data: 'nik' },
             { 
                 data: 'kapal',

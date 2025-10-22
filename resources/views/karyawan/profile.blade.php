@@ -456,7 +456,7 @@
                                         @endforeach
                                     </select>
                                 @else
-                                    {{$show->get_perusahaan->nama}}
+                                    {{$show->perusahaan}}
                                 @endif
                             </div>
                         </div>

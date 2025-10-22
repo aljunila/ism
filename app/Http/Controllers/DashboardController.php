@@ -43,6 +43,24 @@ class DashboardController extends Controller
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->where('karyawan.id_kapal', $id_kapal)
                             ->count();
+        } else {
+            $id_user = Session::get('userid');
+
+            $data['prosedur'] = DB::table('prosedur as a')
+                ->leftJoin('view_prosedur as b', function($join) use ($id_user) {
+                    $join->on('a.id', '=', 'b.id_prosedur')
+                        ->where('b.id_user', '=', $id_user);
+                })
+                ->select(
+                    'a.kode',
+                    'b.jml_lihat',
+                    'b.jml_download',
+                    'b.update_lihat',
+                    'b.update_download'
+                )
+                ->where('a.status', 'A')
+                ->orderBy('a.id')
+                ->get();
         }
         return view('dashboard.show', $data);
     }

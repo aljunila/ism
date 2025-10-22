@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Menu;
 use App\Models\Karyawan;
+use App\Models\ResetPassword;
 use Session;
 use Validator;
 use DB;
@@ -124,7 +125,7 @@ class LoginController extends Controller
         return response()->json($menus);
     }
 
-     public function password(Request $request)
+    public function password(Request $request)
     {
         $id = Session::get('userid');
         $old_password = $request->input('old_password');
@@ -217,5 +218,44 @@ class LoginController extends Controller
                 'created_by' => Session::get('userid'),
                 'created_date' => date('Y-m-d H:i:s')
                 ]);
+    }
+
+    public function lupapassword() {
+        return view('login.lupapassword');
+    }
+
+    public function resetpassword(Request $request) {
+        $nik = $request->input('nik');
+        $get = DB::table('user')
+                ->leftjoin('karyawan', 'karyawan.id', 'user.id_karyawan')
+                ->select('user.id', 'user.username')
+                ->where('nik', $nik)
+                ->first();
+        if($get) {
+            $save = ResetPassword::create([
+                'id_user'   => $get->id,
+                'tgl_ajuan' => date('Y-m-d H:i:s'),
+                'status'    => 'N'
+            ]);
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json([
+                'error' => true,
+                'message' => 'NIK tidak ditemukan'
+            ], 404);
+        }   
+    }
+
+    public function reset($id)
+    {
+        $get = ResetPassword::findOrFail($id);
+        $cek = User::findOrFail($get->id_user);
+        $cek->password = Hash::make('123456');
+        $cek->save();
+
+        $update = ResetPassword::where('id', $id)->update([
+            'tgl_reset' => date('Y-m-d H:i:s'),
+            'status'    => 'R'
+        ]);
     }
 }

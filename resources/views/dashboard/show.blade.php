@@ -15,6 +15,25 @@
 <section id="dashboard-ecommerce">
                     <div class="row match-height">
                         <!-- Statistics Card -->
+                        <div class="col-12">
+                            <div class="card card-congratulations">
+                                <div class="card-body text-center">
+                                    <img src="{{ url('/vuexy/app-assets/images/elements/decore-left.png')}}" class="congratulations-img-left" alt="card-img-left" />
+                                    <img src="{{ url('/vuexy/app-assets/images/elements/decore-right.png')}}" class="congratulations-img-right" alt="card-img-right" />
+                                    <div class="avatar avatar-xl bg-primary shadow">
+                                        <div class="avatar-content">
+                                            <i data-feather="award" class="font-large-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <h1 class="mb-1 text-white">Hallo {{Session::get('name') }}</h1>
+                                        <p class="card-text m-auto w-75">
+                                            Selamat datang di sistem TFM (Trimas Ferries Management)
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         @if(Session::get('previllage')!=4)
                         <div class="col-12">
                             <div class="card card-statistics">
@@ -90,6 +109,40 @@
                                 </div>
                             </div>
                         </div>
+                        @else
+                        @if(Session::get('id_kapal')!=0)
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <p>Frekuensi Akses Prosedur</p>
+                                        <table id="tabledetail" class="table table-bordered table-striped">
+                                            <thead>
+                                            <tr>
+                                                <td>Prosedur</td>
+                                                <td>Lihat</td>
+                                                <td>Terakhir Lihat</td>
+                                                <td>Download</td>
+                                                <td>Terakhir Download</td>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach($prosedur as $show)
+                                            <tr>
+                                                <td>{{$show->kode}}</td>
+                                                <td>{{$show->jml_lihat}}x</td>
+                                                <td>@if($show->update_lihat) {{ \Carbon\Carbon::parse($show->update_lihat)->addHours(7)->format('d-m-Y H:i') }} @else - @endif</td>
+                                                <td>{{$show->jml_download}}x</td>
+                                                 <td>@if($show->update_download) {{ \Carbon\Carbon::parse($show->update_download)->addHours(7)->format('d-m-Y H:i') }} @else - @endif</td>
+                                            </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         @endif
                         <!--/ Statistics Card -->
                     </div>

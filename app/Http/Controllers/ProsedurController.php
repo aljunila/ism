@@ -9,7 +9,7 @@ use App\Models\Karyawan;
 use App\Models\ViewProsedur;
 use Alert;
 use Session;
-\Carbon\Carbon::setLocale('id');
+use Carbon\Carbon;
 use Str;
 use DB;
 
@@ -329,6 +329,19 @@ class ProsedurController extends Controller
             ->where('a.status', 'A')
             ->orderBy('a.id')
             ->get();
-        return response()->json(['data' => $get]);
+        $data = $get->map(function ($item) {
+            return [
+                'kode' => $item->kode,
+                'jml_lihat' => $item->jml_lihat,
+                'jml_download' => $item->jml_download,
+                'update_lihat' => $item->update_lihat 
+                    ? Carbon::parse($item->update_lihat)->addHours(7)->format('d-m-Y H:i')
+                    : '-',
+                'update_download' => $item->update_download 
+                    ? Carbon::parse($item->update_download)->addHours(7)->format('d-m-Y H:i')
+                    : '-',
+            ];
+        });
+        return response()->json(['data' => $data]);
     }
 }

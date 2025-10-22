@@ -116,7 +116,7 @@
                                     <label class="col-form-label" for="first-name">No Dokumen</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="no_dokumen" name="no_dokumen" required value="{{$show->no_dokumen}}">
+                                    <input type="text" class="form-control" id="no_dokumen" name="no_dokumen" value="{{$show->no_dokumen}}">
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -124,7 +124,7 @@
                                     <label class="col-form-label" for="first-name">Edisi</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="edisi" name="edisi" required value="{{$show->edisi}}">
+                                    <input type="text" class="form-control" id="edisi" name="edisi" value="{{$show->edisi}}">
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -140,7 +140,7 @@
                                     <label class="col-form-label" for="first-name">Status Manual</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="status_manual" name="status_manual" required value="{{$show->status_manual}}">
+                                    <input type="text" class="form-control" id="status_manual" name="status_manual" value="{{$show->status_manual}}">
                                 </div>
                             </div>
                             <div class="mb-1 row">

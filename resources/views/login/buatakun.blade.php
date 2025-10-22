@@ -107,7 +107,6 @@
                                             <div class="input-group input-group-merge form-password-toggle">
                                                 <input type="password" class="form-control form-control-merge" name="password1" id="password1" required placeholder="Masukkan password"/>
                                                 <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
-                                                <input type="hidden" name="id" id="id">
                                             </div>
                                         </div>
                                         <div class="mb-1">
@@ -119,6 +118,7 @@
                                                 <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
                                             </div>
                                         </div>
+                                        <input type="hidden" name="id" id="id">
                                         <button class="btn btn-primary w-100" tabindex="4" id="save" type="button">Simpan</button>
                                     </div>
                                     <a href="/login" class="btn btn-primary w-100" tabindex="4" id="login" type="button"><span>Kembali ke Login</span></a>

@@ -331,7 +331,7 @@
                                     <label class="col-form-label" for="first-name">Ditempatkan di</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="id_kapal" id="id_kapal" required class="form-control">
+                                    <select name="id_kapal" id="id_kapal" class="form-control">
                                         <option value="">Office</option>
                                     </select>
                                 </div>

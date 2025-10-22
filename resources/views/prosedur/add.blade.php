@@ -119,7 +119,7 @@
                                     <label class="col-form-label" for="first-name">No Dokumen</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="no_dokumen" name="no_dokumen" required>
+                                    <input type="text" class="form-control" id="no_dokumen" name="no_dokumen">
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -127,7 +127,7 @@
                                     <label class="col-form-label" for="first-name">Edisi</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="edisi" name="edisi" required>
+                                    <input type="text" class="form-control" id="edisi" name="edisi">
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -143,7 +143,7 @@
                                     <label class="col-form-label" for="first-name">Status Manual</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" id="status_manual" name="status_manual" required>
+                                    <input type="text" class="form-control" id="status_manual" name="status_manual">
                                 </div>
                             </div>
                             <div class="mb-1 row">

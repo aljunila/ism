@@ -96,7 +96,41 @@
             </div>
             <ul class="nav navbar-nav align-items-center ms-auto">
                 <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="moon"></i></a></li>
+                @php
+                    use App\Models\ResetPassword;
+                    use Illuminate\Support\Facades\DB;
+                    $previllage = Session::get('previllage');
+                    $id_perusahaan = Session::get('id_perusahaan');
+                    $id_kapal = Session::get('id_kapal');
 
+                    if ($previllage == 1) {
+                        $get = DB::table('reset_password')
+                                ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
+                                ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
+                                ->where('reset_password.status', 'N')
+                                ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
+                                ->get();
+                    } elseif ($previllage == 2) {
+                        $get = DB::table('reset_password')
+                                ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
+                                ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
+                                ->where('karyawan.id_perusahaan', $id_perusahaan)->where('reset_password.status', 'N')
+                                ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
+                                ->get();
+                    } else{
+                        $get = DB::table('reset_password')
+                                ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
+                                ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
+                                ->where('karyawan.id_kapal', $id_kapal)->where('reset_password.status', 'N')
+                                ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
+                                ->get();
+                    }
+                    $count = count($get);
+                @endphp
+                @if($previllage!=4)
+                <li class="nav-item dropdown dropdown-notification me-25"><a class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#ResetPassword" ><i class="ficon" data-feather='key'></i>@if($count>0)<span class="badge rounded-pill bg-danger badge-up">{{$count}}</span>@endif</a>
+                </li>
+                @endif
                 <li class="nav-item dropdown dropdown-user"><a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <div class="user-nav d-sm-flex d-none"><span class="user-name fw-bolder">{{Session::get('name') }}</span></div>
                         
@@ -136,7 +170,6 @@
             <div class="main-menu-content">
             @php
                 use App\Models\Menu;
-                use Illuminate\Support\Facades\DB;
                 $previllage = Session::get('previllage');
                 $id = Session::get('id_karyawan');
 
@@ -273,6 +306,31 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-start" id="ResetPassword" tabindex="-1" aria-labelledby="myModalLabel17" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel17">Reset Password</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                    @csrf
+                    <div class="modal-body">
+                        <table id="tablecheck" class="table">
+                            <thead>
+                            @foreach($get as $value)
+                            <tr>
+                                <td><a href="/karyawan/profil/{{$value->uid}}">{{$value->nama}}</a><br>{{$value->nip}}</td>
+                                <td><button class="btn btn-sm btn-danger" id="reset" data-id="{{$value->id}}">Reset Password</button></td>
+                            </tr>
+                            @endforeach
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+            </div>
+        </div>
+    </div>
     <!-- BEGIN: Footer-->
     <footer class="footer footer-static footer-light">
         <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="https://trimas-ferry.co.id" target="_blank">PT. Tri Sakti Lautan Mas</a></p>
@@ -308,7 +366,9 @@
         }
         });
 
-       $(document).ready(function () {
+
+
+        $(document).ready(function () {
             $.ajax({
                 url: "getMenu",
                 method: "GET",
@@ -320,68 +380,66 @@
             });
 
             $("#sidebarMenu").html(renderMenu(menus));
-    setActiveMenu();
+            setActiveMenu();
 
-    // 🔹 Fungsi render recursive
-    function renderMenu(menus, level = 0) {
-        let html = "";
-        menus.forEach(menu => {
-            let hasChildren = menu.children && menu.children.length > 0;
-            let baseClass = "flex items-center py-2 px-3 rounded-md transition duration-150 ease-in-out cursor-pointer";
-            let inactiveClass = "text-gray-700 hover:bg-gray-100";
+            // 🔹 Fungsi render recursive
+            function renderMenu(menus, level = 0) {
+                let html = "";
+                menus.forEach(menu => {
+                    let hasChildren = menu.children && menu.children.length > 0;
+                    let baseClass = "flex items-center py-2 px-3 rounded-md transition duration-150 ease-in-out cursor-pointer";
+                    let inactiveClass = "text-gray-700 hover:bg-gray-100";
 
-            if (hasChildren) {
-                html += `
-                    <li>
-                        <a class="${baseClass} ${inactiveClass} parent-menu">
-                            ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
-                            <span class="ml-auto">▸</span>
-                        </a>
-                        <ul class="ml-4 hidden border-l border-gray-200 space-y-1 pl-2">
-                            ${renderMenu(menu.children, level + 1)}
-                        </ul>
-                    </li>
-                `;
-            } else {
-                html += `
-                    <li>
-                        <a href="${menu.link}" 
-                           class="${baseClass} ${inactiveClass}" 
-                           data-link="${menu.link}">
-                            ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
-                        </a>
-                    </li>
-                `;
+                    if (hasChildren) {
+                        html += `
+                            <li>
+                                <a class="${baseClass} ${inactiveClass} parent-menu">
+                                    ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
+                                    <span class="ml-auto">▸</span>
+                                </a>
+                                <ul class="ml-4 hidden border-l border-gray-200 space-y-1 pl-2">
+                                    ${renderMenu(menu.children, level + 1)}
+                                </ul>
+                            </li>
+                        `;
+                    } else {
+                        html += `
+                            <li>
+                                <a href="${menu.link}" 
+                                class="${baseClass} ${inactiveClass}" 
+                                data-link="${menu.link}">
+                                    ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
+                                </a>
+                            </li>
+                        `;
+                    }
+                });
+                return html;
             }
-        });
-        return html;
-    }
 
-    // 🔹 Set menu aktif
-    function setActiveMenu() {
-        let current = window.location.pathname;
+            // 🔹 Set menu aktif
+            function setActiveMenu() {
+                let current = window.location.pathname;
 
-        $("#sidebarMenu a[data-link]").each(function () {
-            if ($(this).attr("href") === current) {
-                $(this).addClass("bg-indigo-600 text-white font-semibold");
-                $(this).parents("ul").removeClass("hidden").addClass("block");
-                $(this).parents("li").children(".parent-menu")
-                       .addClass("text-indigo-700 font-bold")
-                       .find("span:last").text("▾");
+                $("#sidebarMenu a[data-link]").each(function () {
+                    if ($(this).attr("href") === current) {
+                        $(this).addClass("bg-indigo-600 text-white font-semibold");
+                        $(this).parents("ul").removeClass("hidden").addClass("block");
+                        $(this).parents("li").children(".parent-menu")
+                            .addClass("text-indigo-700 font-bold")
+                            .find("span:last").text("▾");
+                    }
+                });
             }
-        });
-    }
 
-    // 🔹 Toggle submenu kalau parent diklik
-    $(document).on("click", ".parent-menu", function (e) {
-        e.preventDefault();
-        let submenu = $(this).next("ul");
-        submenu.toggleClass("hidden block");
-        $(this).find("span:last").text(submenu.hasClass("hidden") ? "▸" : "▾");
-    });
+            // 🔹 Toggle submenu kalau parent diklik
+            $(document).on("click", ".parent-menu", function (e) {
+                e.preventDefault();
+                let submenu = $(this).next("ul");
+                submenu.toggleClass("hidden block");
+                $(this).find("span:last").text(submenu.hasClass("hidden") ? "▸" : "▾");
+            });
         });
-        
-
 
         $('#change-pass').on('click', function(e){
             e.preventDefault(); // cegah submit biasa
@@ -419,6 +477,37 @@
                         icon: 'error',
                         title: 'Error',
                         text: 'Terjadi kesalahan server'
+                    });
+                }
+            });
+        });
+
+         $(document).on("click", "#reset", function (e) {
+            let id = $(this).attr('data-id');
+
+            $.ajax({
+                url: "/login/reset/" + id,
+                method: "GET",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'Password berhasil direset',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#ResetPassword').modal('hide');
+                            window.location.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan file'
                     });
                 }
             });

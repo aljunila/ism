@@ -35,6 +35,9 @@ Route::get('/buatakun', [LoginController::class, 'buatakun']);
 Route::post('/carinik', [LoginController::class, 'carinik']);
 Route::get('/dashboard', [DashboardController::class, 'show'])->name('show')->middleware('auth');
 Route::post('/upload-image', [UploadController::class, 'upload'])->name('upload.image');
+Route::get('/lupapassword', [LoginController::class, 'lupapassword']);
+Route::post('/resetpassword', [LoginController::class, 'resetpassword'])->middleware('auth');
+Route::get('/login/reset/{id}', [LoginController::class, 'reset'])->middleware('auth');
 
 Route::get('/perusahaan', [PerusahaanController::class, 'show'])->name('perusahaan')->middleware('auth');
 Route::get('/perusahaan/add', [PerusahaanController::class, 'add' ])->middleware('auth');

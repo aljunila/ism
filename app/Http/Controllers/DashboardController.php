@@ -45,6 +45,7 @@ class DashboardController extends Controller
                             ->count();
         } else {
             $id_user = Session::get('userid');
+            $id_perusahaan = Session::get('id_perusahaan');
 
             $data['prosedur'] = DB::table('prosedur as a')
                 ->leftJoin('view_prosedur as b', function($join) use ($id_user) {
@@ -59,6 +60,7 @@ class DashboardController extends Controller
                     'b.update_download'
                 )
                 ->where('a.status', 'A')
+                ->where('a.id_perusahaan', $id_perusahaan)
                 ->orderBy('a.id')
                 ->get();
         }

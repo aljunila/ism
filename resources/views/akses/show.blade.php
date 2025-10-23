@@ -115,7 +115,7 @@
                 <div class="card">
                     <div class="card-header border-bottom">
                         <h4 class="card-title">Daftar Akses User</h4>
-                        <a href="/karyawan/add" class="btn btn-primary btn-sm">Tambah Data</a>
+                        <!-- <a href="/karyawan/add" class="btn btn-primary btn-sm">Tambah Data</a> -->
                     </div>
                     <div class="card-body">
                     <table id="table" class="table table-bordered table-striped" width="100%">

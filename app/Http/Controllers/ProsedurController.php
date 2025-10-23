@@ -7,6 +7,7 @@ use App\Models\Perusahaan;
 use App\Models\Prosedur;
 use App\Models\Karyawan;
 use App\Models\ViewProsedur;
+use App\Models\User;
 use Alert;
 use Session;
 use Carbon\Carbon;
@@ -38,7 +39,12 @@ class ProsedurController extends Controller
     public function add() 
     {
         $data['active'] = "prosedur";
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        if(Session::get('previllage')==1) {
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } else {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        }
         $data['perusahaan'] = Perusahaan::get();
         return view('prosedur.add', $data);
     }
@@ -86,7 +92,12 @@ class ProsedurController extends Controller
         $data['show'] = $show;
         $data['active'] = "prosedur";
         $data['perusahaan'] = Perusahaan::get();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        if(Session::get('previllage')==1) {
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } else {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        }
         return view('prosedur.edit',$data);
     }
 
@@ -289,10 +300,10 @@ class ProsedurController extends Controller
         $perusahaan = $request->input('id_perusahaan');
         $kapal = $request->input('id_kapal');
 
-        $get = DB::table('karyawan as a')
-                ->leftJoin('user as b', 'a.id', '=', 'b.id_karyawan')
+        $get = DB::table('user as b')
+                ->leftJoin('karyawan as a', 'a.id', '=', 'b.id_karyawan')
                 ->leftJoin('view_prosedur as c', 'b.id', '=', 'c.id_user')
-                ->leftJoin('kapal as d', 'd.id', '=', 'a.id_kapal')
+                ->leftJoin('kapal as d', 'd.id', '=', 'b.id_kapal')
                 ->select(
                     'b.id', 'a.nama', 'd.nama as kapal',
                     DB::raw('COUNT(CASE WHEN c.jml_lihat > 0 THEN 1 END) as lihat'),
@@ -300,12 +311,12 @@ class ProsedurController extends Controller
                 )
                 ->where('a.resign', 'N')
                 ->where('a.status', 'A')
-                ->whereNotNull('a.id_kapal')
+                ->whereNotNull('b.id_kapal')
                 ->when($perusahaan, function($query, $perusahaan) {
-                    return $query->where('a.id_perusahaan', $perusahaan);
+                    return $query->where('b.id_perusahaan', $perusahaan);
                 })
                 ->when($kapal, function($query, $kapal) {
-                    return $query->where('a.id_kapal', $kapal);
+                    return $query->where('b.id_kapal', $kapal);
                 })
                 ->groupBy('b.id', 'a.nama', 'd.nama')
                 ->get();
@@ -314,6 +325,8 @@ class ProsedurController extends Controller
 
     public function viewdetail(Request $request) {
         $id = $request->input('id');
+        $get = User::where('id', $id)->first();
+        $id_perusahaan = $get->id_perusahaan;
         $get = DB::table('prosedur as a')
             ->leftJoin('view_prosedur as b', function($join) use ($id) {
                 $join->on('a.id', '=', 'b.id_prosedur')
@@ -327,6 +340,7 @@ class ProsedurController extends Controller
                 'b.update_download'
             )
             ->where('a.status', 'A')
+            ->where('a.id_perusahaan', $id_perusahaan)
             ->orderBy('a.id')
             ->get();
         $data = $get->map(function ($item) {

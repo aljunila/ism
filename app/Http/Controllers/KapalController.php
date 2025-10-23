@@ -41,8 +41,13 @@ class KapalController extends Controller
     public function add() 
     {
         $data['active'] = "kapal";
-        $data['perusahaan'] = Perusahaan::get();
-          return view('kapal.add', $data);
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+        } else {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+        }
+        return view('kapal.add', $data);
     }
   
     public function store(Request $request)
@@ -96,7 +101,12 @@ class KapalController extends Controller
         $show = Kapal::where('uid', $uid)->first();
         $data['show'] = $show;
         $data['active'] = "Kapal";
-        $data['perusahaan'] = Perusahaan::get();
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+        } else {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+        }
         return view('kapal.edit',$data);
     }
 

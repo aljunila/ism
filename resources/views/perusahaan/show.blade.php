@@ -116,7 +116,9 @@
                       </div>
                       <div class="col-sm-3">
                         <button type="button" class="btn btn-warning btn-sm float-right" id="download"><i data-feather='download'></i> Unduh Data</button>
+                        @if(Session::get('previllage')==1)
                         <a href="/perusahaan/add" class="btn btn-primary btn-sm">Tambah Data</a>
+                        @endif
                       </div>
                     </div>
                     <div class="card-body">

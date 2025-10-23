@@ -20,7 +20,12 @@ class PerusahaanController extends Controller
 {
     public function show()
     {
-        $data['daftar'] = Perusahaan::where('status','A')->get();
+        if(Session::get('previllage')==1) {
+            $data['daftar'] = Perusahaan::where('status','A')->get();
+        } else {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['daftar'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+        }
         $data['active'] = "perusahaan";
         return view('perusahaan.show', $data);
     }

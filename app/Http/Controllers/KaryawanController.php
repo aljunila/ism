@@ -68,7 +68,7 @@ class KaryawanController extends Controller
     {
         $data['active'] = "karyawan";
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
-        $data['perusahaan'] = Perusahaan::get();
+        $data['perusahaan'] = Perusahaan::where('status','A')->get();
         $data['kapal'] = Kapal::where('status', 'A')->get();
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
         $data['ptkp'] = StatusPTKP::get();

@@ -188,12 +188,14 @@ class KaryawanController extends Controller
     {
       $post = Karyawan::find($id)->update($request->all());  
 
-       $update = User::where('id_karyawan', $id)->update([
-        'id_perusahaan' => $request->input('id_perusahaan'),
-        'id_kapal' => $request->input('id_kapal'),
-        'id_previllage' => $request->input('id_previllage'),
-        'changed_by' => Session::get('userid'),
-      ]);    
+        if($request->input('id_perusahaan')) {
+            $update = User::where('id_karyawan', $id)->update([
+                'id_perusahaan' => $request->input('id_perusahaan'),
+                'id_kapal' => $request->input('id_kapal'),
+                'id_previllage' => $request->input('id_previllage'),
+                'changed_by' => Session::get('userid'),
+            ]); 
+        }   
       return response()->json($post);
     }
 

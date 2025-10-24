@@ -62,7 +62,7 @@
                 data: null, 
                 render: function (data, type, row) {
                         return `
-                        <a href="/notulen/pdf4/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                        <a href="/notulen/pdf4/${row.uid}" type="button" target="_blank" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
                                 <i data-feather='printer'></i>
                             </a>
                         `;
@@ -73,7 +73,7 @@
                 render: function (data, type, row) {
                     return `
                         <div class="btn-group">
-                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                             <div class="dropdown-menu">
                                 <a type="button" href="/notulen/edit4/${row.uid}" class="dropdown-item">Edit</a>
                                 <a type="button" href="/notulen/hadir/${row.uid}" class="dropdown-item">Daftar Hadir</a>

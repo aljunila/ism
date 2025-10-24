@@ -25,6 +25,7 @@
         $('#form_karyawan').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
             let id = {{$show->id}};
+            let uid = "{{$show->uid}}";
             let formData = new FormData(this);
 
             $.ajax({
@@ -41,7 +42,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = "{{ url('/karyawan') }}";
+                           window.location.href = "{{ url('/karyawan/profil') }}/"+uid;
                         });
                 },
                 error: function(xhr){

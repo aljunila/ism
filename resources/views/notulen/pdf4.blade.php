@@ -79,7 +79,7 @@
             {!!$materi!!}<br><br><br><br>
             </td>
         </tr>
-        <tr>
+        <tr style="text-align: center;">
             <td colspan="3">DPA/Nahkoda,<br>
             @if($show->get_nahkoda()->tanda_tangan)
             <img src="file://{{ public_path('ttd_karyawan/' . $show->get_nahkoda()->tanda_tangan) }}" width="100px" height="75px"><br>

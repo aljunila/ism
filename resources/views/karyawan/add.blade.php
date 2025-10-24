@@ -333,6 +333,9 @@
                                 <div class="col-sm-9">
                                     <select name="id_kapal" id="id_kapal" class="form-control">
                                         <option value="">Office</option>
+                                        @foreach($kapal as $kp)
+                                            <option value="{{$kp->id}}">{{$kp->nama}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

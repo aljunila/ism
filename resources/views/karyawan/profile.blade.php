@@ -309,7 +309,7 @@
                                         <tr>
                                             <td> Perusahaan</td>
                                             <td>:</td>
-                                            <td>{!! ($show->id_perusahaan) ? $show->perusahaan : '-' !!}</td>
+                                            <td>{!! ($show->perusahaan) ? $show->perusahaan : '-' !!}</td>
                                         </tr>
                                         <tr>
                                             <td> Ditempatkan di</td>
@@ -456,6 +456,7 @@
                                         @endforeach
                                     </select>
                                 @else
+                                    <input type="hidden" name="id_perusahaan" id="id_perusahaan" value="{{$show->id_perusahaan}}">
                                     {{$show->perusahaan}}
                                 @endif
                             </div>

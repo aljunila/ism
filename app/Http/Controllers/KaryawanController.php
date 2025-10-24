@@ -69,7 +69,15 @@ class KaryawanController extends Controller
         $data['active'] = "karyawan";
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
         $data['perusahaan'] = Perusahaan::where('status','A')->get();
-        $data['kapal'] = Kapal::where('status', 'A')->get();
+        if(Session::get('previllage')==1) {
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+        } elseif(Session::get('previllage')==2) {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+        } else{
+            $id_kapal = Session::get('id_kapal');
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+        }
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
         $data['ptkp'] = StatusPTKP::get();
         return view('karyawan.add', $data);
@@ -162,7 +170,15 @@ class KaryawanController extends Controller
         $data['active'] = "karyawan";
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
         $data['perusahaan'] = Perusahaan::get();
-        $data['kapal'] = Kapal::where('status', 'A')->get();
+        if(Session::get('previllage')==1) {
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+        } elseif(Session::get('previllage')==2) {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+        } else{
+            $id_kapal = Session::get('id_kapal');
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+        }
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
         $data['ptkp'] = StatusPTKP::get();
         return view('karyawan.edit',$data);
@@ -190,11 +206,11 @@ class KaryawanController extends Controller
     public function profil($uid)
     {
         $show = DB::table('karyawan')
-                    ->select('karyawan.*', 'user.id as user', 'user.id_perusahaan', 'perusahaan.nama as perusahaan', 
-                        'user.id_kapal', 'kapal.nama as kapal', 'jabatan.nama as jabatan', 'user.username', 'user.id_previllage', 'previllage.nama as previllage')
+                    ->select('karyawan.*', 'user.id as user', 'karyawan.id_perusahaan', 'perusahaan.nama as perusahaan', 
+                        'karyawan.id_kapal', 'kapal.nama as kapal', 'jabatan.nama as jabatan', 'user.username', 'user.id_previllage', 'previllage.nama as previllage')
                     ->leftjoin('user', 'user.id_karyawan', '=', 'karyawan.id')
-                    ->leftjoin('perusahaan', 'user.id_perusahaan', '=', 'perusahaan.id')
-                    ->leftjoin('kapal', 'user.id_kapal', '=', 'kapal.id')
+                    ->leftjoin('perusahaan', 'karyawan.id_perusahaan', '=', 'perusahaan.id')
+                    ->leftjoin('kapal', 'karyawan.id_kapal', '=', 'kapal.id')
                     ->leftjoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')
                     ->leftjoin('previllage', 'user.id_previllage', '=', 'previllage.id')
                     ->where('karyawan.uid', $uid)->first();
@@ -217,7 +233,15 @@ class KaryawanController extends Controller
         $data['show'] = $show;
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
         $data['perusahaan'] = Perusahaan::get();
-        $data['kapal'] = Kapal::where('status', 'A')->get();
+         if(Session::get('previllage')==1) {
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+        } elseif(Session::get('previllage')==2) {
+            $id_perusahaan = Session::get('id_perusahaan');
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+        } else{
+            $id_kapal = Session::get('id_kapal');
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+        }
         $data['previllage'] = Previllage::orderBy('id', 'DESC')->get();
         $data['menu'] = Akses::where('id_karyawan', $show->id)->get();
         $data['active'] = "karyawan";

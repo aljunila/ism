@@ -27,12 +27,16 @@ class KapalController extends Controller
 
     public function getData(Request $request) {
         $perusahaan = $request->input('id_perusahaan');
+        $kapal = Session::get('previllage') >= 3 ? Session::get('id_kapal') : null;
         $get = DB::table('kapal')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'kapal.pemilik')
                 ->select('kapal.*', 'perusahaan.nama as perusahaan')
                 ->where('kapal.status', 'A')
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('perusahaan.id', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('kapal.id', $kapal);
                 })
                 ->get();
         return response()->json(['data' => $get]);

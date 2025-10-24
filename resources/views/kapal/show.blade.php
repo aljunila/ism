@@ -113,7 +113,9 @@
                         <div class="col-sm-5"></div>
                         <div class="col-sm-3">
                         <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
+                        @if(Session::get('previllage')<=2)
                         <a href="/kapal/add" class="btn btn-primary btn-sm">Tambah Data</a>
+                        @endif
                         </div>
                     </div>
                     <div class="card-body">

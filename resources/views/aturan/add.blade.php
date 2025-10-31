@@ -53,6 +53,28 @@
                 }
             });
         });
+
+        $(document).on('change', '#id_perusahaan', function() {
+            var perusahaanID = $(this).val();
+            if (perusahaanID) {
+                $.ajax({
+                    url: '/get-karyawanbyCom/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#enforced_by').empty().append('<option value="">-- Pilih Karyawan --</option>');
+                    
+                        $.each(data, function(key, value) {
+                            $('#enforced_by').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+            } else {
+                $('#enforced_by').empty().append('<option value="">-- Pilih Karyawan --</option>');
+                table.ajax.reload();
+            }
+        });
     </script>
 @endsection
 
@@ -78,6 +100,18 @@
                     @csrf
                     <div class="row">
                         <div class="col-12">
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Perusahaan</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                    @foreach($perusahaan as $p)
+                                        <option value="{{$p->id}}">{{$p->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
                                     <label class="col-form-label" for="first-name">Form ID</label>
@@ -106,6 +140,17 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Publish</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="publish" id="publish"  class="form-control" required>
+                                        <option value="Y">Iya</option>
+                                        <option value="N">Tidak</option>
+                                    </select>
+                                </div>
+                            </div>
                             <hr>
                             <div class="mb-1 row">
                                 <div class="col-sm-12">
@@ -121,6 +166,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Upload File (Format: PDF)</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <input type="file" class="form-control" id="file" name="file" required>
+                                </div>
+                            </div>
                         <div class="col-sm-9 offset-sm-3">
                             <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>
                             <button type="reset" class="btn btn-outline-secondary">Reset</button>

@@ -64,7 +64,7 @@
 
         $('#form_checklist').on('submit', function(e){
             e.preventDefault();
-            let id = {{$show->id}};
+            let id = {{$id_hadir}};
             let formData = new FormData(this);
 
             $.ajax({
@@ -213,13 +213,29 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Perusahaan</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        {!!$show->get_perusahaan()->nama !!}
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Kapal</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        {!!$show->get_kapal()->nama !!}
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
                                         <label class="col-form-label" for="first-name">Tanggal</label>
                                     </div>
                                     <div class="col-sm-9">
                                         {{ \Carbon\Carbon::parse($show->tanggal)->format('d-m-Y') }}
                                     </div>
                                 </div>
-                                 <div class="mb-1 row">
+                                <div class="mb-1 row">
                                     <div class="col-sm-3">
                                         <label class="col-form-label" for="first-name">Tempat</label>
                                     </div>

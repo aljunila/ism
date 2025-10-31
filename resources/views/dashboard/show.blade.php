@@ -28,7 +28,8 @@
                                     <div class="text-center">
                                         <h1 class="mb-1 text-white">Hallo {{Session::get('name') }}</h1>
                                         <p class="card-text m-auto w-75">
-                                            Selamat datang di sistem TFM (Trimas Ferries Management)
+                                            Selamat datang di sistem TFM (Trimas Ferries Management)<br>
+                                            <h5 class="text-white">{{$com->nama}}</h5>
                                         </p>
                                     </div>
                                 </div>

@@ -98,11 +98,15 @@
                 <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="moon"></i></a></li>
                 @php
                     use App\Models\ResetPassword;
+                    use App\Models\Perusahaan;
+                    use App\Models\Previllage;
                     use Illuminate\Support\Facades\DB;
                     $previllage = Session::get('previllage');
                     $id_perusahaan = Session::get('id_perusahaan');
                     $id_kapal = Session::get('id_kapal');
 
+                    $cek = Perusahaan::where('id', $id_perusahaan)->first();
+                    $pre = Previllage::where('id', $previllage)->first();
                     if ($previllage == 1) {
                         $get = DB::table('reset_password')
                                 ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
@@ -132,7 +136,7 @@
                 </li>
                 @endif
                 <li class="nav-item dropdown dropdown-user"><a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <div class="user-nav d-sm-flex d-none"><span class="user-name fw-bolder">{{Session::get('name') }}</span></div>
+                        <div class="user-nav d-sm-flex d-none"><span class="user-name fw-bolder">{{Session::get('name') }}<br> {{$pre->nama}}</span></div>
                         
                         <span class="avatar"><img src="{{url('/img/user.png')}}" alt="avatar" height="40" width="40"><span class="avatar-status-online"></span></span>
                     </a>
@@ -333,7 +337,7 @@
     </div>
     <!-- BEGIN: Footer-->
     <footer class="footer footer-static footer-light">
-        <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="https://trimas-ferry.co.id" target="_blank">PT. Tri Sakti Lautan Mas</a></p>
+        <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="https://trimas-ferry.co.id" target="_blank">{{$cek->nama}}</a></p>
     </footer>
     <button class="btn btn-primary btn-icon scroll-top" type="button"><i data-feather="arrow-up"></i></button>
     <!-- END: Footer-->

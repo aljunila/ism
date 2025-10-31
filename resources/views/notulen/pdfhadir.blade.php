@@ -71,58 +71,12 @@
 <body>
     <table class="table-bordered" width="100%">
         <tr>
-            <td colspan="2" width="25%" style="text-align: center;"><img src="{{ public_path('img/'.$show->get_perusahaan()->logo) }}" alt="" width="50%"></td>
-            <td style="text-transform: uppercase;" colspan="3" width="50%"><h3>{{$form->nama}}</h3></td>
-            <td width="25%" style="text-align: center;"><b>{{$show->kode}}</b><br> Hal <span class="page-number"></span></td>
-        </tr>
-        <tr style="text-align: left;">
-            <td colspan="2">Tanggal : Tanggal : {{ \Carbon\Carbon::parse($show->tanggal)->format('d-m-Y') }}</td>
-            <td colspan="2">Tempat : {{$show->tempat}}</td>
-            <td colspan="2">Hal : {{$show->hal}}</td>
-        </tr>
-        <tr style="text-align: left;">
-            <td colspan="4">Agenda Rapat</td>
-            <td colspan="2">Keterangan</td>
-        </tr>
-        @foreach($agenda as $value)
-        <tr>
-            <td colspan="4">{{$value->agenda}}</td>
-            <td colspan="2">{{$value->ket}}</td>
-        </tr>
-        @endforeach
-        <tr style="text-align: left;">
-            <td colspan="6">Materi Famialirisasi/Penyuluhan<br>
-            {!!$materi!!}<br><br><br><br>
-            </td>
-        </tr>
-        <tr style="text-align: center;">
-            <td colspan="3">DPA/Nahkoda,<br>
-            @if($show->get_nahkoda()->tanda_tangan)
-            <img src="file://{{ public_path('ttd_karyawan/' . $show->get_nahkoda()->tanda_tangan) }}" width="100px" height="75px"><br>
-            @else
-            <br><br><br>
-            @endif
-                {{$show->get_nahkoda()->nama}}
-            </td>
-            <td colspan="3">Notulen,<br>
-            @if($show->get_notulen()->tanda_tangan)
-            <img src="file://{{ public_path('ttd_karyawan/' . $show->get_notulen()->tanda_tangan) }}" width="100px" height="75px"><br>
-            @else
-            <br><br><br>
-            @endif
-            {{$show->get_notulen()->nama}}
-            </td>
-        </tr>
-    </table>
-    <div style="page-break-before: always;"></div>
-    <table class="table-bordered" width="100%">
-        <tr>
             <td colspan="2" style="text-align: center;" width="25%"><img src="{{ public_path('img/'.$show->get_perusahaan()->logo) }}" alt="" width="50%"></td>
             <td style="text-transform: uppercase;" colspan="3" width="45%"><h3>DAFTAR HADIR</h3></td>
-            <td style="text-align: center;" width="30%"><b>EL-04-05</b><br> Hal <span class="page-number"></span></td>
+            <td style="text-align: center; text-transform: uppercase;" width="30%"><br><b>EL-04-05</b><br> Hal <span class="page-number"></span></td>
         </tr>
         <tr style="text-align: left;">
-            <td colspan="6">Agenda Rapat : {{$form->nama}}</td>
+            <td colspan="6">Agenda Rapat : {{$show->get_kode()->ket}}</td>
         </tr>
         <tr style="text-align: left;">
             <td colspan="6">Tanggal : {{ \Carbon\Carbon::parse($show->tanggal)->format('d-m-Y') }}</td>

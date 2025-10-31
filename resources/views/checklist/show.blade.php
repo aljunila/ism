@@ -30,8 +30,10 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <!-- AdminLTE App -->
 <script>
+    let table;
+
     $(function () {
-		$('#table').DataTable({
+		table = $('#table').DataTable({
         processing: true,
         searchable: true,
         ajax:{
@@ -39,6 +41,8 @@
             type: "POST",
             data: function(d){
                 d.kode= "{{ $form->kode}}",
+                d.id_perusahaan= $('#id_perusahaan').val(),
+                d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
         },
@@ -119,7 +123,7 @@
                             timer: 2000,
                             showConfirmButton: false
                         });
-                        $("#table").DataTable().ajax.reload();
+                        table.ajax.reload();
                     },
                     error: function(err){
                         Swal.fire({
@@ -132,6 +136,31 @@
             }
         });
     });
+
+    $(document).on('change', '#id_perusahaan', function() {
+        var perusahaanID = $(this).val();
+        if (perusahaanID) {
+            $.ajax({
+                url: '/get-kapal/' + perusahaanID,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                    $.each(data, function(key, value) {
+                        $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                    });
+                    table.ajax.reload();
+                }
+            });
+        } else {
+            $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+            table.ajax.reload();
+        }
+    });
+
+    $('#id_kapal').on('change', function () {
+         table.ajax.reload();
+    });
 </script>
 @endsection
 @section('content')
@@ -140,8 +169,11 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header border-bottom">
-                        <h4 class="card-title">{{$form->nama}}</h4>
-                        <a href="/checklist/add/{{$form->kode}}" class="btn btn-primary btn-sm">Tambah Data</a>
+                        <div class="col-12"><h4 class="card-title">{{$form->nama}}</h4></div>
+                        @include('filter')
+                        <div class="col-3">
+                            <a href="/checklist/add/{{$form->kode}}" class="btn btn-primary btn-sm">Tambah Data</a>
+                        </div>
                     </div>
                     <div class="card-body">
                         <table id="table" class="table table-bordered table-striped" width="100%">

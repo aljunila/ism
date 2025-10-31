@@ -35,7 +35,15 @@ let table;
     table = $("#table").DataTable({
         processing: true,
         serverSide: false, // kalau data sedikit cukup false, kalau ribuan bisa true
-        ajax: "{{ url('/kkm/data') }}",
+        ajax:{
+            url: "/kkm/data",
+            type: "POST",
+            data: function(d){
+                d.id_perusahaan= $('#id_perusahaan').val(),
+                d.id_kapal= $('#id_kapal').val(),
+                d._token= "{{ csrf_token() }}"
+            },
+        },
         columns: [
             { 
                 data: null, 
@@ -56,7 +64,7 @@ let table;
                 data: null, 
                 render: function (data, type, row) {
                         return `
-                        <a href="/kkm/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                        <a href="/kkm/pdf/${row.uid}" type="button" target="_blank" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
                                 <i data-feather='printer'></i>
                             </a>
                         `;
@@ -170,7 +178,7 @@ $(document).on("click", ".delete-btn", function(){
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    $("#table").DataTable().ajax.reload();
+                    table.ajax.reload();
                 },
                 error: function(err){
                     Swal.fire({
@@ -183,6 +191,43 @@ $(document).on("click", ".delete-btn", function(){
         }
     });
 });
+
+$(document).on('change', '.perusahaan', function() {
+    var perusahaanID = $(this).val();
+    if (perusahaanID) {
+        $.ajax({
+            url: '/get-kapal/' + perusahaanID,
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                $('.kapal').empty().append('<option value="">Semua</option>');           
+                $.each(data, function(key, value) {
+                    $('.kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                });
+                table.ajax.reload();
+            }
+        });
+        $.ajax({
+            url: '/get-karyawanbyCom/' + perusahaanID,
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                $('.karyawan').empty().append('<option value="">Semua</option>');           
+                $.each(data, function(key, value) {
+                    $('.karyawan').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                });
+            }
+        });
+    } else {
+        $('.kapal').empty().append('<option value="">Tidak ada data</option>');
+        $('.karyawan').empty().append('<option value="">Tidak ada data</option>');
+        table.ajax.reload();
+    }
+});
+
+$('#id_kapal').on('change', function () {
+        table.ajax.reload();
+});
 </script>
 @endsection
 @section('content')
@@ -191,8 +236,11 @@ $(document).on("click", ".delete-btn", function(){
         <div class="col-12">
             <div class="card">
                 <div class="card-header border-bottom">
-                    <h4 class="card-title">{{$form->nama}}</h4>
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#FormTambah">Tambah Data</button>
+                    <div class="col-12"><h4 class="card-title">{{$form->nama}}</h4></div>
+                    @include('filter')
+                    <div class="col-3">
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#FormTambah">Tambah Data</button>
+                    </div>
                 </div>
                 <div class="card-body">
                 <table id="table" class="table table-bordered table-striped" width="100%">
@@ -226,6 +274,30 @@ $(document).on("click", ".delete-btn", function(){
                     <div class="col-12">
                         <div class="mb-1 row">
                             <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Perusahaan</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <select name="idp" id="idp"  class="form-control perusahaan" required>
+                                @foreach($perusahaan as $p)
+                                    <option value="{{$p->id}}">{{$p->nama}}</option>
+                                @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Kapal</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <select name="idk" id="idk"  class="form-control kapal" required>
+                                @foreach($karyawan as $kp)
+                                    <option value="{{$kp->id}}">{{$kp->nama}}</option>
+                                @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
                                 <label class="col-form-label" for="first-name">Nomer</label>
                             </div>
                             <div class="col-sm-9">
@@ -237,7 +309,7 @@ $(document).on("click", ".delete-btn", function(){
                                 <label class="col-form-label" for="first-name">Kepada</label>
                             </div>
                             <div class="col-sm-9">
-                                <select name="id_kepada" id="id_kepada"  class="form-control" required>
+                                <select name="id_kepada" id="id_kepada"  class="form-control karyawan" required>
                                 @foreach($karyawan as $k)
                                     <option value="{{$k->id}}">{{$k->nama}}</option>
                                 @endforeach
@@ -264,7 +336,7 @@ $(document).on("click", ".delete-btn", function(){
                                 <label class="col-form-label" for="first-name">KKM Lama</label>
                             </div>
                             <div class="col-sm-9">
-                                <select name="id_lama" id="id_lama"  class="form-control" required>
+                                <select name="id_lama" id="id_lama"  class="form-control karyawan" required>
                                 @foreach($karyawan as $k)
                                     <option value="{{$k->id}}">{{$k->nama}}</option>
                                 @endforeach
@@ -276,7 +348,7 @@ $(document).on("click", ".delete-btn", function(){
                                 <label class="col-form-label" for="first-name">KKM Baru</label>
                             </div>
                             <div class="col-sm-9">
-                                <select name="id_baru" id="id_baru"  class="form-control" required>
+                                <select name="id_baru" id="id_baru"  class="form-control karyawan" required>
                                 @foreach($karyawan as $k)
                                     <option value="{{$k->id}}">{{$k->nama}}</option>
                                 @endforeach
@@ -319,7 +391,7 @@ $(document).on("click", ".delete-btn", function(){
                     </div>
                 </div>    
                 <div class="modal-footer">
-                    <input type="text" class="form-control" name="id" id="id">
+                    <input type="hidden" class="form-control" name="id" id="id">
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>

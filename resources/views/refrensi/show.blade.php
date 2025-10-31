@@ -40,6 +40,8 @@ let table;
             type: "POST",
             data: function(d){
                 d.kode= "{{ $refrensi->kode}}",
+                d.id_perusahaan= $('#id_perusahaan').val(),
+                d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
         },
@@ -54,10 +56,29 @@ let table;
             { data: 'edisi' },
             { data: 'pj' },
             { data: 'lokasi' },
+            { data: 'perusahaan',
+                render: function(data, type, row){
+                   let kapal = '';
+
+                    if (row.kapal === null || row.kapal === '') {
+                    kapal = '';
+                    } else {
+                    kapal = `<br>${row.kapal}`;
+                    }
+
+                    return `${data}${kapal}`;
+                }
+             },
             { 
                 data: 'id',
                 render: function(data, type, row){
                     return `
+                        ${row.file ? `
+                        <a href="{{ asset('file_elemen') }}/${row.file}"class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
+                            title="Buka File" target="_blank">
+                            <i data-feather="file"></i>
+                        </a>
+                        ` : ''}
                         <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning edit-btn" 
                             title="Edit" data-id="${data}">
                             <i data-feather="edit"></i>
@@ -96,7 +117,7 @@ $('#form_refrensi').on('submit', function(e){
                     showConfirmButton: false
                 });
                 $('#FormTambah').modal('hide');
-                $("#table").DataTable().ajax.reload();
+                table.ajax.reload();
         },
         error: function(xhr){
             Swal.fire({
@@ -119,27 +140,32 @@ $(document).on('click', '.edit-btn', function(){
       {
          console.log(data);
         $('#id').val(data.id);
+        $('#idp').val(data.id_perusahaan).trigger('change');
+        setTimeout(() => {
+            $('#idk').val(data.id_kapal).trigger('change');
+        }, 500);
         $('#nama_doc').val(data.nama_doc);
         $('#edisi').val(data.edisi);
-        $('#id_pj').val(data.id_pj).trigger('change');
+        setTimeout(() => {
+            $('#id_pj').val(data.id_pj).trigger('change');
+        }, 500);
         $('#lokasi').val(data.lokasi);
         $('#FormEdit').modal('show');
       }
     });
 })
 
-$(document).on('click', '#edit_data', function(){
+$('#form_edit').on('submit', function(e){
+    e.preventDefault(); 
     let id = $('#id').val()
+    let formData = new FormData(this);
+    
     $.ajax({
         url: "/refrensi/update/" + id,
         type: "POST",
-        data: {
-            nama_doc: $('#nama_doc').val(),
-            edisi: $('#edisi').val(),
-            id_pj: $('#id_pj').val(),
-            lokasi: $('#lokasi').val(),
-            _token: "{{ csrf_token() }}"
-        },
+        data: formData,
+         processData: false,
+        contentType: false,
         success: function(response) {
                 Swal.fire({
                     icon: "success",
@@ -152,7 +178,7 @@ $(document).on('click', '#edit_data', function(){
                 // reset input
                 $("#nama").val("");
                 $('#FormEdit').modal('hide');
-                $('#table').DataTable().ajax.reload();
+                table.ajax.reload();
         },
         error: function(xhr, status, error) {
             Swal.fire({
@@ -193,7 +219,7 @@ $(document).on("click", ".delete-btn", function(){
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    $("#table").DataTable().ajax.reload();
+                    table.ajax.reload();
                 },
                 error: function(err){
                     Swal.fire({
@@ -206,6 +232,66 @@ $(document).on("click", ".delete-btn", function(){
         }
     });
 });
+
+$(document).on('change', '.perusahaan', function() {
+    var perusahaanID = $(this).val();
+    if (perusahaanID) {
+        $.ajax({
+            url: '/get-kapal/' + perusahaanID,
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                $('.kapal').empty().append('<option value="">Semua</option>');           
+                $.each(data, function(key, value) {
+                    $('.kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                });
+                table.ajax.reload();
+            }
+        });
+    } else {
+        $('.kapal').empty().append('<option value="">Tidak ada data</option>');
+        table.ajax.reload();
+    }
+});
+
+$(document).on('change', '.kapal', function() {
+    var kapalID = $(this).val();
+    if (kapalID) {
+        $.ajax({
+            url: '/get-karyawan/' + kapalID,
+            type: "GET",
+            dataType: "json",
+            success: function(data) {
+                $('.karyawan').empty().append('<option value="">-- Pilih Karyawan --</option>');
+            
+                $.each(data, function(key, value) {
+                    $('.karyawan').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                });
+                table.ajax.reload();
+            }
+        });
+    } else {
+        $('.karyawan').empty().append('<option value="">-- Pilih Karyawan --</option>');
+         table.ajax.reload();
+    }
+});
+
+$(document).on('click', '#btn-pdf', function() {
+    let id_perusahaan = $('#id_perusahaan').val();
+    let kode = "{{ $refrensi->kode}}";
+
+    if (!id_perusahaan.trim()) {
+        Swal.fire({
+            icon: "warning",
+            title: "Oops...",
+            text: "Silahkan pilih perusahaan terlebih dahulu"
+        });
+        return;
+    }
+    
+    let url = "{{ url('/refrensi/pdf') }}" + "?kode=" + kode + "&id_perusahaan=" + id_perusahaan;
+    window.open(url, '_blank');
+});
 </script>
 @endsection
 @section('content')
@@ -214,12 +300,17 @@ $(document).on("click", ".delete-btn", function(){
             <div class="col-12">
                 <div class="card">
                     <div class="card-header border-bottom">
-                            <div class="col-9">
+                            <div class="col-12">
                                 <h4 class="card-title">{{$refrensi->nama}}</h4>
                             </div>
+                            @if($refrensi->kode=='el0101')
+                                @include('perusahaan')
+                            @else
+                                @include('filter')
+                            @endif
                             <div class="col-3">
                                 <button type="button" class="btn btn-primary btn-sm float-right" data-bs-toggle="modal" data-bs-target="#FormTambah">Tambah Data</button>
-                                <a href="/refrensi/pdf/{{$refrensi->kode}}" type="button" class="btn btn-success btn-sm float-right" id="btn-pdf">Cetak PDF</a>
+                                <button target="_blank" type="button" class="btn btn-success btn-sm float-right" id="btn-pdf">Cetak PDF</button>
                             </div>
                     </div>
                     <div class="card-body">
@@ -227,11 +318,12 @@ $(document).on("click", ".delete-btn", function(){
                       <thead>
                         <tr>
                           <th width="5%">No.</th>
-                          <th width="30%">Nama</th>
-                          <th width="10%">Edisi</th>
-                          <th width="20%">Tanggung Jawab</th>
-                          <th width="20%">Lokasi</th>
-                          <th width="15%">Aksi</th>
+                          <th width="25%">Nama</th>
+                          <th width="8%">Edisi</th>
+                          <th width="15%">Tanggung Jawab</th>
+                          <th width="10%">Lokasi</th>
+                          <th width="20%">Berkas Milik</th>
+                          <th width="12%">Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -248,7 +340,29 @@ $(document).on("click", ".delete-btn", function(){
                 <h4 class="modal-title" id="myModalLabel33">Edit Data</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form id="form_edit" enctype="multipart/form-data">
+                    @csrf
             <div class="modal-body">
+                <label>Perusahaan </label>
+                    <div class="mb-1">
+                        <select name="idp" id="idp" class="form-control perusahaan" required>
+                            <option value="">Pilih</option>
+                            @foreach($perusahaan as $p)
+                                <option value="{{$p->id}}">{{$p->nama}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @if($refrensi->kode!='el0101')
+                    <label>Kapal </label>
+                    <div class="mb-1">
+                        <select name="idk" id="idk" class="form-control kapal" required>
+                            <option value="">Pilih</option>
+                            @foreach($kapal as $k)
+                                <option value="{{$k->id}}">{{$k->nama}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <label>Nama Dokumen </label>
                     <div class="mb-1">
                         <input type="text" class="form-control" name="nama_doc" id="nama_doc"/>
@@ -261,7 +375,7 @@ $(document).on("click", ".delete-btn", function(){
 
                     <label>Tanggung Jawab </label>
                     <div class="mb-1">
-                        <select name="id_pj" id="id_pj" class="form-control" required>
+                        <select name="id_pj" id="id_pj" class="form-control karyawan" required>
                             @foreach($karyawan as $ky)
                                 <option value="{{$ky->id}}">{{$ky->nama}}</option>
                             @endforeach
@@ -272,11 +386,17 @@ $(document).on("click", ".delete-btn", function(){
                     <div class="mb-1">
                         <input type="text" class="form-control" name="lokasi" id="lokasi"/>
                     </div>
+
+                    <label>Upload File</label>
+                    <div class="mb-1">
+                        <input type="file" class="form-control" name="file" id="file"/>
+                    </div>
             </div>
             <div class="modal-footer">
                 <input type="hidden" name="id" id="id">
                 <button type="submit" class="btn btn-primary" id="edit_data">Simpan</button>
             </div>
+        </form>
         </div>
     </div>
 </div>
@@ -291,19 +411,39 @@ $(document).on("click", ".delete-btn", function(){
             <form id="form_refrensi" enctype="multipart/form-data">
                     @csrf
                 <div class="modal-body">
+                    <label>Perusahaan </label>
+                    <div class="mb-1">
+                        <select name="idp" class="form-control perusahaan" required>
+                            <option value="">Pilih</option>
+                            @foreach($perusahaan as $p)
+                                <option value="{{$p->id}}">{{$p->nama}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @if($refrensi->kode!='el0101')
+                    <label>Kapal </label>
+                    <div class="mb-1">
+                        <select name="idk" class="form-control kapal" required>
+                            <option value="">Pilih</option>
+                            @foreach($kapal as $k)
+                                <option value="{{$k->id}}">{{$k->nama}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <label>Nama Dokumen </label>
                     <div class="mb-1">
-                        <input type="text" class="form-control" name="nama_doc" id="nama_doc"/>
+                        <input type="text" class="form-control" name="nama_doc"/>
                     </div>
 
                     <label>Edisi </label>
                     <div class="mb-1">
-                        <input type="text" class="form-control" name="edisi" id="edisi"/>
+                        <input type="text" class="form-control" name="edisi"/>
                     </div>
 
                     <label>Tanggung Jawab </label>
                     <div class="mb-1">
-                        <select name="id_pj"  class="form-control" required>
+                        <select name="id_pj"  class="form-control karyawan" required>
                             @foreach($karyawan as $ky)
                                 <option value="{{$ky->id}}">{{$ky->nama}}</option>
                             @endforeach
@@ -312,7 +452,12 @@ $(document).on("click", ".delete-btn", function(){
 
                     <label>Lokasi</label>
                     <div class="mb-1">
-                        <input type="text" class="form-control" name="lokasi" id="lokasi"/>
+                        <input type="text" class="form-control" name="lokasi"/>
+                    </div>
+
+                    <label>Upload File</label>
+                    <div class="mb-1">
+                        <input type="file" class="form-control" name="file" id="file"/>
                     </div>
                 </div>
                 <div class="modal-footer">

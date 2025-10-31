@@ -65,7 +65,7 @@
                                 <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                                 <div class="dropdown-menu">
                                     <a href="/kapal/profil/${row.uid}" class="dropdown-item">Profil</a>
-                                    <a type="button" href="/kapal/edit/${row.uid}" class="dropdown-item resign-btn">Edit</a>
+                                    <a type="button" href="/kapal/edit/${row.uid}" class="dropdown-item">Edit</a>
                                     <a type="button" data-id="${row.id}" class="dropdown-item delete-btn">Hapus</a>
                                 </div>
                             </div>
@@ -99,6 +99,50 @@
                 link.click();
             }
         })
+    });
+
+    $(document).on("click", ".delete-btn", function(){
+        let id = $(this).data("id");
+
+        Swal.fire({
+            title: "Yakin mau hapus?",
+            text: "Data yang dihapus tidak bisa dikembalikan!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/kapal/delete/" + id,
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res){
+                        Swal.fire({
+                            icon: "success",
+                            title: "Terhapus!",
+                            text: "Data berhasil dihapus",
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        setTimeout(function(){
+                            location.reload();
+                        }, 2000);
+                    },
+                    error: function(err){
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal!",
+                            text: "Data gagal dihapus"
+                        });
+                    }
+                });
+            }
+        });
     });
 </script>
 @endsection

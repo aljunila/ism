@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Notulen;
+use App\Models\Perusahaan;
+use App\Models\Kapal;
 use App\Models\Karyawan;
 use App\Models\KodeForm;
 use App\Models\Agenda;
@@ -23,13 +25,24 @@ class NotulenController extends Controller
         return view('notulen.show', $data);
     }
 
-    public function getData() {
+    public function getData(Request $request) {
+        $kode = $request->input('kode');
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+
         $get = DB::table('notulen as a')
                 ->leftjoin('karyawan as b', 'b.id', '=', 'a.id_nahkoda')
                 ->leftjoin('karyawan as c', 'c.id', '=', 'a.id_notulen')
                 ->select('a.*', 'b.nama as nahkoda', 'c.nama as notulen')
                 ->where('a.status', 'A')
-                ->where('a.kode', 'el0301')
+                ->where('a.kode', $kode)
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('a.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('a.id_kapal', $kapal);
+                })
+                ->orderBy('a.id', 'DESC')
                 ->get();
         return response()->json(['data' => $get]);
     }
@@ -37,7 +50,20 @@ class NotulenController extends Controller
     public function add() 
     {
         $data['active'] = "el0301";
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         return view('notulen.add', $data);
     }
   
@@ -46,6 +72,8 @@ class NotulenController extends Controller
         $save = Notulen::create([
           'uid' => Str::uuid()->toString(),
           'kode' => $request->input('kode'),
+          'id_perusahaan' => $request->input('id_perusahaan'),
+          'id_kapal' => $request->input('id_kapal'),
           'tanggal' => $request->input('tanggal'),
           'tempat' => $request->input('tempat'),
           'materi' => $request->input('materi'),
@@ -60,6 +88,8 @@ class NotulenController extends Controller
         $save_hadir = DaftarHadir::create([
             'uid' => Str::uuid()->toString(),
             'kode' => $request->input('kode'),
+            'id_perusahaan' => $request->input('id_perusahaan'),
+            'id_kapal' => $request->input('id_kapal'),
             'id_notulen' => $save->id,
             'status' => 'A',
             'created_by' => Session::get('userid'),
@@ -90,7 +120,20 @@ class NotulenController extends Controller
     public function edit($uid)
     {
         $show = Notulen::where('uid', $uid)->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         $data['show'] = $show;
         $data['active'] = "el0301";
         return view('notulen.edit',$data);
@@ -144,7 +187,7 @@ class NotulenController extends Controller
         $pdf = Pdf::loadView('notulen.pdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->download('EL-03-01 '.$show->tanggal.'.pdf');
+        return $pdf->stream('EL-03-01 '.$show->tanggal.'.pdf');
     }
 
     public function el0402()
@@ -170,12 +213,22 @@ class NotulenController extends Controller
 
     public function getData4(Request $request) {
         $kode = $request->input('kode');
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+
         $get = DB::table('notulen as a')
                 ->leftjoin('karyawan as b', 'b.id', '=', 'a.id_nahkoda')
                 ->leftjoin('karyawan as c', 'c.id', '=', 'a.id_notulen')
                 ->select('a.*', 'b.nama as nahkoda', 'c.nama as notulen')
                 ->where('a.status', 'A')
                 ->where('a.kode', $kode)
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('a.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('a.id_kapal', $kapal);
+                })
+                ->orderBy('a.id', 'DESC')
                 ->get();
         return response()->json(['data' => $get]);
     }
@@ -184,7 +237,20 @@ class NotulenController extends Controller
     {
         $data['form'] = KodeForm::where('kode', $kode)->first();
         $data['active'] = $kode;
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         return view('notulen.add4', $data);
     }
 
@@ -193,7 +259,20 @@ class NotulenController extends Controller
         $show = Notulen::where('uid', $uid)->first();
         $data['form'] = KodeForm::where('kode', $show->kode)->first();
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['agenda'] = Agenda::where('id_notulen', $show->id)->where('status', 'A')->get();
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         $data['show'] = $show;
         $data['active'] = $show->kode;
         return view('notulen.edit4',$data);
@@ -217,6 +296,8 @@ class NotulenController extends Controller
         $data['show'] = $show;
         $data['form'] = KodeForm::where('kode', $show->kode)->first();
         $data['agenda'] = Agenda::where('id_notulen', $show->id)->where('status', 'A')->get();
+        $get = DaftarHadir::where('id_notulen', $show->id)->first();
+        $data['detail'] = DaftarHadirDetail::where('id_daftar_hadir', $get->id)->get();
         $data['materi'] = preg_replace_callback(
             '/<img[^>]+src="([^">]+)"/i',
             function ($matches) {
@@ -242,8 +323,57 @@ class NotulenController extends Controller
         $data['show'] = $show;
         $data['active'] = $show->kode;
         $data['form'] = KodeForm::where('kode', $show->kode)->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['detail'] = DaftarHadirDetail::where('id_daftar_hadir', $show->id)->get();
+        $kapal = $show->id_kapal;
+        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')
+                            ->where('id_perusahaan', $show->id_perusahaan)
+                            ->where(function($q) use($kapal) {
+                                $q->where('id_kapal', $kapal)
+                                ->orWhereNull('id_kapal');
+                            })->get();
+        $get = DaftarHadir::where('id_notulen', $show->id)->first();
+        $data['id_hadir'] = $get->id;
+        $data['detail'] = DaftarHadirDetail::where('id_daftar_hadir', $get->id)->get();
         return view('notulen.hadir',$data);
+    }
+
+     public function el0405()
+    {
+        $data['active'] = "el0405";
+        $data['form'] = KodeForm::where('kode', 'el0405')->first();
+        return view('notulen.daftar', $data);
+    }
+
+     public function gethadir(Request $request) {
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+
+        $get = DB::table('daftar_hadir as a')
+                ->leftjoin('kode_form as b', 'b.kode', '=', 'a.kode')
+                ->leftjoin('notulen as c', 'c.id', '=', 'a.id_notulen')
+                ->select('a.id', 'a.uid', 'b.ket as ket', 'c.tanggal', 'c.tempat')
+                ->where('a.status', 'A')
+                ->where('c.status', 'A')
+                ->where('a.kode', 'like', 'el04%')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('c.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('c.id_kapal', $kapal);
+                })
+                ->orderBy('a.id', 'DESC')
+                ->get();
+        return response()->json(['data' => $get]);
+    }
+
+    public function Pdfhadir($uid) {
+        $get = DaftarHadir::where('uid', $uid)->first();
+        $data['detail'] = DaftarHadirDetail::where('id_daftar_hadir', $get->id)->get();
+        $show = Notulen::where('id', $get->id_notulen)->first();
+        $data['show'] = $show;
+        $data['form'] = KodeForm::where('kode', $show->kode)->first();
+        $pdf = Pdf::loadView('notulen.pdfhadir', $data)
+                ->setPaper('a3', 'portrait');
+
+        return $pdf->stream('Daftar Hadir '.$data['form']->ket.' '.$show->tanggal.'.pdf');
     }
 }

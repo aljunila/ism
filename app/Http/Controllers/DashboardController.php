@@ -18,6 +18,8 @@ class DashboardController extends Controller
     {
         $data['active'] = "dashboard";
         $data['pre'] = Session::get('previllage');
+        $id_perusahaan = Session::get('id_perusahaan');
+        $data['com'] = Perusahaan::where('id', $id_perusahaan)->first();
         if(Session::get('previllage')==1) {
             $data['perusahaan'] = Perusahaan::count();
             $data['kapal'] = Kapal::where('status','A')->count();
@@ -27,7 +29,6 @@ class DashboardController extends Controller
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->count();
         } elseif(Session::get('previllage')==2) {
-            $id_perusahaan = Session::get('id_perusahaan');
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->count();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->where('id_perusahaan', $id_perusahaan)->count();
             $data['user'] = DB::table('user')
@@ -45,7 +46,6 @@ class DashboardController extends Controller
                             ->count();
         } else {
             $id_user = Session::get('userid');
-            $id_perusahaan = Session::get('id_perusahaan');
 
             $data['prosedur'] = DB::table('prosedur as a')
                 ->leftJoin('view_prosedur as b', function($join) use ($id_user) {

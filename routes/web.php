@@ -58,7 +58,7 @@ Route::post('kapal/store', [KapalController::class, 'store']);
 Route::get('/kapal/profil/{id}', [KapalController::class, 'profil'])->middleware('auth');
 Route::get('/kapal/edit/{id}', [KapalController::class, 'edit'])->middleware('auth');
 Route::post('/kapal/update/{id}', [KapalController::class, 'update']);
-Route::get('/kapal/delete/{id}', [KapalController::class, 'delete']);
+Route::post('/kapal/delete/{id}', [KapalController::class, 'delete']);
 Route::get('/get-kapal/{id_perusahaan}', [KapalController::class, 'getKapal']);
 Route::post('/kapal/export', [KapalController::class, 'export'])->middleware('auth');
 Route::post('/kapal/savefile/{id}', [KapalController::class, 'savefile']);
@@ -123,16 +123,17 @@ Route::post('/refrensi/delete/{id}', [RefrensiDocController::class, 'delete']);
 Route::get('/el0102', [RefrensiDocController::class, 'el0102'])->name('el0102')->middleware('auth');
 Route::get('/el0103', [RefrensiDocController::class, 'el0103'])->name('el0103')->middleware('auth');
 Route::get('/el0104', [RefrensiDocController::class, 'el0104'])->name('el0104')->middleware('auth');
-Route::get('/refrensi/pdf/{id}', [RefrensiDocController::class, 'pdf'])->name('refrensi.pdf')->middleware('auth');
+Route::get('/refrensi/pdf', [RefrensiDocController::class, 'pdf'])->name('refrensi.pdf')->middleware('auth');
 
 Route::get('/elemen2', [AturanController::class, 'show'])->name('aturan')->middleware('auth');
-Route::get('/aturan/data', [AturanController::class, 'getData'])->middleware('auth');
+Route::post('/aturan/data', [AturanController::class, 'getData'])->middleware('auth');
 Route::get('/aturan/add', [AturanController::class, 'add' ])->middleware('auth');
 Route::post('aturan/store', [AturanController::class, 'store']);
 Route::get('/aturan/edit/{id}', [AturanController::class, 'edit'])->middleware('auth');
 Route::post('/aturan/update/{id}', [AturanController::class, 'update']);
 Route::post('/aturan/delete/{id}', [AturanController::class, 'delete']);
 Route::get('/aturan/pdf/{id}', [AturanController::class, 'aturanPdf'])->name('aturan.pdf')->middleware('auth');
+Route::get('/get-karyawanbyCom/{id_kapal}', [AturanController::class, 'getKaryawan']);
 
 Route::get('/el0302', [ChecklistController::class, 'el0302'])->name('el0302')->middleware('auth');
 Route::post('/checklist/data', [ChecklistController::class, 'getData'])->middleware('auth');
@@ -173,7 +174,7 @@ Route::post('/checklist/updateitem/{id}', [ChecklistController::class, 'updateit
 Route::post('/checklist/deleteitem/{id}', [ChecklistController::class, 'deleteitem']);
 
 Route::get('/el0301', [NotulenController::class, 'show'])->name('notulen')->middleware('auth');
-Route::get('/notulen/data', [NotulenController::class, 'getData'])->middleware('auth');
+Route::post('/notulen/data', [NotulenController::class, 'getData'])->middleware('auth');
 Route::get('/notulen/add', [NotulenController::class, 'add' ])->middleware('auth');
 Route::post('notulen/store', [NotulenController::class, 'store']);
 Route::get('/notulen/edit/{id}', [NotulenController::class, 'edit'])->middleware('auth');
@@ -191,6 +192,9 @@ Route::get('/notulen/edit4/{id}', [NotulenController::class, 'edit4'])->middlewa
 Route::post('/notulen/deleteagenda/{id}', [NotulenController::class, 'deleteagenda']);
 Route::get('/notulen/pdf4/{id}', [NotulenController::class, 'Pdf'])->name('notulen.pdf4')->middleware('auth');
 Route::get('/notulen/hadir/{id}', [NotulenController::class, 'hadir'])->middleware('auth');
+Route::get('/el0405', [NotulenController::class, 'el0405'])->name('el0405')->middleware('auth');
+Route::post('/notulen/gethadir', [NotulenController::class, 'gethadir'])->middleware('auth');
+Route::get('/notulen/pdfhadir/{id}', [NotulenController::class, 'Pdfhadir'])->name('notulen.pdfhadir')->middleware('auth');
 
 Route::get('/el0306', [DaftarHadirController::class, 'el0306'])->name('el0306')->middleware('auth');
 Route::post('/hadir/data', [DaftarHadirController::class, 'getData'])->middleware('auth');
@@ -204,7 +208,7 @@ Route::post('/hadir/KaryawanHadir', [DaftarHadirController::class, 'KaryawanHadi
 Route::post('/hadir/deletedetail/{id}', [DaftarHadirController::class, 'deletedetail']);
 
 Route::get('/el0310', [GantiKKMController::class, 'show'])->name('kkm')->middleware('auth');
-Route::get('/kkm/data', [GantiKKMController::class, 'getData'])->middleware('auth');
+Route::post('/kkm/data', [GantiKKMController::class, 'getData'])->middleware('auth');
 Route::get('/kkm/add', [GantiKKMController::class, 'add' ])->middleware('auth');
 Route::post('kkm/store', [GantiKKMController::class, 'store'])->name('kkm.store');
 Route::get('/kkm/edit/{id}', [GantiKKMController::class, 'edit'])->middleware('auth');

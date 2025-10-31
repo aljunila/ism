@@ -187,7 +187,11 @@ class KaryawanController extends Controller
     public function update(Request $request, $id)
     {
       $post = Karyawan::find($id)->update($request->all());  
-
+        if($request->input('nama')) {
+             $update = User::where('id_karyawan', $id)->update([
+                'nama' => $request->input('nama')
+            ]); 
+        };
         if($request->input('id_perusahaan')) {
             $update = User::where('id_karyawan', $id)->update([
                 'id_perusahaan' => $request->input('id_perusahaan'),

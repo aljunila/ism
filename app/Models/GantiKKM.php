@@ -9,7 +9,7 @@ class GantiKKM extends Model
 {
     public $timestamps = false;
     protected $table = 'ganti_kkm';
-    protected $fillable = ['id', 'uid', 'nomer','id_kepada', 'id_perusahaan', 'tanggal', 'jam', 'id_lama', 'fo', 'do', 'fw', 'id_baru', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'nomer','id_kepada', 'id_perusahaan', 'id_kapal', 'tanggal', 'jam', 'id_lama', 'fo', 'do', 'fw', 'id_baru', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     public function get_lama()
     {
@@ -29,5 +29,10 @@ class GantiKKM extends Model
     public function get_perusahaan()
     {
         return  $this->hasOne(Perusahaan::class, 'id', 'id_perusahaan')->first();
+    }
+
+    public function get_kapal()
+    {
+        return  $this->hasOne(Kapal::class, 'id', 'id_kapal')->first();
     }
 }

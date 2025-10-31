@@ -7,6 +7,7 @@ use App\Models\Perusahaan;
 use App\Models\Prosedur;
 use App\Models\Karyawan;
 use App\Models\ViewProsedur;
+use App\Models\DaftarHadir;
 use App\Models\User;
 use Alert;
 use Session;
@@ -253,6 +254,7 @@ class ProsedurController extends Controller
                 ]);
             }
         }
+
         $filename = $show->file;
         $path = public_path('file_prosedur/' . $filename);
         if (!file_exists($path)) {

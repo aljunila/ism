@@ -8,6 +8,7 @@ use App\Models\Karyawan;
 use App\Models\Perusahaan;
 use App\Models\User;
 use App\Models\KodeForm;
+use App\Models\Kapal;
 use Alert;
 use Session;
 \Carbon\Carbon::setLocale('id');
@@ -20,17 +21,41 @@ class GantiKKMController extends Controller
     {
         $data['active'] = "el0310";
         $data['form'] = KodeForm::where('kode', 'el0310')->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         return view('kkm.show', $data);
     }
 
-    public function getData()
+    public function getData(Request $request)
     {
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+        
         $daftar = DB::table('ganti_kkm as a')
                 ->leftjoin('karyawan as b', 'b.id', 'a.id_lama')
                 ->leftjoin('karyawan as c', 'c.id', 'a.id_baru')
                 ->select('a.*', 'b.nama as lama', 'c.nama as baru')
-                ->where('a.status','A')->get();
+                ->where('a.status','A')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('a.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('a.id_kapal', $kapal);
+                })
+                ->orderBy('a.id', 'DESC')
+                ->get();
         return response()->json([
             'data' => $daftar
         ]);
@@ -39,12 +64,12 @@ class GantiKKMController extends Controller
     public function store(Request $request)
     {
         $id_kepada = $request->input('id_kepada');
-        $perusahaan = User::where('id_karyawan', $id_kepada)->first();
         $id = $request->input('id');
         if($id) { 
             $save = GantiKKM::where('id', $id)->update([
                 'id_kepada' => $id_kepada,
-                'id_perusahaan' => $perusahaan->id_perusahaan,
+                'id_perusahaan' => $request->input('idp'),
+                'id_kapal' => $request->input('idk'),
                 'nomer' => $request->input('nomer'),
                 'tanggal' => $request->input('tanggal'),
                 'jam' => $request->input('jam'),
@@ -60,7 +85,8 @@ class GantiKKMController extends Controller
             $save = GantiKKM::create([
                 'uid' => Str::uuid()->toString(),
                 'id_kepada' => $id_kepada,
-                'id_perusahaan' => $perusahaan->id_perusahaan,
+                'id_perusahaan' => $request->input('idp'),
+                'id_kapal' => $request->input('idk'),
                 'nomer' => $request->input('nomer'),
                 'tanggal' => $request->input('tanggal'),
                 'jam' => $request->input('jam'),
@@ -94,7 +120,8 @@ class GantiKKMController extends Controller
        $save = GantiKKM::where('id', $id)->update([
           'uid' => Str::uuid()->toString(),
           'id_kepada' => $id_kepada,
-          'id_perusahaan' => $perusahaan->id_perusahaan,
+          'id_perusahaan' => $request->input('idp'),
+          'id_kapal' => $request->input('idk'),
           'tanggal' => $request->input('tanggal'),
           'jam' => $request->input('jam'),
           'fo' => $request->input('fo'),
@@ -121,6 +148,6 @@ class GantiKKMController extends Controller
         $pdf = Pdf::loadView('kkm.pdf', $data)
                 ->setPaper('a3', 'portrait');
 
-        return $pdf->stream($data['form']->ket.' '.$show->nomer.'.pdf');
+        return $pdf->stream('Form '.$data['form']->ket.'.pdf');
     }
 }

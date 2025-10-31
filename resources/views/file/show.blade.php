@@ -280,7 +280,7 @@ $('#kode').on('change', function(){
                     <div class="mb-1">
                         <p id="file"></p>
                     </div>
-                    <label>Nama Jabatan </label>
+                    <label>Nama File</label>
                     <div class="mb-1">
                         <input type="text" placeholder="Nama" class="form-control" name="nama" id="nama_file"/>
                     </div>

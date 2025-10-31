@@ -30,15 +30,18 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <!-- AdminLTE App -->
 <script>
+    let table; 
     $(function () {
-		$('#table').DataTable({
+		table = $('#table').DataTable({
         processing: true,
         searchable: true,
         ajax:{
             url: "/hadir/data",
             type: "POST",
             data: function(d){
-                d.kode= "{{ $form->kode}}",
+                d.kode= "el0301",
+                d.id_perusahaan = $('#id_perusahaan').val(),
+                d.id_kapal = $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
         },
@@ -51,6 +54,14 @@
                 searchable: false
             },
             { data: 'kapal' },
+             { data: 'tanggal',
+                render: function(data) {
+                    if (!data) return '';
+                    let parts = data.split(' ')[0].split('-'); 
+                    return parts[2] + '-' + parts[1] + '-' + parts[0]; 
+                }
+            },
+            { data: 'tempat' },
             { 
                 data: null, 
                 render: function (data, type, row) {
@@ -110,7 +121,7 @@
                             timer: 2000,
                             showConfirmButton: false
                         });
-                        $("#table").DataTable().ajax.reload();
+                        table.ajax.reload();
                     },
                     error: function(err){
                         Swal.fire({
@@ -123,6 +134,31 @@
             }
         });
     });
+
+    $(document).on('change', '#id_perusahaan', function() {
+        var perusahaanID = $(this).val();
+        if (perusahaanID) {
+            $.ajax({
+                url: '/get-kapal/' + perusahaanID,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                    $.each(data, function(key, value) {
+                        $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                    });
+                    table.ajax.reload();
+                }
+            });
+        } else {
+            $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+            table.ajax.reload();
+        }
+    });
+
+    $('#id_kapal').on('change', function () {
+        table.ajax.reload();
+    });
 </script>
 @endsection
 @section('content')
@@ -131,17 +167,20 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header border-bottom">
-                        <h4 class="card-title">{{$form->nama}}</h4>
-                        <a href="/hadir/add/{{$form->kode}}" class="btn btn-primary btn-sm">Tambah Data</a>
+                        <div class="col-12"><h4 class="card-title">{{$form->nama}}</h4></div>
+                        @include('filter')
+                        <!-- <a href="/hadir/add/{{$form->kode}}" class="btn btn-primary btn-sm">Tambah Data</a> -->
                     </div>
                     <div class="card-body">
                         <table id="table" class="table table-bordered table-striped" width="100%">
                         <thead>
                             <tr>
                                 <th width="5%">No.</th>
-                                <th width="65%">Nama Kapal</th>
-                                <th width="15%">PDF</th>
-                                <th width="15%">Aksi</th>
+                                <th width="30%">Nama Kapal</th>
+                                <th width="20%">Tanggal</th>
+                                <th width="25%">Tempat</th>
+                                <th width="10%">PDF</th>
+                                <th width="10%">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>

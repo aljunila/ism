@@ -30,11 +30,19 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
 <!-- AdminLTE App -->
 <script>
+    let table;
   $(function () {
-		$('#table').DataTable({  
+		table = $('#table').DataTable({  
         processing: true,
         searchable: true,
-        ajax: "{{ url('/aturan/data') }}",
+         ajax:{
+            url: "/aturan/data",
+            type: "POST",
+            data: function(d){
+                d.id_perusahaan= $('#id_perusahaan').val(),
+                d._token= "{{ csrf_token() }}"
+            },
+        },
         columns: [
             { data: null, 
                 render: function (data, type, row, meta) {
@@ -46,17 +54,35 @@
             { data: 'kode' },
             { data: 'nama' },
             { data: 'enforced' },
-            { data: 'publish' },
+            { data: null,
+                render: function(data, type, row) {
+                    if(row.publish) {
+                        return `Iya`;
+                    } else {
+                        return `Tidak`;
+                    }
+                }
+             },
             { 
                 data: null, 
                 orderable: false, 
                 searchable: false,
                 render: function (data, type, row) {
+                    if(row.isi){
                         return `
-                        <a href="/aturan/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                        <a href="/aturan/pdf/${row.uid}" type="button" target="_blank" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
                                 <i data-feather='printer'></i>
                             </a>
                         `;
+                    } else if(row.file) {
+                        return `
+                        <a href="{{ asset('file_elemen') }}/${row.file}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
+                                <i data-feather='file'></i>
+                            </a>
+                        `;
+                    } else {
+                        return ``;
+                    }
                 }
             },
             { 
@@ -110,7 +136,7 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
-                    $("#table").DataTable().ajax.reload();
+                    table.ajax.reload();
                 },
                 error: function(err){
                     Swal.fire({
@@ -123,6 +149,10 @@
         }
     });
   });
+
+  $(document).on('change', '#id_perusahaan', function() {
+        table.ajax.reload();
+  });
 </script>
 @endsection
 @section('content')
@@ -131,7 +161,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header border-bottom">
-                        <div class="col-sm-8"><h4 class="card-title">Daftar Elemen 2</h4></div>
+                        <div class="col-sm-12"><h4 class="card-title">Daftar Elemen 2</h4></div>
+                        <div class="col-sm-8">@include('perusahaan')</div>
                         <div class="col-sm-4">
                             <a href="/aturan/add" class="btn btn-primary btn-sm">Tambah Data</a>
                         </div>
@@ -144,7 +175,7 @@
                           <th>Form ID</th>
                           <th>Nama</th>
                           <th>Diberlakukan Oleh</th>
-                          <th>Status</th>
+                          <th>Publish</th>
                           <th>File</th>
                           <th>Aksi</th>
                         </tr>

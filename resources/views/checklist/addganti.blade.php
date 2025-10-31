@@ -63,6 +63,40 @@
                 }
             });
         });
+
+        $(document).on('change', '#id_perusahaan', function() {
+            var perusahaanID = $(this).val();
+            if (perusahaanID) {
+                $.ajax({
+                    url: '/get-kapal/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                        $.each(data, function(key, value) {
+                            $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+
+                $.ajax({
+                    url: '/get-karyawanbyCom/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('.karyawan').empty().append('<option value="">Semua</option>');           
+                        $.each(data, function(key, value) {
+                            $('.karyawan').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+            } else {
+                $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+                 $('.karyawan').empty().append('<option value="">Tidak ada data</option>');
+            }
+        });
     </script>
 @endsection
 
@@ -95,6 +129,18 @@
                                     </div>
                                     <div class="col-sm-9">
                                         {!!$form->intruksi !!}
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Perusahaan</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <select name="id_perusahaan" id="id_perusahaan" class="form-control" required>
+                                        @foreach($perusahaan as $p)
+                                            <option value="{{$p->id}}">{{$p->nama}}</option>
+                                        @endforeach
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="mb-1 row">
@@ -138,7 +184,7 @@
                                         <label class="col-form-label" for="first-name">Karyawan yang diganti (Dari)</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_dari" id="id_dari"  class="form-control" required>
+                                        <select name="id_dari" id="id_dari"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
                                             <option value="{{$k->id}}">{{$k->nama}}</option>
                                         @endforeach
@@ -150,7 +196,7 @@
                                         <label class="col-form-label" for="first-name">Karyawan pengganti (Kepada)</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_kepada" id="id_kepada"  class="form-control" required>
+                                        <select name="id_kepada" id="id_kepada"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
                                             <option value="{{$k->id}}">{{$k->nama}}</option>
                                         @endforeach

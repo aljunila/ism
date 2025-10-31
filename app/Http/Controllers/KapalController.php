@@ -156,9 +156,9 @@ class KapalController extends Controller
       return redirect('/kapal')->with('success', 'Data berhasil diperbarui');
     }
 
-    public function delete($uid)
+    public function delete($id)
     {
-       $post = Kapal::where('uid',$uid)->update(['status' => 'D']);
+       $post = Kapal::where('id',$id)->update(['status' => 'D']);
        return redirect('/kapal')->with('danger', 'Data berhasil dihapus');
     }
 

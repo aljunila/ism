@@ -31,65 +31,67 @@
 <!-- AdminLTE App -->
 <script>
     let table;
+
     $(function () {
-		table = $('#table').DataTable({  
-            processing: true,
-            searchable: true,
-            ajax:{
-                url: "/notulen/data",
-                type: "POST",
-                data: function(d){
-                    d.kode= "el0301",
-                    d.id_perusahaan = $('#id_perusahaan').val(),
-                    d.id_kapal = $('#id_kapal').val(),
-                    d._token= "{{ csrf_token() }}"
-                },
+		table = $('#table').DataTable({
+        processing: true,
+        searchable: true,
+        ajax:{
+            url: "/notulen/gethadir",
+            type: "POST",
+            data: function(d){
+                d.id_perusahaan = $('#id_perusahaan').val(),
+                d.id_kapal = $('#id_kapal').val(),
+                d._token= "{{ csrf_token() }}"
             },
-            columns: [
-                { data: null, 
-                    render: function (data, type, row, meta) {
-                        return meta.row + 1;
-                    },
-                    orderable: false,
-                    searchable: false
+        },
+        columns: [
+            { data: null, 
+                render: function (data, type, row, meta) {
+                    return meta.row + 1; // auto numbering
                 },
-                { data: 'tanggal' },
-                { data: 'tempat' },
-                { data: 'nahkoda' },
-                { data: 'notulen' },
-                { 
-                    data: null, 
-                    orderable: false, 
-                    searchable: false,
-                    render: function (data, type, row) {
-                            return `
-                            <a href="/notulen/pdf/${row.uid}" type="button" target="_blank" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
-                                    <i data-feather='printer'></i>
-                                </a>
-                            `;
-                    }
-                },
-                { 
-                    data: null, 
-                    orderable: false, 
-                    searchable: false,
-                    render: function (data, type, row) {
-                        return `
-                            <div class="btn-group">
-                                <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
-                                <div class="dropdown-menu">
-                                    <a href="/notulen/edit/${row.uid}" class="dropdown-item">Edit</a>
-                                    <a type="button" data-id="${row.id}" class="dropdown-item delete-btn">Hapus</a>
-                                </div>
-                            </div>
-                        `;
-                    }
+                orderable: false,
+                searchable: false
+            },
+            { data: 'ket' },
+            { data: 'tanggal',
+                render: function(data) {
+                    if (!data) return '';
+                    let parts = data.split(' ')[0].split('-'); 
+                    return parts[2] + '-' + parts[1] + '-' + parts[0]; 
                 }
-            ],
-            drawCallback: function(settings) {
-                feather.replace(); 
+            },
+            { data: 'tempat' },
+            { 
+                data: null, 
+                render: function (data, type, row) {
+                        return `
+                        <a href="/notulen/pdfhadir/${row.uid}" type="button" target="_blank" class="btn btn-icon btn-xs btn-flat-primary download" title="Cetak PDF">
+                                <i data-feather='printer'></i>
+                            </a>
+                        `;
+                }
+            },
+            { 
+                data: null, 
+                render: function (data, type, row) {
+                    return `
+                        <div class="btn-group">
+                            <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
+                            <div class="dropdown-menu">
+                                <a type="button" href="/notulen/edit4/${row.uid}" class="dropdown-item">Edit</a>
+                                <a type="button" href="/notulen/hadir/${row.uid}" class="dropdown-item">Daftar Hadir</a>
+                                <a type="button" data-id="${row.id}" class="dropdown-item delete-btn">Hapus</a>
+                            </div>
+                        </div>
+                    `;
+                }
             }
-        });
+        ],
+         drawCallback: function(settings) {
+            feather.replace(); // supaya icon feather muncul ulang
+        }
+    });
     });
 
     $(document).on("click", ".delete-btn", function(){
@@ -166,28 +168,25 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header border-bottom">
-                        <div class="col-sm-12"><h4 class="card-title">Daftar Notulen Rapat Familiarisasi / Penyuluhan Manajemen Keselamatan </h4></div>
+                        <div class="col-sm-12"><h4 class="card-title">{{$form->nama}}</h4></div>
                         @include('filter')
-                        <div class="col-sm-3">
-                            <a href="/notulen/add" class="btn btn-primary btn-sm">Tambah Data</a>
-                        </div>
+                        <div class="col-sm-3"><a href="/notulen/add4/{{$form->kode}}" class="btn btn-primary btn-sm">Tambah Data</a></div>
                     </div>
                     <div class="card-body">
-                    <table id="table" class="table table-bordered table-striped" width="100%">
-                      <thead>
-                        <tr>
-                          <th>No.</th>
-                          <th>Tanggal</th>
-                          <th>Tempat</th>
-                          <th>DPA/Nahkoda</th>
-                          <th>Notulen</th>
-                          <th>File</th>
-                          <th>Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                    </table>
+                        <table id="table" class="table table-bordered table-striped" width="100%">
+                        <thead>
+                            <tr>
+                            <th>No.</th>
+                            <th>Form</th>
+                            <th>Tanggal</th>
+                            <th>Tempat</th>
+                            <th>PDF</th>
+                            <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

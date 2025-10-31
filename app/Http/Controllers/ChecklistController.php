@@ -9,6 +9,7 @@ use App\Models\ChecklistGanti;
 use App\Models\ChecklistDataDetail;
 use App\Models\Karyawan;
 use App\Models\KodeForm;
+use App\Models\Perusahaan;
 use App\Models\Kapal;
 use Alert;
 use Session;
@@ -20,6 +21,9 @@ class ChecklistController extends Controller
 {
     public function getData(Request $request)
     {
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+
         $daftar = DB::table('checklist_data')
                 ->leftjoin('karyawan', 'karyawan.id', '=', 'checklist_data.id_karyawan')
                 ->leftjoin('jabatan', 'jabatan.id', '=', 'karyawan.id_jabatan')
@@ -27,6 +31,13 @@ class ChecklistController extends Controller
                 ->select('checklist_data.*', 'karyawan.nama as nama', 'jabatan.nama as jabatan', 'kapal.nama as kapal')
                 ->where('checklist_data.kode', $request->input('kode'))
                 ->where('checklist_data.status','A')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('checklist_data.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('checklist_data.id_kapal', $kapal);
+                })
+                ->orderBy('checklist_data.id', 'DESC')
                 ->get();
 
         return response()->json([
@@ -37,8 +48,21 @@ class ChecklistController extends Controller
     public function add($kode)
     {
         $data['form'] = KodeForm::where('kode', $kode)->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['kapal'] = Kapal::where('status','A')->get();
+        $id_perusahaan = Session::get('id_perusahaan');
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         $data['checklist'] = ChecklistItem::where('kode', $kode)->where('status', 'A')->get();
         $data['active'] = $kode;
         return view('checklist.add',$data);
@@ -53,6 +77,7 @@ class ChecklistController extends Controller
         $save = ChecklistData::create([
           'uid' => Str::uuid()->toString(),
           'kode' => $request->input('kode'),
+          'id_perusahaan' => $request->input('id_perusahaan'),
           'id_karyawan' => $request->input('id_karyawan'),
           'id_jabatan' => $karyawan->id_jabatan,
           'date' => $request->input('date'),
@@ -89,8 +114,21 @@ class ChecklistController extends Controller
     {
         $show =  ChecklistData::where('uid', $uid)->first();
         $data['form'] = KodeForm::where('kode', $show->kode)->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['kapal'] = Kapal::where('status','A')->get();
+        $id_perusahaan = Session::get('id_perusahaan');
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->where('kode', $show->kode)->get();
         $data['active'] = $show->kode;
         $data['show'] = $show;
@@ -259,6 +297,9 @@ class ChecklistController extends Controller
 
     public function getGanti(Request $request)
     {
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+
         $daftar = DB::table('checklist_penggantian as a')
                 ->leftjoin('karyawan as b', 'b.id', '=', 'a.id_dari')
                 ->leftjoin('karyawan as c', 'c.id', '=', 'a.id_kepada')
@@ -266,6 +307,13 @@ class ChecklistController extends Controller
                 ->select('a.*', 'b.nama as dari', 'c.nama as kepada', 'd.nama as kapal')
                 ->where('a.kode', $request->input('kode'))
                 ->where('a.status','A')
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('a.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('a.id_kapal', $kapal);
+                })
+                ->orderBy('a.id', 'DESC')
                 ->get();
 
         return response()->json([
@@ -276,8 +324,21 @@ class ChecklistController extends Controller
     public function addganti($kode)
     {
         $data['form'] = KodeForm::where('kode', $kode)->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['kapal'] = Kapal::where('status','A')->get();
+        $id_perusahaan = Session::get('id_perusahaan');
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         $data['checklist'] = ChecklistItem::where('kode', $kode)->where('status', 'A')->get();
         $data['active'] = $kode;
         return view('checklist.addganti',$data);
@@ -291,6 +352,7 @@ class ChecklistController extends Controller
         $save = ChecklistGanti::create([
           'uid' => Str::uuid()->toString(),
           'kode' => $request->input('kode'),
+          'id_perusahaan' => $request->input('id_perusahaan'),
           'id_dari' => $request->input('id_dari'),
           'id_kepada' => $request->input('id_kepada'),
           'date' => $request->input('date'),
@@ -330,8 +392,21 @@ class ChecklistController extends Controller
     {
         $show =  ChecklistGanti::where('uid', $uid)->first();
         $data['form'] = KodeForm::where('kode', $show->kode)->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['kapal'] = Kapal::where('status','A')->get();
+        $id_perusahaan = Session::get('id_perusahaan');
+        if(Session::get('previllage')==1) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->get();
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif(Session::get('previllage')==2) {
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
+        } else {
+            $id_kapal = Session::get('id_kapal');
+            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
+        }
         $data['item'] = ChecklistDataDetail::where('checklist_data_id', $show->id)->where('kode', $show->kode)->get();
         $data['active'] = $show->kode;
         $data['show'] = $show;
@@ -342,6 +417,7 @@ class ChecklistController extends Controller
     {
         $kode = $request->input('kode');
       $post = ChecklistGanti::where('id',$id)->update([
+          'id_perusahaan' => $request->input('id_perusahaan'),
           'id_dari' => $request->input('id_dari'),
           'id_kepada' => $request->input('id_kepada'),
           'date' => $request->input('date'),
@@ -391,10 +467,15 @@ class ChecklistController extends Controller
 
     public function getKaryawan($id_kapal)
     {
+        $get = Kapal::findOrFail($id_kapal);
         $karyawan = DB::table('karyawan as a')
-                    ->join('user as b', 'b.id_karyawan', '=', 'a.id', 'left')
                     ->select('a.id', 'a.nama')
-                    ->where('b.id_kapal', $id_kapal)->where('a.status','A')->where('a.resign', 'N')
+                    ->where('a.id_perusahaan', $get->pemilik)
+                    ->where(function($q) use ($id_kapal) {
+                        $q->where('a.id_kapal', $id_kapal)
+                        ->orWhereNull('a.id_kapal');
+                    })
+                    ->where('a.status','A')->where('a.resign', 'N')
                     ->get();
         return response()->json($karyawan);
     }

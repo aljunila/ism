@@ -63,6 +63,40 @@
                 }
             });
         });
+
+        $(document).on('change', '#id_perusahaan', function() {
+            var perusahaanID = $(this).val();
+            if (perusahaanID) {
+                $.ajax({
+                    url: '/get-kapal/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                        $.each(data, function(key, value) {
+                            $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+
+                $.ajax({
+                    url: '/get-karyawanbyCom/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('.karyawan').empty().append('<option value="">Semua</option>');           
+                        $.each(data, function(key, value) {
+                            $('.karyawan').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+            } else {
+                $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+                 $('.karyawan').empty().append('<option value="">Tidak ada data</option>');
+            }
+        });
     </script>
 @endsection
 
@@ -99,12 +133,12 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Nama Karyawan</label>
+                                        <label class="col-form-label" for="first-name">Perusahaan</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_karyawan" id="id_karyawan"  class="form-control" required>
-                                        @foreach($karyawan as $k)
-                                            <option value="{{$k->id}}">{{$k->nama}}</option>
+                                        <select name="id_perusahaan" id="id_perusahaan" class="form-control" required>
+                                        @foreach($perusahaan as $p)
+                                            <option value="{{$p->id}}">{{$p->nama}}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -117,6 +151,18 @@
                                         <select name="id_kapal" id="id_kapal"  class="form-control" required>
                                         @foreach($kapal as $kp)
                                             <option value="{{$kp->id}}">{{$kp->nama}}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Nama Karyawan</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <select name="id_karyawan" id="id_karyawan"  class="form-control karyawan" required>
+                                        @foreach($karyawan as $k)
+                                            <option value="{{$k->id}}">{{$k->nama}}</option>
                                         @endforeach
                                         </select>
                                     </div>
@@ -165,7 +211,7 @@
                                         <label class="col-form-label" for="first-name">Mengetahui</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_mengetahui" id="id_mengetahui"  class="form-control" required>
+                                        <select name="id_mengetahui" id="id_mengetahui"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
                                             <option value="{{$k->id}}">{{$k->nama}}</option>
                                         @endforeach
@@ -177,7 +223,7 @@
                                         <label class="col-form-label" for="first-name">Yang Memberi Penyuluhan</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_mentor" id="id_mentor"  class="form-control" required>
+                                        <select name="id_mentor" id="id_mentor"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
                                             <option value="{{$k->id}}">{{$k->nama}}</option>
                                         @endforeach

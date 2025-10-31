@@ -24,12 +24,24 @@ class DaftarHadirController extends Controller
         return view('hadir.el0306', $data);
     }
 
-    public function getData(Request $request) {
+     public function getData(Request $request) {
+        $kode = $request->input('kode');
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+        
         $get = DB::table('daftar_hadir as a')
-                ->leftjoin('kapal as b', 'b.id', '=', 'a.id_kapal')
-                ->select('a.*', 'b.nama as kapal')
-                ->where('a.status', 'A')
+                ->leftjoin('notulen as b', 'b.id', '=', 'a.id_notulen')
+                ->leftjoin('kapal as c', 'c.id', '=', 'b.id_kapal')
+                ->select('a.*', 'c.nama as kapal', 'b.tanggal', 'b.tempat')
+                ->where('a.status', 'A')->where('c.status', 'A')
                 ->where('a.kode', $request->input('kode'))
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('b.id_perusahaan', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('b.id_kapal', $kapal);
+                })
+                ->orderBy('b.id', 'DESC')
                 ->get();
         return response()->json(['data' => $get]);
     }

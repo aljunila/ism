@@ -53,6 +53,47 @@
                 }
             });
         });
+
+        $(document).on('change', '#id_perusahaan', function() {
+            var perusahaanID = $(this).val();
+            if (perusahaanID) {
+                $.ajax({
+                    url: '/get-kapal/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#id_kapal').empty().append('<option value="">Semua</option>');           
+                        $.each(data, function(key, value) {
+                            $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+            } else {
+                $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+                table.ajax.reload();
+            }
+        });
+
+        $('#id_kapal').on('change', function() {
+            var kapalID = $(this).val();
+            if (kapalID) {
+                $.ajax({
+                    url: '/get-karyawan/' + kapalID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('.karyawan').empty().append('<option value="">-- Pilih Karyawan --</option>');
+                    
+                        $.each(data, function(key, value) {
+                            $('.karyawan').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                    }
+                });
+            } else {
+                $('.karyawan').empty().append('<option value="">-- Pilih Karyawan --</option>');
+            }
+        });
     </script>
 @endsection
 
@@ -78,6 +119,30 @@
                     @csrf
                     <div class="row">
                         <div class="col-12">
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Perusahaan</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_perusahaan" id="id_perusahaan" class="form-control" required>
+                                    @foreach($perusahaan as $p)
+                                        <option value="{{$p->id}}" @selected ($p->id==$show->id_perusahaan)>{{$p->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Kapal</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_kapal" id="id_kapal"  class="form-control" required>
+                                    @foreach($kapal as $kp)
+                                        <option value="{{$kp->id}}"  @selected ($kp->id==$show->id_kapal)>{{$kp->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
                                     <label class="col-form-label" for="first-name">Tanggal</label>
@@ -107,7 +172,7 @@
                                     <label class="col-form-label" for="first-name">DPA/Nahkoda</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <select name="id_nahkoda" id="id_nahkoda"  class="form-control" required>
+                                    <select name="id_nahkoda" id="id_nahkoda"  class="form-control karyawan" required>
                                     @foreach($karyawan as $ky)
                                         <option value="{{$ky->id}}" @selected ($ky->id == $show->id_nahkoda)>{{$ky->nama}}</option>
                                     @endforeach
@@ -119,7 +184,7 @@
                                     <label class="col-form-label" for="first-name">Notulen</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <select name="id_notulen" id="id_notulen"  class="form-control" required>
+                                    <select name="id_notulen" id="id_notulen"  class="form-control karyawan" required>
                                     @foreach($karyawan as $k)
                                         <option value="{{$k->id}}" @selected ($k->id == $show->id_notulen)>{{$k->nama}}</option>
                                     @endforeach

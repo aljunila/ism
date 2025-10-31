@@ -53,6 +53,28 @@
                 }
             });
         });
+
+        $(document).on('change', '#id_perusahaan', function() {
+            var perusahaanID = $(this).val();
+            if (perusahaanID) {
+                $.ajax({
+                    url: '/get-karyawanbyCom/' + perusahaanID,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#enforced_by').empty().append('<option value="">-- Pilih Karyawan --</option>');
+                    
+                        $.each(data, function(key, value) {
+                            $('#enforced_by').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                        table.ajax.reload();
+                    }
+                });
+            } else {
+                $('#enforced_by').empty().append('<option value="">-- Pilih Karyawan --</option>');
+                table.ajax.reload();
+            }
+        });
     </script>
 @endsection
 
@@ -80,6 +102,18 @@
                         <div class="col-12">
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Perusahaan</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                    @foreach($perusahaan as $p)
+                                        <option value="{{$p->id}}" @selected ($p->id==$show->id_perusahaan)>{{$p->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
                                     <label class="col-form-label" for="first-name">Form ID</label>
                                 </div>
                                 <div class="col-sm-10">
@@ -101,12 +135,19 @@
                                 <div class="col-sm-10">
                                     <select name="enforced_by" id="enforced_by"  class="form-control" required>
                                     @foreach($karyawan as $ky)
-                                        @if($ky->id==$show->enforced_by)
-                                            <option value="{{$ky->id}}" selected>{{$ky->nama}}</option>
-                                        @else
-                                            <option value="{{$ky->id}}">{{$ky->nama}}</option>
-                                        @endif
+                                            <option value="{{$ky->id}}" @selected ($ky->id==$show->enforced_by)>{{$ky->nama}}</option>
                                     @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Publish</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="publish" id="publish"  class="form-control" required>
+                                        <option value="Y">Iya</option>
+                                        <option value="N">Tidak</option>
                                     </select>
                                 </div>
                             </div>

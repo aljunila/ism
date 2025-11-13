@@ -56,7 +56,7 @@
                         <!-- Login basic -->
                         <div class="card mb-0">
                             <div class="card-body">
-                                <a href="index.html" class="brand-logo">
+                                <a href="{{ url('/') }}" class="brand-logo">
                                     <img src="{{ url('/img/trimas.png')}}" alt="" width="50%">
                                 </a>
                                 <div id="search">

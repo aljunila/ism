@@ -78,6 +78,7 @@ class NotulenController extends Controller
           'tempat' => $request->input('tempat'),
           'materi' => $request->input('materi'),
           'id_nahkoda' => $request->input('id_nahkoda'),
+          'id_dpa' => $request->input('id_dpa'),
           'id_notulen' => $request->input('id_notulen'),
           'hal' => $request->input('hal'),
           'status' => 'A',

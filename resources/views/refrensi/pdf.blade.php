@@ -13,9 +13,9 @@
 
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 14px;
-            border: 2px solid #655dd6ff; /* garis tepi hitam */
-            padding: 40px; /* jarak isi dengan garis */
+            font-size: 16px;
+            border: 4px solid #655dd6ff; /* garis tepi hitam */
+            padding: 30px; /* jarak isi dengan garis */
             padding-top: 80px;
             padding-bottom: 80px;
             box-sizing: border-box;
@@ -34,7 +34,7 @@
         .table-bordered {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
         }
 

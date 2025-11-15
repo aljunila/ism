@@ -157,24 +157,40 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-2">
-                                        <label class="col-form-label" for="first-name">Nama Karyawan</label>
-                                    </div>
-                                    <div class="col-sm-10">
-                                        <select name="id_karyawan" id="id_karyawan"  class="form-control karyawan" required>
-                                        @foreach($karyawan as $k)
-                                            <option value="{{$k->id}}" @selected ($k->id == $show->id_karyawan)>{{$k->nama}}</option>
-                                        @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-1 row">
-                                    <div class="col-sm-2">
                                         <label class="col-form-label" for="first-name">Tanggal</label>
                                     </div>
                                     <div class="col-sm-10">
                                         <input type="date" class="form-control" id="date" name="date" value="{{$show->date}}" required>
                                     </div>
                                 </div>
+                                @if($form->kode=='el0501')
+                                <div class="mb-1 row">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label" for="first-name">Waktu</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="time" name="time" value="{{ $show->time}}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label" for="first-name">Posisi</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="ket" value="{{ $show->ket}}" required>
+                                    </div>
+                                </div>
+                                @endif
+                                @if($form->kode=='el0502')
+                                <div class="mb-1 row">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label" for="first-name">Pelabuhan</label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="ket" value="{{ $show->ket}}" required>
+                                    </div>
+                                </div>
+                                @endif
                                 <div class="mb-1 row">
                                     <div class="col-sm-2">
                                         <label class="col-form-label" for="first-name">Materi</label>
@@ -190,7 +206,7 @@
                                             @foreach($item as $ck)
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
-                                                <td>{{$ck->get_item()->item}}</td>
+                                                <td>{!!$ck->get_item()->item!!}</td>
                                                 <td><input type="radio" class="form-check-input" name="item[{{$ck->checklist_item_id}}]" value="1" @checked ($ck->value == 1)></td>
                                                 <td><input type="radio" class="form-check-input" name="item[{{$ck->checklist_item_id}}]" value="0" @checked ($ck->value == 0)></td>
                                             </tr>
@@ -208,7 +224,7 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-2">
-                                        <label class="col-form-label" for="first-name">Mengetahui</label>
+                                        <label class="col-form-label" for="first-name">{!! ($form->kode=='el0511') ? 'Nahkoda' : 'Mengetahui' !!}</label>
                                     </div>
                                     <div class="col-sm-10">
                                         <select name="id_mengetahui" id="id_mengetahui"  class="form-control karyawan" required>
@@ -220,12 +236,29 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-2">
-                                        <label class="col-form-label" for="first-name">Yang Memberi Penyuluhan</label>
+                                        <label class="col-form-label" for="first-name">{{$text = match ($form->kode) {
+                                                                                        'el0501' => 'Diperiksa Oleh',
+                                                                                        'el0502' => 'Diperoleh Oleh',
+                                                                                        'el0511' => 'Mualim',
+                                                                                        default  => 'Yang Memberi Penyuluhan',
+                                                                                    };}}</label>
                                     </div>
                                     <div class="col-sm-10">
                                         <select name="id_mentor" id="id_mentor"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
                                             <option value="{{$k->id}}" @selected ($k->id == $show->id_mentor)>{{$k->nama}}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-2">
+                                        <label class="col-form-label" for="first-name">{!! ($form->kode=='el0502') ? 'Pemeriksa' : 'Yang menerima penyuluhan' !!} </label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <select name="id_karyawan" id="id_karyawan"  class="form-control karyawan" required>
+                                        @foreach($karyawan as $k)
+                                            <option value="{{$k->id}}" @selected ($k->id == $show->id_karyawan)>{{$k->nama}}</option>
                                         @endforeach
                                         </select>
                                     </div>

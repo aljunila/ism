@@ -122,7 +122,7 @@
                             timer: 1500,
                             showConfirmButton: true
                         });
-                        $("#item").val("");
+                        tinymce.get("item").setContent("");
                         $('#FormTambah').modal('hide');
                         $('#table').DataTable().ajax.reload();
                 },
@@ -147,7 +147,7 @@
             {
                 console.log(data);
                 $('#id').val(data.id);
-                $('#nama').val(data.item);
+                tinymce.get('nama').setContent(data.item);
                 $('#FormEdit').modal('show');
             }
             });
@@ -274,7 +274,7 @@
         </div>
     </div>
 </section>
-
+@if(($form->kode!='el0503') or ($form->kode!='el0510'))
 <section id="basic-horizontal-layouts">
     <div class="row">
         <div class="col-12">
@@ -322,7 +322,7 @@
                     <div class="modal-body">
                         <label>Item Checklist </label>
                         <div class="mb-1">
-                            <textarea name="item" id="item"  class="form-control"></textarea>
+                            <textarea name="item" id="item"  class="tinymce form-control"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -342,16 +342,16 @@
                     <div class="modal-body">
                         <label>Item Checklist </label>
                         <div class="mb-1">
-                            <textarea name="nama" id="nama"  class="form-control"></textarea>
+                            <textarea name="nama" id="nama"  class="tinymce form-control"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="text" id="id" name="id">
+                        <input type="hidden" id="id" name="id">
                         <button type="button" class="btn btn-primary" id="edit_data">Simpan</button>
                     </div>
             </div>
         </div>
     </div>
 </section>
-
+@endif
 @endsection

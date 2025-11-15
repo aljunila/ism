@@ -8,6 +8,6 @@ class ChecklistItem extends Model
 {
     public $timestamps = false;
     protected $table = 'checklist_item';
-    protected $fillable = ['id', 'uid', 'kode', 'item', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'kode', 'item', 'parent_id', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
 }

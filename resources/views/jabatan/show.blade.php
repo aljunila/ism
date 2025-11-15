@@ -43,6 +43,11 @@ let table;
                     return meta.row + 1; // auto numbering
                 }
             },
+            { data: 'kel',
+                render: function(data, type, row){
+                    return data==1 ? 'Laut' : 'Darat';
+                }
+            },
             { data: 'nama' },
             { 
                 data: 'id',
@@ -67,7 +72,8 @@ let table;
 });
 
 $('#tambah_data').click(function(){
-    let nama = $('#nama').val()
+    let nama = $('#nama').val();
+    let kel = $('#kel').val();
 
     if (!nama.trim()) {
         Swal.fire({
@@ -82,6 +88,7 @@ $('#tambah_data').click(function(){
         type: "POST",
         data: {
             nama: nama,
+            kel: kel,
             _token: "{{ csrf_token() }}"
         },
         success: function(response) {
@@ -122,6 +129,7 @@ $(document).on('click', '.edit-btn', function(){
          console.log(data);
         $('#id_jab').val(data.id);
         $('#nama_jab').val(data.nama);
+        $('#kel_jab').val(data.kel).trigger('change');
         $('#FormEdit').modal('show');
       }
     });
@@ -129,6 +137,7 @@ $(document).on('click', '.edit-btn', function(){
 
 $(document).on('click', '#edit_data', function(){
     let nama_jab = $('#nama_jab').val()
+    let kel_jab = $('#kel_jab').val()
     let id = $('#id_jab').val()
     if (!nama_jab.trim()) {
         Swal.fire({
@@ -143,6 +152,7 @@ $(document).on('click', '#edit_data', function(){
         type: "POST",
         data: {
             nama: nama_jab,
+            kel: kel_jab,
             id: id,
             _token: "{{ csrf_token() }}"
         },
@@ -228,8 +238,9 @@ $(document).on("click", ".delete-btn", function(){
                       <thead>
                         <tr>
                           <th width="10%">No.</th>
-                          <th width="50%">Nama</th>
-                          <th width="40%">Aksi</th>
+                          <th width="35%">Kelompok</th>
+                          <th width="35%">Nama</th>
+                          <th width="20%">Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -247,10 +258,19 @@ $(document).on("click", ".delete-btn", function(){
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                    <label>Nama Jabatan </label>
+                    <label>Kelompok</label>
                     <div class="mb-1">
-                        <input type="text" placeholder="Nama" class="form-control" name="nama" id="nama_jab"/>
+                        <select name="kel" id="kel_jab" class="form-control">
+                            <option value="1">Laut</option>
+                            <option value="2">Darat</option>
+                        </select>
                     </div>
+            </div>
+            <div class="modal-body">
+                <label>Nama Jabatan </label>
+                <div class="mb-1">
+                    <input type="text" placeholder="Nama" class="form-control" name="nama" id="nama_jab"/>
+                </div>
             </div>
             <div class="modal-footer">
                 <input type="hidden" name="id_jab" id="id_jab">
@@ -267,6 +287,15 @@ $(document).on("click", ".delete-btn", function(){
                 <h4 class="modal-title" id="myModalLabel33">Tambah Data</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+                <div class="modal-body">
+                    <label>Kelompok</label>
+                    <div class="mb-1">
+                        <select name="kel" id="kel" class="form-control">
+                            <option value="1">Laut</option>
+                            <option value="2">Darat</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="modal-body">
                     <label>Nama Jabatan </label>
                     <div class="mb-1">

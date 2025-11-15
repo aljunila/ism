@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            margin: 60px; /* jarak isi dengan border */
+        }
+
+        .page-number:before {
+        content: counter(page);
+        }
+
+        body {
+            font-family: aria, sans-serif;
+            font-size: 14px;
+            border: 2px solid #655dd6ff; /* garis tepi hitam */
+            padding: 40px; /* jarak isi dengan garis */
+            padding-top: 80px;
+            padding-bottom: 80px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .table-bordered {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .table-bordered td {
+            border: 1px solid #000; 
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        .underline {
+            text-decoration: underline;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <table class="table-bordered" width="100%">
+            <tr>
+                <td colspan="2" width="25%"><img src="{{ public_path('img/'.$show->get_perusahaan()->logo) }}" alt="" width="50%"></td>
+                <td style="text-transform: uppercase;" colspan="3" width="50%"><h3>{{$form->nama}}</h3></td>
+                <td width="25%" style="text-align: center;"><b>{{$form->ket}}</b><br> Hal <span class="page-number"></span></td>
+            </tr>
+            <tr style="text-align: left;">
+                <td colspan="3">Nama Kapal : {{$show->get_kapal()->nama}}</td>
+                <td colspan="2">Tanggal : {{ \Carbon\Carbon::parse($show->tanggal)->format('d-m-Y') }}</td>
+                <td>Waktu : {{ $show->waktu }}</td>
+            </tr>
+            <tr style="text-align: left;">
+                <td colspan="3">No Pelayaran : {{ $show->no_pelayaran }}</td>
+                <td colspan="3">Pelabuhan : {{ $show->pelabuhan }}</td>
+            </tr>
+            <tr style="text-align: center;">
+                <td colspan="6">VOLUME PENGISIAN</td>
+            </tr>
+            <tr style="text-align: left;">
+                <td colspan="3">Fuel Oil (FO) 	: {{ $show->fo }}</td>
+                <td colspan="3">Marine Diesel Oil (MDO) : {{ $show->mdo }}</td>
+            </tr>
+            <tr>
+                <td colspan="5">Keterangan</td>
+                <td>Ya/Tidak</td>
+            </tr>
+            @foreach($item as $ck)
+            @php
+                $detail = $child[$ck->checklist_item_id] ?? [];
+            @endphp
+            <tr >
+                <td colspan="6" style="text-align: left;">{!! $ck->item !!}</td>     
+            </tr>
+            @foreach($detail as $c)
+            <tr>
+                <td colspan="5" style="text-align: left;">{!! $c->item !!}</td>
+                <td style="text-align: center;">
+                    @if($c->value==1)
+                    <img src="file://{{ public_path('img/check.png') }}" width="25px"><br>
+                    @else
+                    <img src="file://{{ public_path('img/silang.jpg') }}" width="25px"><br>
+                    @endif
+                </td>            
+            </tr>
+            @endforeach
+            @endforeach
+            <tr>
+                <td colspan="2">Mengetahui,<br>
+                @if($show->get_nahkoda()->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $show->get_nahkoda()->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    {{$show->get_nahkoda()->nama}}
+                </td>
+                <td colspan="2">Diperoleh Oleh,<br>
+                @if($show->get_kkm()->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $show->get_kkm()->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    {{$show->get_kkm()->nama}}
+                </td>
+                <td colspan="2">Dilaksanakan Oleh,<br>
+                @if($show->get_jaga()->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $show->get_jaga()->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                {{$show->get_jaga()->nama}}
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

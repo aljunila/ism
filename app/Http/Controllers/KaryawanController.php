@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 use App\Models\Karyawan;
 use App\Models\Perusahaan;
 use App\Models\Kapal;
@@ -36,6 +37,7 @@ class KaryawanController extends Controller
     public function getData(Request $request)
     {
         $perusahaan = $request->input('id_perusahaan');
+        $kel = $request->input('kel');
         $kapal = $request->input('id_kapal');
 
         $karyawan = DB::table('karyawan')
@@ -53,15 +55,24 @@ class KaryawanController extends Controller
                 )
                 ->where('karyawan.resign', 'N')
                 ->where('karyawan.status','A')
+                ->when($kel, function($query, $kel) {
+                    return $query->where('jabatan.kel', $kel);
+                })
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('perusahaan.id', $perusahaan);
                 })
                 ->when($kapal, function($query, $kapal) {
-                    return $query->where('kapal.id', $kapal);
-                })
-                ->get();
+                    return $query->where('karyawan.id_kapal', $kapal);
+                });
         // print_r($kapal);die();
-        return response()->json(['data' => $karyawan]);
+        return DataTables::of($karyawan)
+        ->filterColumn('kapal', function($query, $keyword) {
+            $query->where('kapal.nama', 'like', "%{$keyword}%");
+        })
+        ->filterColumn('jabatan', function($query, $keyword) {
+            $query->where('jabatan.nama', 'like', "%{$keyword}%");
+        })
+        ->make(true);
     }
 
     public function add() 

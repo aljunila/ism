@@ -25,6 +25,10 @@
     <!-- END: Page JS-->
 
    <script>
+    $(function(){
+        $('#prepered_by').select2();
+        $('#enforced_by').select2();
+    });
         $('#form_prosedur').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
 
@@ -87,7 +91,7 @@
                                     <label class="col-form-label" for="first-name">Perusahaan</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                    <select name="id_perusahaan" id="id_perusahaan"  class="select2 form-select" required>
                                     <option value="">Pilih</option>
                                     @foreach($perusahaan as $ph)
                                         <option value="{{$ph->id}}">{{$ph->nama}}</option>
@@ -151,7 +155,7 @@
                                     <label class="col-form-label" for="first-name">Disiapkan Oleh</label>
                                 </div>
                                 <div class="col-sm-10">
-                                    <select name="prepered_by" id="select2-basic" class="select2 form-select" required>
+                                    <select name="prepered_by" id="prepered_by" class="select2 form-select" required>
                                     @foreach($karyawan as $k)
                                         <option value="{{$k->id}}">{{$k->nama}}</option>
                                     @endforeach

@@ -19,7 +19,7 @@ class JabatanController extends Controller
 
     public function getData()
     {
-        $daftar = Jabatan::select('id', 'nama')->where('status','A')->get();
+        $daftar = Jabatan::select('id', 'nama', 'kel')->where('status','A')->get();
 
         return response()->json([
             'data' => $daftar
@@ -39,6 +39,7 @@ class JabatanController extends Controller
         $save = Jabatan::create([
           'uid' => Str::uuid()->toString(),
           'nama' => $request->input('nama'),
+          'kel' => $request->input('kel'),
           'status' => 'A',
           ]);
         if($save) {
@@ -58,7 +59,8 @@ class JabatanController extends Controller
     public function update(Request $request, $id)
     {
       $nama = $request->input('nama');
-      $post = Jabatan::where('id',$id)->update(['nama'=>$nama]);     
+      $kel = $request->input('kel');
+      $post = Jabatan::where('id',$id)->update(['nama'=>$nama, 'kel'=> $kel]);     
       return response()->json(['success' => true]);
     }
 

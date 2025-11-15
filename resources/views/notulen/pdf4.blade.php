@@ -95,24 +95,53 @@
             {!!$materi!!}<br><br><br><br>
             </td>
         </tr>
-        <tr style="text-align: center;">
-            <td colspan="3">DPA/Nahkoda,<br>
-            @if($show->get_nahkoda()->tanda_tangan)
-            <img src="file://{{ public_path('ttd_karyawan/' . $show->get_nahkoda()->tanda_tangan) }}" width="100px" height="75px"><br>
-            @else
-            <br><br><br>
-            @endif
-                {{$show->get_nahkoda()->nama}}
-            </td>
-            <td colspan="3">Notulen,<br>
-            @if($show->get_notulen()->tanda_tangan)
-            <img src="file://{{ public_path('ttd_karyawan/' . $show->get_notulen()->tanda_tangan) }}" width="100px" height="75px"><br>
-            @else
-            <br><br><br>
-            @endif
-            {{$show->get_notulen()->nama}}
-            </td>
-        </tr>
+        @if($form->kode=='el0403')
+            <tr style="text-align: center;">
+                <td colspan="3">DPA<br>
+                    @if($show->get_nahkoda()->tanda_tangan)
+                    <img src="file://{{ public_path('ttd_karyawan/' . $show->get_nahkoda()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
+                        {{$show->get_nahkoda()->nama}}
+                </td>
+                <td colspan="3">Notulis,<br>
+                    @if($show->get_notulen()->tanda_tangan)
+                    <img src="file://{{ public_path('ttd_karyawan/' . $show->get_notulen()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
+                    {{$show->get_notulen()->nama}}
+                </td>
+            </tr>
+        @else
+            <tr style="text-align: center;">
+                <td colspan="2">{!! ($form->kode=='el0402') ? 'Direktur' : 'Nahkoda' !!}<br>
+                    @if($show->get_nahkoda()->tanda_tangan)
+                    <img src="file://{{ public_path('ttd_karyawan/' . $show->get_nahkoda()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
+                        {{$show->get_nahkoda()->nama}}
+                </td>
+                <td colspan="2">{!! ($form->kode=='el0402') ? 'DPA' : 'Mualim' !!}<br>
+                    @if($show->get_dpa()->tanda_tangan)
+                    <img src="file://{{ public_path('ttd_karyawan/' . $show->get_dpa()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
+                        {{$show->get_dpa()->nama}}
+                </td>
+                <td colspan="2">{!! ($form->kode=='el0402') ? 'Notulis' : 'KKM' !!}<br>
+                    @if($show->get_notulen()->tanda_tangan)
+                    <img src="file://{{ public_path('ttd_karyawan/' . $show->get_notulen()->tanda_tangan) }}" width="100px" height="75px"><br>
+                    @else
+                    <br><br><br>
+                    @endif
+                    {{$show->get_notulen()->nama}}
+                </td>
+            </tr>
+        @endif
     </table>
     <div style="page-break-before: always;"></div>
     <table class="table-bordered" width="100%">

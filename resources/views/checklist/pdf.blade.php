@@ -13,8 +13,8 @@
 
         body {
             font-family: aria, sans-serif;
-            font-size: 14px;
-            border: 2px solid #655dd6ff; /* garis tepi hitam */
+            font-size: 16px;
+            border: 4px solid #655dd6ff; /* garis tepi hitam */
             padding: 40px; /* jarak isi dengan garis */
             padding-top: 80px;
             padding-bottom: 80px;
@@ -34,7 +34,7 @@
         .table-bordered {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
         }
 
@@ -71,20 +71,20 @@
             </tr>
             <tr>
                 <td colspan="4">Materi</td>
-                <td>Ya</td>
-                <td>Tidak</td>
+                <td><img src="file://{{ public_path('img/check.png') }}" width="25px"></td>
+                <td><img src="file://{{ public_path('img/silang.jpg') }}" width="25px"></td>
             </tr>
             @foreach($item as $ck)
             <tr >
                 <td colspan="4" style="text-align: left;">{{$ck->get_item()->item}}</td>
                 <td style="text-align: center;">
                     @if($ck->value==1)
-                    <img src="file://{{ public_path('img/check.png') }}" width="25px"><br>
+                    <img src="file://{{ public_path('img/check.png') }}" width="25px">
                     @endif
                 </td>
                 <td style="text-align: center;">
                     @if($ck->value==0)
-                    <img src="file://{{ public_path('img/silang.jpg') }}" width="25px"><br>
+                    <img src="file://{{ public_path('img/silang.jpg') }}" width="25px">
                     @endif
                 </td>
             </tr>

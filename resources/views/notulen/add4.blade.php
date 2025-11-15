@@ -191,7 +191,7 @@
                             </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
-                                    <label class="col-form-label" for="first-name">DPA/Nahkoda</label>
+                                    <label class="col-form-label" for="first-name">{!! ($form->kode=='el0402') ? 'Direktur' : (($form->kode=='el0403') ? 'DPA' : 'Nahkoda') !!}</label>
                                 </div>
                                 <div class="col-sm-10">
                                     <select name="id_nahkoda" id="id_nahkoda"  class="form-control karyawan" required>
@@ -201,9 +201,23 @@
                                     </select>
                                 </div>
                             </div>
-                             <div class="mb-1 row">
+                            @if($form->kode!='el0403')
+                            <div class="mb-1 row">
                                 <div class="col-sm-2">
-                                    <label class="col-form-label" for="first-name">Notulen</label>
+                                    <label class="col-form-label" for="first-name">{!! ($form->kode=='el0402') ? 'DPA' : 'Mualim' !!}</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <select name="id_dpa" id="id_dpa"  class="form-control karyawan" required>
+                                    @foreach($karyawan as $ky)
+                                        <option value="{{$ky->id}}">{{$ky->nama}}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            @endif
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">{!! ($form->kode=='el0404') ? 'KKM' : 'Notulis' !!}</label>
                                 </div>
                                 <div class="col-sm-10">
                                     <select name="id_notulen" id="id_notulen"  class="form-control karyawan" required>
@@ -245,7 +259,7 @@
                             </div>
                             <div class="mb-1 row">
                                 <div class="col-sm-2">
-                                    <label class="col-form-label" for="first-name">Isiiii</label>
+                                    <label class="col-form-label" for="first-name">Isi</label>
                                 </div>
                                 <div class="col-sm-10">
                                     <textarea class="form-control tinymce" id="materi" name="materi"></textarea>

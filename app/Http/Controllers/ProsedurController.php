@@ -8,6 +8,8 @@ use App\Models\Prosedur;
 use App\Models\Karyawan;
 use App\Models\ViewProsedur;
 use App\Models\DaftarHadir;
+use App\Models\DaftarHadirDetail;
+use App\Models\Notulen;
 use App\Models\User;
 use Alert;
 use Session;
@@ -234,6 +236,10 @@ class ProsedurController extends Controller
     }
 
     public function view_file($uid){
+        $id_perusahaan = Session::get('id_perusahaan');
+        $id_kapal = Session::get('id_kapal');
+        $id_karyawan = Session::get('id_karyawan');
+        
         $show = Prosedur::where('uid', $uid)->first();
         if(Session::get('id_kapal')!=0){
             $id_user = Session::get('userid');
@@ -253,8 +259,46 @@ class ProsedurController extends Controller
                     'update_lihat' => date('Y-m-d H:i:s')
                 ]);
             }
-        }
 
+            $cek = DB::table('prosedur as a')
+                ->leftJoin('view_prosedur as b', function($join) use ($id_user) {
+                    $join->on('a.id', '=', 'b.id_prosedur')
+                        ->where('b.id_user', '=', $id_user);
+                })
+                ->select(
+                    'a.kode',
+                    'b.jml_lihat',
+                    'b.jml_download',
+                    'b.update_lihat',
+                    'b.update_download'
+                )
+                ->where('a.status', 'A')
+                ->where('a.id_perusahaan', $id_perusahaan)
+                ->where('b.jml_lihat', NULL)
+                ->orderBy('a.id')
+                ->get();
+            if(empty($cek)){
+                $get = DB::table('notulena as a')
+                        ->leftjoin('daftar_hadir as b', 'b.id_notulen', '=', 'a.id')
+                        ->select('b.*')
+                        ->where('a.id_perusahaan', $id_perusahaan)
+                        ->where('a.id_kapal', $id_kapal)
+                        ->where('a.kode', 'el0301')
+                        ->where('a.status', 'A')
+                        ->first();
+                $hadir = DaftarHadirDetail::where('id_daftar_hadir', $get->id)->where('id_karyawan', $id_karyawan)->first();
+                if(empty($hadir)){
+                    $karyawan = Karyawan::findOrFail($id_karyawan);
+                    $save_hadir = DaftarHadirDetail::insert([
+                        'id_daftar_hadir'   => $get->id,
+                        'id_karyawan'       => $id_karyawan,
+                        'id_jabatan'        => $karyawan->id_jabatan,
+                        'tanggal'           => date('Y-m-d'),
+                        'status'            => 'A'
+                    ]);
+                }
+            }
+        }
         $filename = $show->file;
         $path = public_path('file_prosedur/' . $filename);
         if (!file_exists($path)) {

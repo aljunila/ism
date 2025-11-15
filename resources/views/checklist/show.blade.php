@@ -90,7 +90,7 @@
             }
         ],
          drawCallback: function(settings) {
-            feather.replace(); // supaya icon feather muncul ulang
+            feather.replace(); 
         }
     });
     });

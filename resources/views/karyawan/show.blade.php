@@ -31,20 +31,23 @@
 <!-- AdminLTE App -->
 <script>
     let table;
+    $('#id_kapal').hide();
  
   $(function () {
 	table = $('#table').DataTable({  
         processing: true,
         searchable: true,
-        serverSide: false,
+        serverSide: true,
         ajax:{
             url: "/karyawan/data",
             type: "POST",
             data: function(d){
                 d.id_perusahaan= $('#id_perusahaan').val(),
+                d.kel= $('#kel').val(),
                 d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
+            dataSrc: "data"
         },
         columns: [
             { data: null, 
@@ -91,10 +94,6 @@
         }
     });
   });
-     
-    $('#id_kapal').on('change', function () {
-         table.ajax.reload();
-    });
 
   $(document).on("click", ".delete-btn", function(){
     let id = $(this).data("id");
@@ -180,6 +179,17 @@
     });
   });
 
+    $(document).on('change', '#kel', function() {
+        let kel = $(this).val();
+        if(kel==1){
+            $('#id_kapal').show();
+            table.ajax.reload();
+        } else {
+            $('#id_kapal').hide();
+            table.ajax.reload();
+        }
+    })
+
     $(document).on('change', '#id_perusahaan', function() {
         var perusahaanID = $(this).val();
         if (perusahaanID) {
@@ -199,6 +209,10 @@
             $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
             table.ajax.reload();
         }
+    });
+    
+    $('#id_kapal').on('change', function () {
+         table.ajax.reload();
     });
 
     $(document).on('click', '#download', function() {
@@ -231,9 +245,18 @@
                     @csrf -->
                     <div class="card-header border-bottom">
                         <div class="col-sm-12"><h4 class="card-title">Daftar Karyawan</h4></div>
+                        <div class="col-sm-2">
+                        <select name="kel" id="kel" class="form-control">
+                            <option value="0">Pilih</option>
+                            <option value="1">Laut</option>
+                            <option value="2">Darat</option>
+                        </select>
+                        </div>
                         @include('filter')
+                        <div class="col-sm-3">
                         <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
                         <a href="/karyawan/add" class="btn btn-primary btn-sm"><i data-feather='file-plus'></i> Tambah Data</a>
+                        </div>
                     </div>
                     <!-- </form> -->
                     <div class="card-body">

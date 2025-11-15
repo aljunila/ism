@@ -10,5 +10,5 @@ class Jabatan extends Model
     // use HasFactory;
     public $timestamps = false;
     protected $table = 'jabatan';
-    protected $fillable = ['id', 'uid', 'nama', 'status'];
+    protected $fillable = ['id', 'uid', 'kel', 'nama', 'status'];
 }

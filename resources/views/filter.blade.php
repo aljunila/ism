@@ -8,7 +8,7 @@
     $perusahaan = Perusahaan::get();
     $kapal = Kapal::where('status', 'A')->get();
 @endphp
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <select name="id_perusahaan" id="id_perusahaan" class="form-control perusahaan">
                 <option value="">Pilih Perusahaan</option>
                 @foreach($perusahaan as $p)
@@ -16,7 +16,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <select name="id_kapal" id="id_kapal" class="form-control kapal">
                 <option value="">Pilih Kapal</option>
                 @foreach($kapal as $k)

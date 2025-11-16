@@ -228,6 +228,27 @@ Route::middleware('auth')->group(function () {
     Route::post('checklist/updateitem/{id}', [ChecklistController::class, 'updateitem']);
     Route::post('checklist/deleteitem/{id}', [ChecklistController::class, 'deleteitem']);
     Route::get('get-karyawan/{id_kapal}', [ChecklistController::class, 'getKaryawan']);
+    Route::get('/el0501', [ChecklistController::class, 'el0501'])->name('el0501')->middleware('auth');
+    Route::get('/el0502', [ChecklistController::class, 'el0502'])->name('el0502')->middleware('auth');
+    Route::get('/el0511', [ChecklistController::class, 'el0511'])->name('el0511')->middleware('auth');
+    Route::get('/el0505', [ChecklistController::class, 'el0505'])->name('el0505')->middleware('auth');
+    Route::get('/el0509', [ChecklistController::class, 'el0509'])->name('el0509')->middleware('auth');   
+    Route::get('/checklist/parentadd/{kode}', [ChecklistController::class, 'parentadd' ])->middleware('auth');
+    Route::post('/checklist/parentstore', [ChecklistController::class, 'parentstore'])->name('parentstore');
+    Route::get('/checklist/parentedit/{id}', [ChecklistController::class, 'parentedit'])->middleware('auth');
+    Route::get('/checklist/parentpdf/{id}', [ChecklistController::class, 'parentpdf'])->name('checklist.parentpdf')->middleware('auth');
+    Route::post('/checklist/parentupdate/{id}', [ChecklistController::class, 'parentupdate']);
+    Route::get('/checklist/parentitem/{kode}', [ChecklistController::class, 'parentitem' ])->middleware('auth');
+    Route::get('/el0508', [ChecklistController::class, 'el0508'])->name('el0508')->middleware('auth');
+    Route::get('/checklist/panasadd/{kode}', [ChecklistController::class, 'panasadd' ])->middleware('auth');
+    Route::post('/checklist/panasstore', [ChecklistController::class, 'panasstore'])->name('panasstore');
+    Route::get('/checklist/panasedit/{id}', [ChecklistController::class, 'panasedit'])->middleware('auth');
+    Route::get('/checklist/panaspdf/{id}', [ChecklistController::class, 'panaspdf'])->name('checklist.panaspdf')->middleware('auth');
+    Route::post('/checklist/panasupdate/{id}', [ChecklistController::class, 'panasupdate']);
+    Route::get('/checklist/panasitem/{kode}', [ChecklistController::class, 'panasitem' ])->middleware('auth');
+    Route::post('/checklist/GetPersonil', [ChecklistController::class, 'GetPersonil'])->middleware('auth');
+    Route::post('/checklist/deletepersonil/{id}', [ChecklistController::class, 'deletepersonil']);
+    Route::post('/checklist/store09', [ChecklistController::class, 'store09'])->name('store09');
 
     Route::get('el0301', [NotulenController::class, 'show'])->name('notulen');
     Route::post('notulen/data', [NotulenController::class, 'getData']);
@@ -270,6 +291,35 @@ Route::middleware('auth')->group(function () {
     Route::post('kkm/update/{id}', [GantiKKMController::class, 'update']);
     Route::post('kkm/delete/{id}', [GantiKKMController::class, 'delete']);
     Route::get('kkm/pdf/{id}', [GantiKKMController::class, 'pdf'])->name('kkm.pdf');
+
+    Route::get('/el0504', [BbmController::class, 'el0504'])->name('el0504')->middleware('auth');
+    Route::post('/bbm/data', [BbmController::class, 'getData'])->middleware('auth');
+    Route::get('/bbm/add/{kode}', [BbmController::class, 'add' ])->middleware('auth');
+    Route::post('/bbm/store', [BbmController::class, 'store'])->name('store');
+    Route::get('/bbm/edit/{id}', [BbmController::class, 'edit'])->middleware('auth');
+    Route::post('/bbm/update/{id}', [BbmController::class, 'update']);
+    Route::post('/bbm/delete/{id}', [BbmController::class, 'delete']);
+    Route::get('/bbm/pdf/{id}', [BbmController::class, 'pdf'])->name('bbm.pdf')->middleware('auth');
+
+    Route::get('/el0506', [AlarmController::class, 'el0506'])->name('el0506')->middleware('auth');
+    Route::post('/alarm/data', [AlarmController::class, 'getData'])->middleware('auth');
+    Route::get('/alarm/add/{kode}', [AlarmController::class, 'add' ])->middleware('auth');
+    Route::post('/alarm/store', [AlarmController::class, 'store'])->name('store');
+    Route::get('/alarm/edit/{id}', [AlarmController::class, 'edit'])->middleware('auth');
+    Route::post('/alarm/update/{id}', [AlarmController::class, 'update']);
+    Route::post('/alarm/delete/{id}', [AlarmController::class, 'delete']);
+    Route::get('/alarm/pdf/{id}', [AlarmController::class, 'pdf'])->name('alarm.pdf')->middleware('auth');
+
+    Route::get('/el0512', [ReviewController::class, 'el0512'])->name('el0512')->middleware('auth');
+    Route::post('/review/data', [ReviewController::class, 'getData'])->middleware('auth');
+    Route::get('/review/add/{kode}', [ReviewController::class, 'add' ])->middleware('auth');
+    Route::post('/review/store', [ReviewController::class, 'store'])->name('store');
+    Route::get('/review/edit/{id}', [ReviewController::class, 'edit'])->middleware('auth');
+    Route::post('/review/update/{id}', [ReviewController::class, 'update']);
+    Route::post('/review/delete/{id}', [ReviewController::class, 'delete']);
+    Route::get('/review/pdf/{id}', [ReviewController::class, 'pdf'])->name('review.pdf')->middleware('auth');
+    Route::get('/review/get/{id}', [ReviewController::class, 'get'])->middleware('auth');
+    Route::post('/review/updatedpa/{id}', [ReviewController::class, 'updatedpa']);
 
     Route::prefix('file')->group(function () {
         Route::get('/', [FileController::class, 'show'])->name('file');

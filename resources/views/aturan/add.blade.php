@@ -167,13 +167,13 @@
                             </div>
                         </div>
                         <div class="mb-1 row">
-                                <div class="col-sm-2">
-                                    <label class="col-form-label" for="first-name">Upload File (Format: PDF)</label>
-                                </div>
-                                <div class="col-sm-10">
-                                    <input type="file" class="form-control" id="file" name="file" required>
-                                </div>
+                            <div class="col-sm-2">
+                                <label class="col-form-label" for="first-name">Upload File (Format: PDF)</label>
                             </div>
+                            <div class="col-sm-10">
+                                <input type="file" class="form-control" id="file" name="file" required>
+                            </div>
+                        </div>
                         <div class="col-sm-9 offset-sm-3">
                             <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>
                             <button type="reset" class="btn btn-outline-secondary">Reset</button>

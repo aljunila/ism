@@ -13,8 +13,8 @@
 
         body {
             font-family: aria, sans-serif;
-            font-size: 14px;
-            border: 2px solid #655dd6ff; /* garis tepi hitam */
+            font-size: 16px;
+            border: 4px solid #655dd6ff; /* garis tepi hitam */
             padding: 40px; /* jarak isi dengan garis */
             padding-top: 80px;
             padding-bottom: 80px;
@@ -34,7 +34,7 @@
         .table-bordered {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
             text-align: center;
         }
 
@@ -62,7 +62,7 @@
                 <td colspan="6">{!!$form->intruksi!!}</td>
             </tr>
             <tr style="text-align: left;">
-                <td colspan="6">Unit Kerja/Nama Kapal : {{$show->get_kapal()->nama}}</td>
+                <td colspan="6">Unit Kerja/Nama Kapal : {{$show->kapal}}</td>
             </tr>
             <tr>
                 <td>Tanggal</td>

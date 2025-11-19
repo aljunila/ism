@@ -224,7 +224,7 @@ class KaryawanController extends Controller
     {
         $show = DB::table('karyawan')
                     ->select('karyawan.*', 'user.id as user', 'karyawan.id_perusahaan', 'perusahaan.nama as perusahaan', 
-                        'karyawan.id_kapal', 'kapal.nama as kapal', 'jabatan.nama as jabatan', 'user.username', 'user.id_previllage', 'previllage.nama as previllage')
+                        'karyawan.id_kapal', 'kapal.nama as kapal', 'jabatan.nama as jabatan', 'jabatan.kel', 'user.username', 'user.id_previllage', 'previllage.nama as previllage')
                     ->leftjoin('user', 'user.id_karyawan', '=', 'karyawan.id')
                     ->leftjoin('perusahaan', 'karyawan.id_perusahaan', '=', 'perusahaan.id')
                     ->leftjoin('kapal', 'karyawan.id_kapal', '=', 'kapal.id')
@@ -238,6 +238,11 @@ class KaryawanController extends Controller
                 : asset('ttd_karyawan/no-signature.png');
         }
         $id_karyawan = $show->id;
+        if($show->kel==1) {
+            $type='Crew Laut';
+        } else {
+            $type='Crew Darat';
+        }
         $data['file'] = DB::table('master_file as a')
                 ->leftJoin('file_upload as b', function($join) use ($id_karyawan) {
                     $join->on('a.id', '=', 'b.id_file')
@@ -245,6 +250,7 @@ class KaryawanController extends Controller
                 })
                 ->where('a.type', 'S')
                 ->where('a.status', 'A')
+                ->where('a.ket', $type)
                 ->select('a.*', 'b.file')
                 ->get();
         $data['show'] = $show;
@@ -305,7 +311,7 @@ class KaryawanController extends Controller
     public function savefile(Request $request, $id)
     {
         $request->validate([
-            'file' => 'nullable|file|mimes:pdf|max:20480',
+            'file' => 'nullable|file|mimes:pdf|max:80480',
         ]);
 
         $cek = FileUpload::where('id_file', $id)->where('id_karyawan', $request->input('id_karyawan'))->first();

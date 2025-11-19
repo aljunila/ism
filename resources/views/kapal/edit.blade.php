@@ -25,8 +25,6 @@
             e.preventDefault(); // cegah submit biasa
             let id = {{$show->id}};
             let formData = new FormData(this);
-
-            console.log(id);
             
             $.ajax({
                 url: '/kapal/update/'+id,

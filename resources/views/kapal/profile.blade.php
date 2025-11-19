@@ -294,13 +294,18 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h5 class="fw-bolder border-bottom pb-50 mb-1">Berkas Penunjang</h5>
+                    <h5 class="fw-bolder border-bottom pb-50 mb-1">Ship Documents</h5>
                         <div class="table-responsive">
-                            <table class="table" width="100%">
+                            <table class="table table-bordered" width="100%">
+                                <tr>
+                                    <td width="50%">Nama File</td>
+                                    <td width="25%">Kelompok</td>
+                                    <td width="25%">Aksi</td>
+                                </tr>
                                 @foreach($file as $f)
                                 <tr>
-                                    <td width="70%">{{$f->nama}}</td>
-                                    <td width="5%">:</td>
+                                    <td width="50%">{{$f->nama}}</td>
+                                    <td width="25%">{{$f->ket}}</td>
                                     <td width="25%">
                                             <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
                                                 title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">

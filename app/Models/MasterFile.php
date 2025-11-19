@@ -8,5 +8,5 @@ class MasterFile extends Model
 {
     public $timestamps = false;
     protected $table = 'master_file';
-    protected $fillable = ['id', 'type', 'nama', 'status'];
+    protected $fillable = ['id', 'type', 'nama', 'ket', 'status'];
 }

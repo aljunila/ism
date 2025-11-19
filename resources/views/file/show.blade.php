@@ -32,6 +32,9 @@
 <script>
 let table;
  $(function () {
+    $('#karyawan').hide();
+    $('#kapal').hide();
+
     table = $("#table").DataTable({
         processing: true,
         serverSide: false, // kalau data sedikit cukup false, kalau ribuan bisa true
@@ -58,6 +61,7 @@ let table;
                 }
              },
             { data: 'nama' },
+            { data: 'ket' },
             { 
                 data: 'id',
                 render: function(data, type, row){
@@ -83,6 +87,8 @@ let table;
 $('#tambah_data').click(function(){
     let nama = $('#nama').val();
     let type = $('#type').val();
+    let kapal = $('#kapal').val();
+    let karyawan = $('#karyawan').val();
 
      $.ajax({
         url: "{{ url('/file/store') }}",
@@ -90,6 +96,8 @@ $('#tambah_data').click(function(){
         data: {
             nama: nama,
             type: type,
+            kapal: kapal,
+            karyawan: karyawan,
             _token: "{{ csrf_token() }}"
         },
         success: function(response) {
@@ -130,13 +138,20 @@ $(document).on('click', '.edit-btn', function(){
          console.log(data);
         $('#id_file').val(data.id);
         $('#nama_file').val(data.nama);
+        $('#tipe').val(data.type);
         let file = data.type; // atau ambil dari input
         if (file === 'S') {
             $('#file').html('Karyawan');
-        } else if (file === 'P') {
-            $('#file').html('Perusahaan');
-        } else {
+            $('.karyawan').show();
+            $('.kapal').hide();
+        } else if (file === 'K') {
             $('#file').html('Kapal');
+            $('.kapal').show();
+            $('.karyawan').hide();
+        } else {
+            $('#file').html('Perusahaan');
+            $('.karyawan').hide();
+            $('.kapal').hide();
         }
         $('#FormEdit').modal('show');
       }
@@ -146,6 +161,10 @@ $(document).on('click', '.edit-btn', function(){
 $(document).on('click', '#edit_data', function(){
     let nama_file = $('#nama_file').val()
     let id = $('#id_file').val()
+    let type = $('#tipe').val();
+    let kapal = $('#ket_kapal').val();
+    let karyawan = $('#ket_karyawan').val();
+
     if (!nama_file.trim()) {
         Swal.fire({
             icon: "warning",
@@ -160,6 +179,9 @@ $(document).on('click', '#edit_data', function(){
         data: {
             nama: nama_file,
             id: id,
+            type: type,
+            kapal: kapal,
+            karyawan: karyawan,
             _token: "{{ csrf_token() }}"
         },
         success: function(response) {
@@ -232,6 +254,20 @@ $(document).on("click", ".delete-btn", function(){
 $('#kode').on('change', function(){
     table.ajax.reload();
 });
+
+$(document).on('change', '#type', function() {
+    let type = $(this).val();
+    if(type=='K'){
+        $('.kapal').show();
+        $('.karyawan').hide();
+    } else if(type=='S') {
+        $('.kapal').hide();
+        $('.karyawan').show();
+    } else {
+        $('.karyawan').hide();
+        $('.kapal').hide();
+    }
+})
 </script>
 @endsection
 @section('content')
@@ -255,10 +291,11 @@ $('#kode').on('change', function(){
                     <table id="table" class="table table-bordered table-striped" width="100%">
                       <thead>
                         <tr>
-                          <th width="10%">No.</th>
+                          <th width="5%">No.</th>
                           <th width="25%">File</th>
-                          <th width="45%">Nama File</th>
-                          <th width="20%">Aksi</th>
+                          <th width="30%">Nama File</th>
+                          <th width="25%">Keterangan</th>
+                          <th width="15%">Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -280,6 +317,18 @@ $('#kode').on('change', function(){
                     <div class="mb-1">
                         <p id="file"></p>
                     </div>
+                    <div class="mb-1">
+                        <select name="ket" id="ket_kapal" class="kapal form-control" required>
+                            <option value="Perhubungan Laut">Perhubungan Laut</option>
+                            <option value="BKI">BKI</option>
+                        </select>
+                    </div>
+                    <div class="mb-1">
+                        <select name="ket" id="ket_karyawan" class="karyawan form-control" required>
+                            <option value="Crew Laut">Crew Laut</option>
+                            <option value="Crew Darat">Crew Darat</option>
+                        </select>
+                    </div>
                     <label>Nama File</label>
                     <div class="mb-1">
                         <input type="text" placeholder="Nama" class="form-control" name="nama" id="nama_file"/>
@@ -287,6 +336,7 @@ $('#kode').on('change', function(){
             </div>
             <div class="modal-footer">
                 <input type="hidden" name="id_file" id="id_file">
+                <input type="hidden" placeholder="Nama" class="form-control" name="tipe" id="tipe"/>
                 <button type="submit" class="btn btn-primary" id="edit_data">Simpan</button>
             </div>
         </div>
@@ -307,6 +357,18 @@ $('#kode').on('change', function(){
                             <option value="P">Perusahaan</option>
                             <option value="K">Kapal</option>
                             <option value="S">Karyawan</option>
+                        </select>
+                    </div>
+                    <div class="mb-1">
+                        <select name="ket" id="kapal" class="kapal form-control" required>
+                            <option value="Perhubungan Laut">Perhubungan Laut</option>
+                            <option value="BKI">BKI</option>
+                        </select>
+                    </div>
+                    <div class="mb-1">
+                        <select name="ket" id="karyawan" class="karyawan form-control" required>
+                            <option value="Crew Laut">Crew Laut</option>
+                            <option value="Crew Darat">Crew Darat</option>
                         </select>
                     </div>
                     <label>Nama File </label>

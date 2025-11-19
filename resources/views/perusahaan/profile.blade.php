@@ -138,7 +138,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h5 class="fw-bolder border-bottom pb-50 mb-1">Berkas Penunjang</h5>
+                    <h5 class="fw-bolder border-bottom pb-50 mb-1">Companies Documents</h5>
                         <div class="table-responsive">
                             <table class="table" width="100%">
                                 @foreach($file as $f)

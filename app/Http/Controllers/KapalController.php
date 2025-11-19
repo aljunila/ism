@@ -176,6 +176,7 @@ class KapalController extends Controller
                 ->where('a.type', 'K')
                 ->where('a.status', 'A')
                 ->select('a.*', 'b.file')
+                ->orderBy('a.ket', 'ASC')
                 ->get();
         return view('kapal.profile',$data);
     }

@@ -133,9 +133,14 @@ class DaftarHadirController extends Controller
     }
 
     public function hadirPdf($uid) {
-        $show = DaftarHadir::where('uid', $uid)->first();
+        $show = DB::table('daftar_hadir as a')
+                ->leftJoin('notulen as b', 'a.id_notulen', '=', 'b.id')
+                ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
+                ->select('a.*', 'c.nama as kapal')
+                ->where('a.uid', $uid)
+                ->get();
         $data['show'] = $show;
-        $data['form'] = KodeForm::where('kode', $show->kode)->first();
+        $data['form'] = KodeForm::where('kode', 'el0306')->first();
         $data['detail'] = DaftarHadirDetail::where('id_daftar_hadir', $show->id)->where('status', 'A')->get();
         $pdf = Pdf::loadView('hadir.pdf', $data)
                 ->setPaper('a3', 'portrait');

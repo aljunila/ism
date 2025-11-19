@@ -21,7 +21,7 @@ class FileController extends Controller
     {
         $kode = $request->input('kode');
 
-        $daftar = MasterFile::select('id', 'type', 'nama')->where('status','A')
+        $daftar = MasterFile::select('id', 'type', 'nama', 'ket')->where('status','A')
                 ->when($kode, function($query, $kode) {
                     return $query->where('type', $kode);
                 })
@@ -42,9 +42,19 @@ class FileController extends Controller
     {
         $created = Session::get('username');
         $date = date('Y-m-d H:i:s');
+
+        if($request->input('type')=='K') {
+            $ket = $request->input('kapal');
+        } elseif($request->input('type')=='S') {
+            $ket = $request->input('karyawan');
+        } else{
+            $ket = '';
+        }
+
         $save = MasterFile::create([
           'type' => $request->input('type'),
           'nama' => $request->input('nama'),
+          'ket' => $ket,
           'status' => 'A',
           ]);
         if($save) {
@@ -64,7 +74,14 @@ class FileController extends Controller
     public function update(Request $request, $id)
     {
       $nama = $request->input('nama');
-      $post = MasterFile::where('id',$id)->update(['nama'=>$nama]);     
+       if($request->input('type')=='K') {
+            $ket = $request->input('kapal');
+        } elseif($request->input('type')=='S') {
+            $ket = $request->input('karyawan');
+        } else{
+            $ket = '';
+        }
+      $post = MasterFile::where('id',$id)->update(['nama'=>$nama, 'ket'=>$ket]);     
       return response()->json(['success' => true]);
     }
 

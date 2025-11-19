@@ -177,18 +177,6 @@ Route::middleware('auth')->group(function () {
     Route::get('el0103', [RefrensiDocController::class, 'el0103'])->name('el0103');
     Route::get('el0104', [RefrensiDocController::class, 'el0104'])->name('el0104');
 
-    Route::get('elemen2', [AturanController::class, 'show'])->name('aturan');
-    Route::prefix('aturan')->group(function () {
-        Route::post('data', [AturanController::class, 'getData']);
-        Route::get('add', [AturanController::class, 'add']);
-        Route::post('store', [AturanController::class, 'store']);
-        Route::get('edit/{id}', [AturanController::class, 'edit']);
-        Route::post('update/{id}', [AturanController::class, 'update']);
-        Route::post('delete/{id}', [AturanController::class, 'delete']);
-        Route::get('pdf/{id}', [AturanController::class, 'aturanPdf'])->name('aturan.pdf');
-    });
-    Route::get('get-karyawanbyCom/{id_kapal}', [AturanController::class, 'getKaryawan']);
-
     // Purchasing
     Route::prefix('purchas')->group(function(){
         Route::get('/', [PurchasingController::class, 'index']);
@@ -228,10 +216,12 @@ Route::middleware('auth')->group(function () {
     Route::post('checklist/updateitem/{id}', [ChecklistController::class, 'updateitem']);
     Route::post('checklist/deleteitem/{id}', [ChecklistController::class, 'deleteitem']);
     Route::get('get-karyawan/{id_kapal}', [ChecklistController::class, 'getKaryawan']);
+
     Route::get('/el0501', [ChecklistController::class, 'el0501'])->name('el0501')->middleware('auth');
     Route::get('/el0502', [ChecklistController::class, 'el0502'])->name('el0502')->middleware('auth');
     Route::get('/el0511', [ChecklistController::class, 'el0511'])->name('el0511')->middleware('auth');
     Route::get('/el0505', [ChecklistController::class, 'el0505'])->name('el0505')->middleware('auth');
+    Route::get('/el0508', [ChecklistController::class, 'el0508'])->name('el0508')->middleware('auth');
     Route::get('/el0509', [ChecklistController::class, 'el0509'])->name('el0509')->middleware('auth');   
     Route::get('/checklist/parentadd/{kode}', [ChecklistController::class, 'parentadd' ])->middleware('auth');
     Route::post('/checklist/parentstore', [ChecklistController::class, 'parentstore'])->name('parentstore');
@@ -239,7 +229,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/checklist/parentpdf/{id}', [ChecklistController::class, 'parentpdf'])->name('checklist.parentpdf')->middleware('auth');
     Route::post('/checklist/parentupdate/{id}', [ChecklistController::class, 'parentupdate']);
     Route::get('/checklist/parentitem/{kode}', [ChecklistController::class, 'parentitem' ])->middleware('auth');
-    Route::get('/el0508', [ChecklistController::class, 'el0508'])->name('el0508')->middleware('auth');
     Route::get('/checklist/panasadd/{kode}', [ChecklistController::class, 'panasadd' ])->middleware('auth');
     Route::post('/checklist/panasstore', [ChecklistController::class, 'panasstore'])->name('panasstore');
     Route::get('/checklist/panasedit/{id}', [ChecklistController::class, 'panasedit'])->middleware('auth');
@@ -251,6 +240,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/checklist/store09', [ChecklistController::class, 'store09'])->name('store09');
 
     Route::get('el0301', [NotulenController::class, 'show'])->name('notulen');
+    Route::get('el0404', [NotulenController::class, 'el0404'])->name('el0404');
+    Route::get('el0402', [NotulenController::class, 'el0402'])->name('el0402');
+    Route::get('el0403', [NotulenController::class, 'el0403'])->name('el0403');
+    Route::get('el0401', [NotulenController::class, 'el0401'])->name('el0401');
     Route::post('notulen/data', [NotulenController::class, 'getData']);
     Route::get('notulen/add', [NotulenController::class, 'add']);
     Route::post('notulen/store', [NotulenController::class, 'store']);
@@ -258,9 +251,6 @@ Route::middleware('auth')->group(function () {
     Route::post('notulen/update/{id}', [NotulenController::class, 'update']);
     Route::post('notulen/delete/{id}', [NotulenController::class, 'delete']);
     Route::get('notulen/pdf/{id}', [NotulenController::class, 'notulenPdf'])->name('notulen.pdf');
-    Route::get('el0404', [NotulenController::class, 'el0404'])->name('el0404');
-    Route::get('el0402', [NotulenController::class, 'el0402'])->name('el0402');
-    Route::get('el0403', [NotulenController::class, 'el0403'])->name('el0403');
     Route::post('notulen/GetAgenda', [NotulenController::class, 'GetAgenda']);
     Route::post('notulen/data4', [NotulenController::class, 'getData4']);
     Route::get('notulen/add4/{kode}', [NotulenController::class, 'add4']);
@@ -271,6 +261,8 @@ Route::middleware('auth')->group(function () {
     Route::get('el0405', [NotulenController::class, 'el0405'])->name('el0405');
     Route::post('notulen/gethadir', [NotulenController::class, 'gethadir']);
     Route::get('notulen/pdfhadir/{id}', [NotulenController::class, 'Pdfhadir'])->name('notulen.pdfhadir');
+    Route::post('notulen/data41', [NotulenController::class, 'getData41']);
+    Route::get('/notulen/pdf41/{id_perusahaan}/{tahun}', [NotulenController::class, 'pdf41']);
 
     Route::get('el0306', [DaftarHadirController::class, 'el0306'])->name('el0306');
     Route::post('hadir/data', [DaftarHadirController::class, 'getData']);
@@ -329,5 +321,22 @@ Route::middleware('auth')->group(function () {
         Route::get('edit/{id}', [FileController::class, 'edit']);
         Route::post('update/{id}', [FileController::class, 'update']);
         Route::post('delete/{id}', [FileController::class, 'delete']);
+    });
+
+    Route::prefix('prosedur')->group(function () {
+        Route::get('/', [ProsedurController::class, 'show'])->name('prosedur');
+        Route::post('data', [ProsedurController::class, 'getData']);
+        Route::get('add', [ProsedurController::class, 'add']);
+        Route::post('store', [ProsedurController::class, 'store']);
+        Route::get('edit/{id}', [ProsedurController::class, 'edit']);
+        Route::post('update/{id}', [ProsedurController::class, 'update']);
+        Route::post('delete/{id}', [ProsedurController::class, 'delete']);
+        Route::get('pdf/{id}', [ProsedurController::class, 'prosedurPdf'])->name('prosedur.pdf');
+        Route::get('pdfdownload/{id}', [ProsedurController::class, 'pdfdownload'])->name('prosedur.pdf');
+        Route::get('view', [ProsedurController::class, 'view'])->name('view');
+        Route::post('viewuser', [ProsedurController::class, 'viewuser']);
+        Route::post('viewdetail', [ProsedurController::class, 'viewdetail']);       
+        Route::get('view-file/{uid}', [ProsedurController::class, 'view_file'])->name('view_file');
+        Route::get('download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file');
     });
 });

@@ -9,8 +9,8 @@
 
         body {
             font-family: arial, sans-serif;
-            font-size: 12px;
-            border: 2px solid #655dd6ff; /* garis tepi hitam */
+            font-size: 16px;
+            border: 4px solid #655dd6ff; /* garis tepi hitam */
             padding: 40px; /* jarak isi dengan garis */
             padding-top: 80px;
             padding-bottom: 80px;
@@ -30,7 +30,7 @@
         .table-bordered {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 16px;
             text-align: center;
         }
 

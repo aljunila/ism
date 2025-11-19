@@ -191,6 +191,13 @@ class NotulenController extends Controller
         return $pdf->stream('EL-03-01 '.$show->tanggal.'.pdf');
     }
 
+    public function el0401()
+    {
+        $data['active'] = "el0401";
+        $data['form'] = KodeForm::where('kode', 'el0401')->first();
+        return view('notulen.show41', $data);
+    }
+
     public function el0402()
     {
         $data['active'] = "el0402";
@@ -232,6 +239,29 @@ class NotulenController extends Controller
                 ->orderBy('a.id', 'DESC')
                 ->get();
         return response()->json(['data' => $get]);
+    }
+
+    public function getData41(Request $request) {
+        $kode = $request->input('kode');
+        $perusahaan = $request->input('id_perusahaan');
+
+        $data = DB::table('notulen as a')
+        ->leftJoin('perusahaan as b', 'a.id_perusahaan', '=', 'b.id')
+        ->select(
+            'a.id_perusahaan',
+            'b.nama as perusahaan',
+            DB::raw('YEAR(a.tanggal) as tahun')
+        )
+        ->where('a.kode', 'like', 'el04%')
+        ->where('a.status', 'A')
+        ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('a.id_perusahaan', $perusahaan);
+                })
+        ->distinct()
+        ->orderBy('tahun', 'DESC')
+        ->get();
+
+        return response()->json(['data' => $data]);
     }
 
     public function add4($kode) 
@@ -318,6 +348,61 @@ class NotulenController extends Controller
         return $pdf->stream($data['form']->ket.' '.$show->tanggal.'.pdf');
     }
 
+    public function pdf41($idp, $tahun) {
+        $show = Perusahaan::where('id', $idp)->first();
+        $data['show'] = $show;
+        $data['tahun'] = $tahun;
+        $el0402 = DB::table('notulen as a')
+                ->select('a.*', DB::raw("DATE_FORMAT(a.tanggal, '%m') as bulan"))
+                ->where('a.kode', 'el0402')
+                ->where('a.status', 'A')
+                ->whereYear('a.tanggal', $tahun)
+                ->where('a.id_perusahaan', $idp)
+                ->get();
+        $get42 = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $get42[str_pad($i, 2, '0', STR_PAD_LEFT)] = collect();
+        }
+
+        foreach ($el0402 as $el42) {
+            $tanggal = "$tahun-$el42->bulan%";
+            $get42[$el42->bulan] = Notulen::where('kode', 'el0402')
+                ->where('status', 'A')
+                ->where('id_perusahaan', $idp)
+                ->where('tanggal', 'like', $tanggal)
+                ->get();
+        }
+        $data['el0402'] = $el0402;
+        $data['get42'] = $get42;
+
+        $el0403 = DB::table('notulen as a')
+                ->select('a.*', DB::raw("DATE_FORMAT(a.tanggal, '%m') as bulan"))
+                ->where('a.kode', 'el0403')
+                ->where('a.status', 'A')
+                ->whereYear('a.tanggal', $tahun)
+                ->where('a.id_perusahaan', $idp)
+                ->get();
+       $get43 = [];
+        for ($a = 1; $a <= 12; $a++) {
+            $get43[str_pad($a, 2, '0', STR_PAD_LEFT)] = collect();
+        }
+
+        foreach ($el0403 as $el43) {
+            $tanggal = "$tahun-$el43->bulan%";
+            $get43[$el43->bulan] = Notulen::where('kode', 'el0403')
+                ->where('status', 'A')
+                ->where('id_perusahaan', $idp)
+                ->where('tanggal', 'like', $tanggal)
+                ->get();
+        }
+        $data['el0403'] = $el0403;
+        $data['get43'] = $get43;
+        $pdf = Pdf::loadView('notulen.pdf41', $data)
+                ->setPaper('a3', 'landscape');
+
+        return $pdf->stream('EL-04-01 '.$show->nama.'.pdf');
+    }
+
     public function hadir($uid)
     {
         $show = Notulen::where('uid', $uid)->first();
@@ -337,7 +422,7 @@ class NotulenController extends Controller
         return view('notulen.hadir',$data);
     }
 
-     public function el0405()
+    public function el0405()
     {
         $data['active'] = "el0405";
         $data['form'] = KodeForm::where('kode', 'el0405')->first();

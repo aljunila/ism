@@ -38,7 +38,7 @@
             let formData = new FormData(this);
 
             $.ajax({
-                url: "{{ url('/checklist/parentstore') }}",
+                url: "{{ url('/interview/store') }}",
                 method: "POST",
                 data: formData,
                 processData: false,
@@ -68,19 +68,6 @@
             var perusahaanID = $(this).val();
             if (perusahaanID) {
                 $.ajax({
-                    url: '/get-kapal/' + perusahaanID,
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        $('#id_kapal').empty().append('<option value="">Semua</option>');           
-                        $.each(data, function(key, value) {
-                            $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
-                        });
-                        table.ajax.reload();
-                    }
-                });
-
-                $.ajax({
                     url: '/get-karyawanbyCom/' + perusahaanID,
                     type: "GET",
                     dataType: "json",
@@ -93,7 +80,6 @@
                     }
                 });
             } else {
-                $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
                  $('.karyawan').empty().append('<option value="">Tidak ada data</option>');
             }
         });
@@ -107,7 +93,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Input Form: {{$form->nama}}</h4>
-                    <a href="/checklist/parentitem/{{$form->kode}}" class="btn btn-danger btn-sm">Setting Form</a>
+                    <a href="/checklist/item/{{$form->kode}}" class="btn btn-danger btn-sm">Setting Form</a>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -145,44 +131,30 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Nama Kapal</label>
+                                        <label class="col-form-label" for="first-name">Nama</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_kapal" id="id_kapal"  class="form-control" required>
-                                        @foreach($kapal as $kp)
-                                            <option value="{{$kp->id}}">{{$kp->nama}}</option>
+                                        <input type="text" class="form-control" id="nama" name="nama" required>
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Jabatan</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <select name="id_jabatan" id="id_jabatan" class="form-control" required>
+                                        @foreach($jabatan as $j)
+                                            <option value="{{$j->id}}">{{$j->nama}}</option>
                                         @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Tanggal</label>
+                                        <label class="col-form-label" for="first-name">Tgl Periksa</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <input type="date" class="form-control" id="date" name="date" required>
-                                    </div>
-                                </div>
-                                <div class="mb-1 row">
-                                    <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Kegiatan Bulan</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <select class="form-control" name="keterangan">
-                                            <option value="">Pilih</option>
-                                            <option value="Januari">Januari</option>
-                                            <option value="Februari">Februari</option>
-                                            <option value="Maret">Maret</option>
-                                            <option value="April">April</option>
-                                            <option value="Mei">Mei</option>
-                                            <option value="Juni">Juni</option>
-                                            <option value="Juli">Juli</option>
-                                            <option value="Agustus">Agustus</option>
-                                            <option value="September">September</option>
-                                            <option value="Oktober">Oktober</option>
-                                            <option value="November">November</option>
-                                            <option value="Desember">Desember</option>
-                                        </select>
+                                        <input type="date" class="form-control" id="tgl_periksa" name="tgl_periksa" required>
                                     </div>
                                 </div>
                                 <div class="mb-1 row">
@@ -193,67 +165,37 @@
                                         <table class="table table-bordered table-striped" border="1">
                                             <tr>
                                                 <td>No</td>
-                                                <td>Materi</td>
+                                                <td>Pertanyaan</td>
                                                 <td>Ya</td>
                                                 <td>Tidak</td>
+                                                <td>Catatan</td>
                                             </tr>
                                             @foreach($item as $ck)
-                                            @php
-                                                $detail = $child[$ck->id] ?? [];
-                                            @endphp
-                                            <tr>
-                                                <td></td>
-                                                <td colspan="3">{!!$ck->item!!} </td>
-                                            </tr>
-                                             @foreach($detail as $c)
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
-                                                <td>{!!$c->item!!}</td>
+                                                <td>{!!$ck->item!!}</td>
                                                 <td><input type="radio" class="form-check-input" name="item[{{$ck->id}}]" value="1"></td>
                                                 <td><input type="radio" class="form-check-input" name="item[{{$ck->id}}]" value="0"></td>
-                                            </tr>
-                                            @endforeach
-                                            <tr>
-                                                <td></td>
-                                                <td>Catatan kelainan pada pengukuran maupun observasi sbb 
-                                                    <input type="hidden" class="form-control" name="item[{{$ck->id}}]" value="0"></td>
-                                                <td colspan="2"><textarea name="ket[{{$ck->id}}]" class="form-control"></textarea></td>
+                                                <td><input type="text" class="form-control" name="ket[{{$ck->id}}]"></td>
                                             </tr>
                                             @endforeach
                                         </table>
                                     </div>
                                 </div>
-                                
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Mengetahui</label>
+                                        <label class="col-form-label" for="first-name">Catatan</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_mengetahui" id="id_mengetahui"  class="form-control karyawan" required>
-                                        @foreach($karyawan as $k)
-                                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                                        @endforeach
-                                        </select>
+                                        <textarea name="note" id="note" class="form-control"></textarea>
                                     </div>
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Diperiksa Oleh</label>
+                                        <label class="col-form-label" for="first-name">Yang Menyetujui</label>
                                     </div>
                                     <div class="col-sm-9">
-                                        <select name="id_mentor" id="id_mentor"  class="form-control karyawan" required>
-                                        @foreach($karyawan as $k)
-                                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                                        @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-1 row">
-                                    <div class="col-sm-3">
-                                        <label class="col-form-label" for="first-name">Pemeriksa</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <select name="id_karyawan" id="id_karyawan"  class="form-control karyawan" required>
+                                        <select name="id_menyetujui" id="id_menyetujui"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
                                             <option value="{{$k->id}}">{{$k->nama}}</option>
                                         @endforeach

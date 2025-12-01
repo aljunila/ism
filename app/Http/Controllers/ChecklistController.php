@@ -637,6 +637,12 @@ class ChecklistController extends Controller
         }
         $data['checklist'] = ChecklistItem::where('kode', $kode)->where('status', 'A')->where('parent_id',0)->get();
         $data['active'] = $kode;
+        $item = ChecklistItem::where('kode', $kode)->where('status', 'A')->where('parent_id',0)->get();
+        foreach ($item as $ck) {
+            $get[$ck->id] = ChecklistItem::where('kode', $kode)->where('status', 'A')->where('parent_id',$ck->id)->get();
+        }
+        $data['item'] = $item;
+        $data['child'] = $get;
         return view('checklist.parentadd',$data);
     }
 

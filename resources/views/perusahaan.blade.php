@@ -8,7 +8,7 @@
     $perusahaan = Perusahaan::get();
 @endphp
         <div class="col-sm-4">
-            <select name="id_perusahaan" id="id_perusahaan" class="form-control">
+            <select name="id_perusahaan" id="id_perusahaan" class="form-control perusahaan">
                 <option value="">Semua</option>
                 @foreach($perusahaan as $p)
                     <option value="{{$p->id}}">{{$p->nama}}</option>

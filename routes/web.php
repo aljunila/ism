@@ -22,6 +22,11 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\BbmController;
 use App\Http\Controllers\AlarmController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\EvaluasiController;
+use App\Http\Controllers\PelatihanController;
+use App\Http\Controllers\MutasiController;
+use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\KonditeController;
 use App\Http\Controllers\Purchasing\PurchasingController;
 
 Route::get('/', function () {
@@ -239,6 +244,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/checklist/deletepersonil/{id}', [ChecklistController::class, 'deletepersonil']);
     Route::post('/checklist/store09', [ChecklistController::class, 'store09'])->name('store09');
 
+    Route::get('el0604', [EvaluasiController::class, 'el0604'])->name('el0604');
+    Route::get('el0605', [EvaluasiController::class, 'el0605'])->name('el0605');
+    Route::post('evaluasi/data', [EvaluasiController::class, 'getData']);
+    Route::get('/evaluasi/add/{kode}', [EvaluasiController::class, 'add' ])->middleware('auth');
+    Route::post('/evaluasi/store', [EvaluasiController::class, 'store'])->name('store');
+    Route::get('/evaluasi/edit/{id}', [EvaluasiController::class, 'edit'])->middleware('auth');
+    Route::post('/evaluasi/update/{id}', [EvaluasiController::class, 'update']);
+    Route::post('/evaluasi/delete/{id}', [EvaluasiController::class, 'delete']);
+    Route::get('/evaluasi/pdf/{id}', [EvaluasiController::class, 'pdf'])->name('evaluasi.pdf')->middleware('auth');
+
     Route::get('el0301', [NotulenController::class, 'show'])->name('notulen');
     Route::get('el0404', [NotulenController::class, 'el0404'])->name('el0404');
     Route::get('el0402', [NotulenController::class, 'el0402'])->name('el0402');
@@ -312,6 +327,46 @@ Route::middleware('auth')->group(function () {
     Route::get('/review/pdf/{id}', [ReviewController::class, 'pdf'])->name('review.pdf')->middleware('auth');
     Route::get('/review/get/{id}', [ReviewController::class, 'get'])->middleware('auth');
     Route::post('/review/updatedpa/{id}', [ReviewController::class, 'updatedpa']);
+
+    Route::get('/el0602', [PelatihanController::class, 'el0602'])->name('el0602')->middleware('auth');
+    Route::get('/el0603', [PelatihanController::class, 'el0603'])->name('el0603')->middleware('auth');
+    Route::post('/pelatihan/data', [PelatihanController::class, 'getData'])->middleware('auth');
+    Route::post('/pelatihan/store', [PelatihanController::class, 'store'])->name('store');
+    Route::get('/pelatihan/edit/{id}', [PelatihanController::class, 'edit'])->middleware('auth');
+    Route::post('/pelatihan/update/{id}', [PelatihanController::class, 'update']);
+    Route::post('/pelatihan/delete/{id}', [PelatihanController::class, 'delete']);
+    Route::get('/pelatihan/pdf', [PelatihanController::class, 'pdf'])->name('pelatihan.pdf')->middleware('auth');
+    Route::post('get-karyawanbyJab', [PelatihanController::class, 'getKaryawan']);
+
+    Route::get('/el0610', [MutasiController::class, 'el0610'])->name('el0610')->middleware('auth');
+    Route::post('/mutasi/data', [MutasiController::class, 'getData'])->middleware('auth');
+    Route::post('/mutasi/store', [MutasiController::class, 'store'])->name('store');
+    Route::get('/mutasi/edit/{id}', [MutasiController::class, 'edit'])->middleware('auth');
+    Route::post('/mutasi/update/{id}', [MutasiController::class, 'update']);
+    Route::post('/mutasi/delete/{id}', [MutasiController::class, 'delete']);
+    Route::get('/mutasi/pdf', [MutasiController::class, 'pdf'])->name('mutasi.pdf')->middleware('auth');
+
+    Route::get('/el0607', [InterviewController::class, 'el0607'])->name('el0607')->middleware('auth');
+    Route::post('/interview/data', [InterviewController::class, 'getData'])->middleware('auth');
+    Route::get('/interview/add/{kode}', [InterviewController::class, 'add' ])->middleware('auth');
+    Route::post('/interview/store', [InterviewController::class, 'store'])->name('store');
+    Route::get('/interview/edit/{id}', [InterviewController::class, 'edit'])->middleware('auth');
+    Route::post('/interview/update/{id}', [InterviewController::class, 'update']);
+    Route::post('/interview/delete/{id}', [InterviewController::class, 'delete']);
+    Route::get('/interview/pdf/{id}', [InterviewController::class, 'pdf'])->name('interview.pdf')->middleware('auth');
+
+    Route::get('/el0608', [KonditeController::class, 'el0608'])->name('el0608')->middleware('auth');
+    Route::post('/kondite/data', [KonditeController::class, 'getData'])->middleware('auth');
+    Route::post('/kondite/store', [KonditeController::class, 'store'])->name('store');
+    Route::get('/kondite/edit/{id}', [KonditeController::class, 'edit'])->middleware('auth');
+    Route::post('/kondite/update/{id}', [KonditeController::class, 'update']);
+    Route::post('/kondite/delete/{id}', [KonditeController::class, 'delete']);
+    Route::get('/kondite/pdf/{id}', [KonditeController::class, 'pdf'])->name('kondite.pdf')->middleware('auth');
+    Route::get('/kondite/detail/{uid}', [KonditeController::class, 'detail'])->middleware('auth');
+    Route::post('/kondite/datadetail', [KonditeController::class, 'getDetail'])->middleware('auth');
+    Route::post('/kondite/getChecklist', [KonditeController::class, 'getChecklist'])->middleware('auth');
+    Route::post('/kondite/getKondite', [KonditeController::class, 'getKondite'])->middleware('auth');
+    Route::post('/kondite/saveform', [KonditeController::class, 'saveform'])->name('saveform');
 
     Route::prefix('file')->group(function () {
         Route::get('/', [FileController::class, 'show'])->name('file');

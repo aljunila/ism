@@ -16,6 +16,7 @@ use Session;
 \Carbon\Carbon::setLocale('id');
 use Str;
 use DB;
+use App\Support\RoleContext;
 
 class EvaluasiController extends Controller
 {
@@ -37,6 +38,7 @@ class EvaluasiController extends Controller
     {
         $perusahaan = $request->input('id_perusahaan');
         $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+        $ctx = RoleContext::get();
        
         $kodeInput = $request->input('kode');
         $kode = match($kodeInput) {
@@ -53,12 +55,10 @@ class EvaluasiController extends Controller
                 ->select('checklist_data.*', 'karyawan.nama as nama', 'jabatan.nama as jabatan', 'kapal.nama as kapal', 'evaluasi.uid as evaluasi')
                 ->where('checklist_data.kode', $kode)
                 ->where('checklist_data.status','A')
-                ->when($perusahaan, function($query, $perusahaan) {
-                    return $query->where('checklist_data.id_perusahaan', $perusahaan);
-                })
-                ->when($kapal, function($query, $kapal) {
-                    return $query->where('checklist_data.id_kapal', $kapal);
-                })
+                ->when($perusahaan, fn($query, $perusahaan) => $query->where('checklist_data.id_perusahaan', $perusahaan))
+                ->when($kapal, fn($query, $kapal) => $query->where('checklist_data.id_kapal', $kapal))
+                ->when($ctx['jenis'] == 2 && $ctx['perusahaan_id'], fn($q) => $q->where('checklist_data.id_perusahaan', $ctx['perusahaan_id']))
+                ->when($ctx['jenis'] == 3 && $ctx['kapal_id'], fn($q) => $q->where('checklist_data.id_kapal', $ctx['kapal_id']))
                 ->orderBy('checklist_data.id', 'DESC')
                 ->get();
 
@@ -83,17 +83,18 @@ class EvaluasiController extends Controller
             default  => $kodeInput,
         };
         $data['form'] = KodeForm::where('kode', $kode)->first();
-        $id_perusahaan = Session::get('id_perusahaan');
-        if(Session::get('previllage')==1) {
+        $ctx = RoleContext::get();
+        $id_perusahaan = $ctx['perusahaan_id'];
+        if($ctx['is_superadmin']) {
             $data['perusahaan'] = Perusahaan::where('status','A')->get();
             $data['kapal'] = Kapal::where('status', 'A')->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        } elseif(Session::get('previllage')==2) {
+        } elseif($ctx['jenis']==2) {
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
         } else {
-            $id_kapal = Session::get('id_kapal');
+            $id_kapal = $ctx['kapal_id'];
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();

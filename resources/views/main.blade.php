@@ -21,6 +21,7 @@
 
     <!-- BEGIN: Theme CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/vendors/css/forms/select/tom-select.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/bootstrap-extended.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/colors.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/components.css')}}">
@@ -83,7 +84,7 @@
 </head>
 <!-- END: Head-->
 
-<!-- BEGIN: Body-->
+    <!-- BEGIN: Body-->
 
 <body class="vertical-layout vertical-menu-modern  navbar-floating footer-static  " data-open="click" data-menu="vertical-menu-modern" data-col="">
     <!-- BEGIN: Header-->
@@ -94,19 +95,25 @@
                     <li class="nav-item"><a class="nav-link menu-toggle" href="#"><i class="ficon" data-feather="menu"></i></a></li>
                 </ul>
             </div>
+            <div>
+                <select name="" id="perusahaan" class="form-select">
+                    <option value="">Pilih Perusahaan</option>
+                </select>
+            </div>
             <ul class="nav navbar-nav align-items-center ms-auto">
                 <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="moon"></i></a></li>
                 @php
                     use App\Models\ResetPassword;
                     use App\Models\Perusahaan;
-                    use App\Models\Previllage;
+                    use App\Models\Role;
                     use Illuminate\Support\Facades\DB;
                     $previllage = Session::get('previllage');
                     $id_perusahaan = Session::get('id_perusahaan');
                     $id_kapal = Session::get('id_kapal');
 
                     $cek = Perusahaan::where('id', $id_perusahaan)->first();
-                    $pre = Previllage::where('id', $previllage)->first();
+                    $activeRoleId = Session::get('active_role_id', Session::get('role_id'));
+                    $pre = Role::find($activeRoleId);
                     if ($previllage == 1) {
                         $get = DB::table('reset_password')
                                 ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
@@ -136,7 +143,7 @@
                 </li>
                 @endif
                 <li class="nav-item dropdown dropdown-user"><a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <div class="user-nav d-sm-flex d-none"><span class="user-name fw-bolder">{{Session::get('name') }}<br> {{$pre->nama}}</span></div>
+                        <div class="user-nav d-sm-flex d-none"><span class="user-name fw-bolder">{{Session::get('name') }}<br> {{$pre->nama ?? '-'}} </span></div>
                         
                         <span class="avatar"><img src="{{url('/img/user.png')}}" alt="avatar" height="40" width="40"><span class="avatar-status-online"></span></span>
                     </a>
@@ -175,40 +182,78 @@
             @php
                 use App\Models\Menu;
                 $previllage = Session::get('previllage');
-                $id = Session::get('id_karyawan');
+                $roleId = Session::get('active_role_id', $previllage);
+                $role = \App\Models\Role::find($roleId);
+                $isSuper = $role && (int)($role->is_superadmin ?? 0) === 1;
 
                 // fungsi recursive
-                function getMenu($parentId = 0, $previllage, $id) {
-                    if ($previllage == 1) {
+                function getMenu($parentId = 0, $roleId, $isSuper) {
+                    if ($isSuper) {
                         return Menu::where('status', 'A')
                                     ->where('id_parent', $parentId)
-                                    ->where('menu.menu_user', 'N')
                                     ->orderBy('no', 'ASC')
                                     ->get();
-                    } else if ($previllage == 4) {
-                        return Menu::where('status', 'A')
-                                    ->where('id_parent', $parentId)
-                                    ->where('menu.menu_user', 'Y')
-                                    ->orderBy('no', 'ASC')
-                                    ->get();
-                    } else {
-                        return DB::table('akses')
-                            ->leftJoin('menu', 'menu.id', '=', 'akses.id_menu')
-                            ->where('menu.status', 'A')
-                            ->where('menu.menu_user', 'N')
-                            ->where('menu.id_parent', $parentId)
-                            ->where('akses.id_karyawan', $id)
-                            ->orderBy('no', 'ASC')
-                            ->get();
                     }
+                    return DB::table('role_menu')
+                        ->leftJoin('menu', 'menu.id', '=', 'role_menu.menu_id')
+                        ->where('role_menu.role_id', $roleId)
+                        ->where('menu.status', 'A')
+                        ->where('menu.id_parent', $parentId)
+                        ->orderBy('menu.no', 'ASC')
+                        ->select('menu.*')
+                        ->get();
                 }
 
-                $menus = getMenu(0, $previllage, $id);
+                // Tambah parent ACL khusus superadmin
+                $aclParent = null;
+                $aclChildren = [];
+                if ($isSuper) {
+                    $aclParent = (object) [
+                        'id' => 9999,
+                        'id_parent' => 0,
+                        'kode' => 'acl',
+                        'nama' => 'ACL',
+                        'link' => '#',
+                        'icon' => "<i data-feather='shield'></i>",
+                    ];
+
+                    $aclChildren = [
+                        (object) [
+                            'id' => 99991,
+                            'id_parent' => 9999,
+                            'kode' => '/data_master/menu',
+                            'nama' => 'Menu',
+                            'link' => url('/data_master/menu'),
+                            'icon' => "<i data-feather='circle'></i>",
+                        ],
+                        (object) [
+                            'id' => 99992,
+                            'id_parent' => 9999,
+                            'kode' => '/acl/roles',
+                            'nama' => 'Role',
+                            'link' => url('/acl/roles'),
+                            'icon' => "<i data-feather='circle'></i>",
+                        ],
+                        (object) [
+                            'id' => 99993,
+                            'id_parent' => 9999,
+                            'kode' => '/acl/users',
+                            'nama' => 'User Management',
+                            'link' => url('/acl/users'),
+                            'icon' => "<i data-feather='circle'></i>",
+                        ],
+                    ];
+                }
+
+                $menus = getMenu(0, $roleId, $isSuper);
+                if ($aclParent) {
+                    $menus->push($aclParent);
+                }
             @endphp
             <ul class="navigation navigation-main" data-menu="menu-navigation">
                 @foreach($menus as $menu)
                     @php
-                        $children = getMenu($menu->id, $previllage, $id);
+                        $children = $menu->id == 9999 ? collect($aclChildren) : getMenu($menu->id, $roleId, $isSuper);
                         $hasChild = count($children) > 0;
                         $isActive = ($active == $menu->kode) ? 'active' : '';
                     @endphp
@@ -222,7 +267,7 @@
                             <ul>
                                 @foreach($children as $child)
                                     @php
-                                        $subChildren = getMenu($child->id, $previllage, $id);
+                                         $subChildren = getMenu($child->id, $roleId, $isSuper);
                                         $subHasChild = count($subChildren) > 0;
                                         $isChildActive = ($active == $child->kode) ? 'active' : '';
                                     @endphp
@@ -352,7 +397,9 @@
     <!-- BEGIN: Theme JS-->
     <script src="{{ url('/app-assets/js/core/app-menu.js')}}"></script>
     <script src="{{ url('/app-assets/js/core/app.js')}}"></script>
+    <script src="{{ url('/app-assets/vendors/js/tom-select.min.js')}}"></script>
     <!-- END: Theme JS-->
+    
     @yield('scriptfooter')
     <script>
         $(window).on('load', function() {
@@ -368,81 +415,6 @@
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-        });
-
-
-
-        $(document).ready(function () {
-            $.ajax({
-                url: "getMenu",
-                method: "GET",
-                success: function (menus) {
-                    let html = renderMenu(menus);
-                    $("#sidebarMenu").html(html);
-                    setActiveMenu();
-                }
-            });
-
-            $("#sidebarMenu").html(renderMenu(menus));
-            setActiveMenu();
-
-            // 🔹 Fungsi render recursive
-            function renderMenu(menus, level = 0) {
-                let html = "";
-                menus.forEach(menu => {
-                    let hasChildren = menu.children && menu.children.length > 0;
-                    let baseClass = "flex items-center py-2 px-3 rounded-md transition duration-150 ease-in-out cursor-pointer";
-                    let inactiveClass = "text-gray-700 hover:bg-gray-100";
-
-                    if (hasChildren) {
-                        html += `
-                            <li>
-                                <a class="${baseClass} ${inactiveClass} parent-menu">
-                                    ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
-                                    <span class="ml-auto">▸</span>
-                                </a>
-                                <ul class="ml-4 hidden border-l border-gray-200 space-y-1 pl-2">
-                                    ${renderMenu(menu.children, level + 1)}
-                                </ul>
-                            </li>
-                        `;
-                    } else {
-                        html += `
-                            <li>
-                                <a href="${menu.link}" 
-                                class="${baseClass} ${inactiveClass}" 
-                                data-link="${menu.link}">
-                                    ${menu.icon ?? ""}<span class="ml-2">${menu.nama}</span>
-                                </a>
-                            </li>
-                        `;
-                    }
-                });
-                return html;
-            }
-
-            // 🔹 Set menu aktif
-            function setActiveMenu() {
-                let current = window.location.pathname;
-
-                $("#sidebarMenu a[data-link]").each(function () {
-                    if ($(this).attr("href") === current) {
-                        $(this).addClass("bg-indigo-600 text-white font-semibold");
-                        $(this).parents("ul").removeClass("hidden").addClass("block");
-                        $(this).parents("li").children(".parent-menu")
-                            .addClass("text-indigo-700 font-bold")
-                            .find("span:last").text("▾");
-                    }
-                });
-            }
-
-            // 🔹 Toggle submenu kalau parent diklik
-            $(document).on("click", ".parent-menu", function (e) {
-                e.preventDefault();
-                let submenu = $(this).next("ul");
-                submenu.toggleClass("hidden block");
-                $(this).find("span:last").text(submenu.hasClass("hidden") ? "▸" : "▾");
-            });
         });
 
         $('#change-pass').on('click', function(e){

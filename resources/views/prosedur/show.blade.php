@@ -270,9 +270,7 @@
                         <li class="nav-item">
                             <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" aria-controls="home" role="tab" aria-selected="true">Daftar Prosedur</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="akses-tab" data-bs-toggle="tab" href="#profile" aria-controls="profile" role="tab" aria-selected="false">Frekuensi Akses Prosedur</a>
-                        </li>
+                        {{-- Tab akses (ACL lama) dihilangkan --}}
                     </ul>
                     <div class="row">
                         @include('filter')
@@ -298,22 +296,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="tab-pane" id="profile" aria-labelledby="akses-tab" role="tabpanel">
-                        <table id="tableuser" class="table table-bordered table-striped" width="100%">
-                            <thead>
-                                <tr>
-                                    <th>No.</th>
-                                    <th>Nama</th>
-                                    <th>Kapal</th>
-                                    <th>Lihat</th>
-                                    <th>Download</th>
-                                    <th>Detail</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
+                    {{-- Tab akses (frekuensi akses) dihilangkan --}}
                 </div>
                 </div>
             </div>

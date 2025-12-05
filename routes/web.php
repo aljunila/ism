@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\DashboardController;
@@ -9,7 +10,6 @@ use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\KapalController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KaryawanController;
-use App\Http\Controllers\AksesController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ProsedurController;
 use App\Http\Controllers\RefrensiDocController;
@@ -28,6 +28,13 @@ use App\Http\Controllers\MutasiController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\KonditeController;
 use App\Http\Controllers\Purchasing\PurchasingController;
+use App\Http\Controllers\Data_master\KodeFormController;
+use App\Http\Controllers\Data_master\MenuController;
+use App\Http\Controllers\AclController;
+use App\Http\Controllers\Acl\RoleController;
+use App\Http\Controllers\Acl\UserController;
+use App\Models\Perusahaan;
+use App\Models\Karyawan;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -48,7 +55,13 @@ Route::get('lupapassword', [LoginController::class, 'lupapassword']);
 Route::post('resetpassword', [LoginController::class, 'resetpassword'])->middleware('auth');
 Route::get('login/reset/{id}', [LoginController::class, 'reset'])->middleware('auth');
 
-Route::middleware('auth')->group(function () {
+// Pilih context role/perusahaan (auth saja)
+Route::middleware(['auth'])->group(function () {
+    Route::get('active-context/options', [\App\Http\Controllers\ActiveContextController::class, 'options']);
+    Route::post('active-context/set', [\App\Http\Controllers\ActiveContextController::class, 'set']);
+});
+
+Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('show');
     Route::post('upload-image', [UploadController::class, 'upload'])->name('upload.image');
 
@@ -107,19 +120,6 @@ Route::middleware('auth')->group(function () {
         Route::get('pdf/{id}', [KaryawanController::class, 'pdf'])->name('karyawan.pdf');
     });
 
-    Route::prefix('akses')->group(function () {
-        Route::get('/', [AksesController::class, 'show'])->name('akses');
-        Route::get('data', [AksesController::class, 'getData']);
-        Route::get('add', [AksesController::class, 'add']);
-        Route::post('store', [AksesController::class, 'store'])->name('akses.store');
-        Route::get('profil/{id}', [AksesController::class, 'profil']);
-        Route::get('edit/{id}', [AksesController::class, 'edit']);
-        Route::post('update/{id}', [AksesController::class, 'update']);
-        Route::post('delete/{id}', [AksesController::class, 'delete']);
-        Route::post('save', [AksesController::class, 'saveChecked'])->name('akses.save');
-    });
-    Route::get('menu', [AksesController::class, 'menu']);
-
     Route::get('/el0101', [RefrensiDocController::class, 'el0101'])->name('el0101')->middleware('auth');
     Route::post('/refrensi/data', [RefrensiDocController::class, 'getData'])->middleware('auth');
     Route::get('/refrensi/add', [RefrensiDocController::class, 'add' ])->middleware('auth');
@@ -168,6 +168,52 @@ Route::middleware('auth')->group(function () {
     });
     Route::get('get-karyawanbyCom/{id_kapal}', [AturanController::class, 'getKaryawan']);
 
+    Route::prefix('data_master')->group(function() {
+        Route::get('kode_form', [KodeFormController::class, 'index']);
+        Route::get('kode_form/data', [KodeFormController::class, 'data'])->name('kode_form.data');
+        Route::post('kode_form', [KodeFormController::class, 'store'])->name('kode_form.store');
+        Route::put('kode_form/{id}', [KodeFormController::class, 'update'])->name('kode_form.update');
+        Route::delete('kode_form/{id}', [KodeFormController::class, 'destroy'])->name('kode_form.destroy');
+
+        // Placeholder ACL menu
+        Route::get('menu', [MenuController::class, 'index'])->name('acl.menu');
+        Route::get('menu/data', [MenuController::class, 'data'])->name('acl.menu.data');
+        Route::post('menu', [MenuController::class, 'store'])->name('acl.menu.store');
+        Route::put('menu/{id}', [MenuController::class, 'update'])->name('acl.menu.update');
+        Route::delete('menu/{id}', [MenuController::class, 'destroy'])->name('acl.menu.destroy');
+    });
+
+    Route::prefix('acl')->group(function () {
+        Route::get('roles', [AclController::class, 'roles'])->name('acl.roles');
+        Route::get('users', [AclController::class, 'users'])->name('acl.users');
+        Route::get('roles/data', [RoleController::class, 'data'])->name('acl.roles.data');
+        Route::get('roles/all', [RoleController::class, 'all'])->name('acl.roles.all');
+        Route::post('roles', [RoleController::class, 'store'])->name('acl.roles.store');
+        Route::put('roles/{id}', [RoleController::class, 'update'])->name('acl.roles.update');
+        Route::delete('roles/{id}', [RoleController::class, 'destroy'])->name('acl.roles.destroy');
+        Route::get('roles/menu/{roleId}', [RoleController::class, 'getRoleMenus'])->name('acl.roles.menu');
+        Route::post('roles/map-menu', [RoleController::class, 'mapMenu'])->name('acl.roles.mapmenu');
+
+        Route::get('users/data', [UserController::class, 'data'])->name('acl.users.data');
+        Route::post('users', [UserController::class, 'store'])->name('acl.users.store');
+        Route::put('users/{id}/status', [UserController::class, 'toggleStatus'])->name('acl.users.status');
+        Route::get('users/{id}', [UserController::class, 'show'])->name('acl.users.show');
+        Route::put('users/{id}', [UserController::class, 'update'])->name('acl.users.update');
+        Route::delete('users/{id}', [UserController::class, 'destroy'])->name('acl.users.destroy');
+
+        // Simple API helpers for select options
+        Route::get('api/perusahaan/all', function () {
+            return Perusahaan::select('id', 'kode', 'nama')->get();
+        });
+        Route::get('api/karyawan/all', function (Request $request) {
+            $query = Karyawan::select('id', 'nama', 'nik', 'id_perusahaan');
+            if ($request->filled('perusahaan_id')) {
+                $query->where('id_perusahaan', $request->get('perusahaan_id'));
+            }
+            return $query->get();
+        });
+    });
+
     Route::prefix('refrensi')->group(function () {
         Route::post('data', [RefrensiDocController::class, 'getData']);
         Route::get('add', [RefrensiDocController::class, 'add']);
@@ -183,7 +229,7 @@ Route::middleware('auth')->group(function () {
     Route::get('el0104', [RefrensiDocController::class, 'el0104'])->name('el0104');
 
     // Purchasing
-    Route::prefix('purchas')->group(function(){
+    Route::prefix('purchasing')->group(function(){
         Route::get('/', [PurchasingController::class, 'index']);
     });
 

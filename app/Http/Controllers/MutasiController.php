@@ -14,6 +14,7 @@ use Session;
 \Carbon\Carbon::setLocale('id');
 use Str;
 use DB;
+use App\Support\RoleContext;
 
 class MutasiController extends Controller
 {
@@ -21,18 +22,21 @@ class MutasiController extends Controller
     {
         $data['active'] = "el0610";
         $data['form'] = KodeForm::where('kode', 'el0610')->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $id_perusahaan = Session::get('id_perusahaan');
-        if(Session::get('previllage')==1) {
+        $ctx = RoleContext::get();
+        $id_perusahaan = $ctx['perusahaan_id'];
+        if($ctx['is_superadmin']) {
             $data['perusahaan'] = Perusahaan::where('status','A')->get();
             $data['kapal'] = Kapal::where('status', 'A')->get();
-        } elseif(Session::get('previllage')==2) {
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif($ctx['jenis']==2) {
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
         } else {
-            $id_kapal = Session::get('id_kapal');
+            $id_kapal = $ctx['kapal_id'];
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $id_kapal)->get();
         }
         return view('refrensi.mutasi', $data);
     }
@@ -42,6 +46,7 @@ class MutasiController extends Controller
     {
         $perusahaan = $request->input('id_perusahaan');
         $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
+        $ctx = RoleContext::get();
 
         $daftar = DB::table('mutasi as a')
                 ->leftjoin('perusahaan as b', 'a.dari_perusahaan', '=', 'b.id')
@@ -53,12 +58,10 @@ class MutasiController extends Controller
                 ->select('a.*', 'b.nama as dari_perusahaan', 'c.nama as dari_kapal', 'f.nama as karyawan', 'g.nama as jabatan', 'd.nama as ke_perusahaan', 'e.nama as ke_kapal')
                 ->where('a.kode', $request->input('kode'))
                 ->where('a.status','A')
-                ->when($perusahaan, function($query, $perusahaan) {
-                    return $query->where('a.dari_perusahaan', $perusahaan);
-                })
-                ->when($kapal, function($query, $kapal) {
-                    return $query->where('a.dari_kapal', $kapal);
-                })
+                ->when($perusahaan, fn($query, $perusahaan) => $query->where('a.dari_perusahaan', $perusahaan))
+                ->when($kapal, fn($query, $kapal) => $query->where('a.dari_kapal', $kapal))
+                ->when($ctx['jenis']==2 && $ctx['perusahaan_id'], fn($q) => $q->where('a.dari_perusahaan', $ctx['perusahaan_id']))
+                ->when($ctx['jenis']==3 && $ctx['kapal_id'], fn($q) => $q->where('a.dari_kapal', $ctx['kapal_id']))
                 ->orderBy('a.id', 'DESC')
                 ->get();
 

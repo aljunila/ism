@@ -402,8 +402,8 @@
                                     <label class="col-form-label" for="first-name">Level Akses</label>
                                 </div>
                                 <div class="col-sm-9">
-                                     <select name="id_previllage" id="id_previllage"  class="form-control">
-                                    @foreach($previllage as $p)
+                                     <select name="role_id" id="role_id"  class="form-control">
+                                    @foreach($roles as $p)
                                         <option value="{{$p->id}}">{{$p->nama}}</option>
                                     @endforeach
                                     </select>

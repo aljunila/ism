@@ -9,3 +9,77 @@ NOTE:
 ------
 PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
 WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+
+/* Global color override: switch purple palette to blue */
+:root {
+    --bs-primary: #0d6efd;
+    --bs-primary-rgb: 13, 110, 253;
+    --bs-purple: #0d6efd;
+    --bs-link-color: #0d6efd;
+    --bs-link-hover-color: #0b5ed7;
+}
+
+.text-primary { color: #0d6efd !important; }
+.bg-primary { background-color: #0d6efd !important; }
+.border-primary { border-color: #0d6efd !important; }
+.badge-primary { background-color: #0d6efd !important; }
+
+.btn-primary {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary:focus-visible {
+    background-color: #0b5ed7 !important;
+    border-color: #0b5ed7 !important;
+}
+.btn-outline-primary {
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #fff !important;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd, #3a8df7) !important;
+}
+
+.avatar.bg-primary { background-color: #0d6efd !important; }
+.avatar.bg-light-primary {
+    background-color: rgba(13, 110, 253, 0.12) !important;
+    color: #0d6efd !important;
+}
+.bg-light-primary {
+    background-color: rgba(13, 110, 253, 0.12) !important;
+    color: #0d6efd !important;
+}
+.text-purple,
+.bg-purple,
+.border-purple {
+    color: #0d6efd !important;
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.form-check-input:checked,
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: #0d6efd !important;
+}
+
+.page-item.active .page-link {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}

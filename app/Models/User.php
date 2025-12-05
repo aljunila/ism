@@ -13,7 +13,7 @@ class User extends Authenticatable
 
     public $timestamps = false;
     protected $table = 'user';
-    protected $fillable =  ['username', 'password', 'nama', 'pic', 'id_previllage', 'status', 'id_karyawan', 
+    protected $fillable =  ['username', 'password', 'nama', 'pic', 'id_previllage', 'role_id', 'status', 'id_karyawan', 
     'id_perusahaan', 'id_kapal', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     public function get_karyawan()

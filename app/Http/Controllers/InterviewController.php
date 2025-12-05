@@ -15,6 +15,7 @@ use Session;
 \Carbon\Carbon::setLocale('id');
 use Str;
 use DB;
+use App\Support\RoleContext;
 
 class InterviewController extends Controller
 {
@@ -28,6 +29,7 @@ class InterviewController extends Controller
     public function getData(Request $request)
     {
         $perusahaan = $request->input('id_perusahaan');
+        $ctx = RoleContext::get();
 
         $daftar = DB::table('interview')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'interview.id_perusahaan')
@@ -35,9 +37,8 @@ class InterviewController extends Controller
                 ->select('interview.*', 'perusahaan.nama as perusahaan', 'jabatan.nama as jabatan')
                 ->where('interview.kode', $request->input('kode'))
                 ->where('interview.status','A')
-                ->when($perusahaan, function($query, $perusahaan) {
-                    return $query->where('interview.id_perusahaan', $perusahaan);
-                })
+                ->when($perusahaan, fn($query, $perusahaan) => $query->where('interview.id_perusahaan', $perusahaan))
+                ->when($ctx['jenis']==2 && $ctx['perusahaan_id'], fn($q) => $q->where('interview.id_perusahaan', $ctx['perusahaan_id']))
                 ->orderBy('interview.id', 'DESC')
                 ->get();
 
@@ -49,8 +50,9 @@ class InterviewController extends Controller
     public function add($kode)
     {
         $data['form'] = KodeForm::where('kode', $kode)->first();
-        $id_perusahaan = Session::get('id_perusahaan');
-        if(Session::get('previllage')==1) {
+        $ctx = RoleContext::get();
+        $id_perusahaan = $ctx['perusahaan_id'];
+        if($ctx['is_superadmin']) {
             $data['perusahaan'] = Perusahaan::where('status','A')->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
         } else {

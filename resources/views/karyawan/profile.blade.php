@@ -185,7 +185,7 @@
                             <a class="nav-link" id="karyawan-tab" data-bs-toggle="tab" href="#karyawan" aria-controls="karyawan" role="tab" aria-selected="true"><i data-feather="user"></i>Profil Karyawan</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="akses-tab" data-bs-toggle="tab" href="#profile" aria-controls="profile" role="tab" aria-selected="false"><i data-feather="tool"></i>Akses</a>
+                            
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -359,7 +359,7 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="tab-pane" id="profile" aria-labelledby="akses-tab" role="tabpanel">
+                        {{-- Tab akses dihapus --}}
                             <div class="card-header border-bottom">
                                 <h5 class="fw-bolder">Informasi Akses</h5>
                                 <!-- <button class="btn btn-warning btn-sm float-right me-1" data-bs-toggle="modal" data-bs-target="#FormPassword">Ubah Password</button> -->
@@ -370,7 +370,7 @@
                                         <tr>
                                             <th width="30%"> Level Akses</th>
                                             <td width="5%">:</td>
-                                            <td width="65%">{!! ($show->previllage) ? $show->previllage : '-' !!}</td>
+                                            <td width="65%">{{ $show->role_nama ?? '-' }}</td>
                                         </tr>
                                         <tr>
                                             <th> Level Menu</th>

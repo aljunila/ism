@@ -17,10 +17,11 @@ class DashboardController extends Controller
     public function show()
     {
         $data['active'] = "dashboard";
-        $data['pre'] = Session::get('previllage');
+        $roleJenis = Session::get('previllage'); // sudah dimapping di middleware
+        $data['pre'] = $roleJenis;
         $id_perusahaan = Session::get('id_perusahaan');
         $data['com'] = Perusahaan::where('id', $id_perusahaan)->first();
-        if(Session::get('previllage')==1) {
+        if($roleJenis==1) { // superadmin
             $data['perusahaan'] = Perusahaan::count();
             $data['kapal'] = Kapal::where('status','A')->count();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->count();
@@ -28,7 +29,7 @@ class DashboardController extends Controller
                             ->leftjoin('karyawan', 'karyawan.id', 'user.id_karyawan')
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->count();
-        } elseif(Session::get('previllage')==2) {
+        } elseif($roleJenis==2) { // admin perusahaan
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->count();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->where('id_perusahaan', $id_perusahaan)->count();
             $data['user'] = DB::table('user')
@@ -36,7 +37,7 @@ class DashboardController extends Controller
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->where('karyawan.id_perusahaan', $id_perusahaan)
                             ->count();
-        } elseif(Session::get('previllage')==3) {
+        } elseif($roleJenis==3) { // user kapal
             $id_kapal = Session::get('id_kapal');
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->where('id_kapal', $id_kapal)->count();
             $data['user'] = DB::table('user')

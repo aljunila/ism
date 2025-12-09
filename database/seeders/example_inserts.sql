@@ -970,22 +970,24 @@ INSERT INTO `status_ptkp` (`id`, `kode`, `nama`, `tarif`) VALUES
 (10, 'K/I/1', 'K/I/1 (1 Tanggungan)', 117000000),
 (11, 'K/I/2', 'K/I/2 (2 Tanggungan)', 121500000),
 (12, 'K/I/3', 'K/I/3 (3 Tanggungan)', 126000000);
-INSERT INTO `user` (`id`, `username`, `password`, `nama`, `pic`, `id_previllage`, `status`, `id_karyawan`, `id_perusahaan`, `id_kapal`, `created_by`, `created_date`, `changed_by`, `changed_date`) VALUES
-(1, 'admin@test.com', '$2y$12$ZbN9NO7v9Rh5AMEi69crEufMHRRZ11qL6fcSHqTvWEyAMkADNg8U.', 'Admin', 'sadsad', 1, 'A', 0, 1, 0, 'citra', '2025-11-25 09:10:53', 'dsads', '2025-06-18 16:30:54'),
-(2, 'wantekheru@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'Wantek Heru W.', NULL, NULL, 'A', 3, 1, 2, NULL, '2025-10-24 10:23:44', '13', NULL),
-(3, 'nurfathoni@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'NURFATHONI. F', NULL, NULL, 'A', 4, 1, 2, '1', '2025-10-10 07:51:44', '8', NULL),
-(4, 'mohsaiful@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'Mohamad Saiful', NULL, NULL, 'A', 11, 1, 2, '1', '2025-10-10 07:52:24', '8', NULL),
-(5, 'gunturcahyo@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'GUNTUR CAHYO. S', NULL, NULL, 'A', 12, 1, 2, '1', '2025-10-10 03:43:24', '8', NULL),
-(6, 'joniyoga@als.com', '$2y$12$KRtf96QpMUIfGc6Fc5aWEO1bDWBCGSV6NucKsqd6WssJE7EaK7JR6', 'JONI YOGA P.S,ST', NULL, NULL, 'A', 15, 1, 2, '1', '2025-10-10 07:51:12', '8', NULL),
-(7, 'aguschobib@als.com', '$2y$12$WBsl.u3RXXm.pkf3sQ6Bqu0FCf.jfOasGIWEcVamPK42CYpFlLzXa', 'AGUS CHOBIB', NULL, NULL, 'A', 16, 1, 2, '1', '2025-10-10 07:52:57', '8', NULL),
-(8, '1377010706000001', '$2y$12$mdL1vYrtr6m24XuJUpo6v.pO0lYfYhHXyYJLBtBmi3BzMQEp81zOy', 'AL FIQRI', NULL, NULL, 'A', 18, 1, NULL, '1', '2025-10-13 07:42:58', '8', NULL),
-(9, '3672031804710001', '$2y$12$Sfxg9IeSTPNiCXwsxFDAoud1LyWWFynfjFdTLepd.1XzAVHHOhJnm', 'ALEXANDER', NULL, NULL, 'A', 19, 1, 2, '1', '2025-10-10 07:50:57', '8', NULL),
-(10, 'antomeis@als.com', '$2y$12$k9jesEBse1MvbaTDs4X0Yuv5kHXcsKaFF82a6ORd0CVfvaeEwzetK', 'ANTO MEI SURYONO', NULL, 4, 'A', 25, 1, NULL, '8', '2025-10-10 08:04:23', NULL, NULL),
-(11, '3525130501680017', '$2y$12$WQjplLR8teGtVJjX5n0aF.itk27upr3ie7DK1ZY2ftGv6r8n6a4Qe', 'MARDIYANTO', NULL, 2, 'A', 26, 4, NULL, NULL, '2025-10-23 21:39:03', '1', NULL),
-(12, '3510212510840004', '$2y$12$ir4bKGAwwcQT2daGufeRbOh6woAB.iuFWDYiqm3YJFdPSH133R3Ti', 'ARIF MUHAZALIN', NULL, 2, 'A', 27, 3, NULL, NULL, '2025-10-24 10:34:23', '1', NULL),
-(13, '1214062702890002', '$2y$12$qF5TBJ.Mx5wDZ20VCJUtaOEqbTatt9qAAJLcvY0gsz0c9U9tEZAUO', 'BENAR HATI LOI ', NULL, 3, 'A', 28, 1, 2, NULL, '2025-10-24 10:04:57', '1', NULL),
-(14, '3672020908840001', '$2y$12$w4A2PBDya.33zQv78VErousXa1o/OfaI1eLtqM3/bGhPNPsUXzBXW', 'DISMA ANDRI AGUSTIANTO', NULL, 4, 'A', 86, 4, 5, NULL, '2025-10-23 15:07:22', NULL, NULL),
-(15, '67891012345', '$2y$12$bJqWpLQ1sv3anLs/H7KXfO2RH9BTBTMtgIrP8N7ey/VSDl91xApM.', 'USER KAPAL', NULL, 3, 'A', 223, 1, 1, NULL, '2025-11-01 06:57:47', '1', NULL);
+INSERT INTO `roles` (`id`, `kode`, `nama`, `jenis`, `is_superadmin`, `status`) VALUES
+(1, 'superadmin', 'Super Admin', NULL, 1, 1);
+INSERT INTO `user` (`id`, `username`, `password`, `nama`, `pic`, `id_previllage`, `role_id`, `status`, `id_karyawan`, `id_perusahaan`, `id_kapal`, `created_by`, `created_date`, `changed_by`, `changed_date`) VALUES
+(1, 'admin@test.com', '$2y$12$ZbN9NO7v9Rh5AMEi69crEufMHRRZ11qL6fcSHqTvWEyAMkADNg8U.', 'Admin', 'sadsad', 1, 1, 1, 0, 1, 0, 'citra', '2025-11-25 09:10:53', 'dsads', '2025-06-18 16:30:54'),
+(2, 'wantekheru@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'Wantek Heru W.', NULL, NULL, NULL, 1, 3, 1, 2, NULL, '2025-10-24 10:23:44', '13', NULL),
+(3, 'nurfathoni@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'NURFATHONI. F', NULL, NULL, NULL, 1, 4, 1, 2, '1', '2025-10-10 07:51:44', '8', NULL),
+(4, 'mohsaiful@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'Mohamad Saiful', NULL, NULL, NULL, 1, 11, 1, 2, '1', '2025-10-10 07:52:24', '8', NULL),
+(5, 'gunturcahyo@als.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'GUNTUR CAHYO. S', NULL, NULL, NULL, 1, 12, 1, 2, '1', '2025-10-10 03:43:24', '8', NULL),
+(6, 'joniyoga@als.com', '$2y$12$KRtf96QpMUIfGc6Fc5aWEO1bDWBCGSV6NucKsqd6WssJE7EaK7JR6', 'JONI YOGA P.S,ST', NULL, NULL, NULL, 1, 15, 1, 2, '1', '2025-10-10 07:51:12', '8', NULL),
+(7, 'aguschobib@als.com', '$2y$12$WBsl.u3RXXm.pkf3sQ6Bqu0FCf.jfOasGIWEcVamPK42CYpFlLzXa', 'AGUS CHOBIB', NULL, NULL, NULL, 1, 16, 1, 2, '1', '2025-10-10 07:52:57', '8', NULL),
+(8, '1377010706000001', '$2y$12$mdL1vYrtr6m24XuJUpo6v.pO0lYfYhHXyYJLBtBmi3BzMQEp81zOy', 'AL FIQRI', NULL, NULL, NULL, 1, 18, 1, NULL, '1', '2025-10-13 07:42:58', '8', NULL),
+(9, '3672031804710001', '$2y$12$Sfxg9IeSTPNiCXwsxFDAoud1LyWWFynfjFdTLepd.1XzAVHHOhJnm', 'ALEXANDER', NULL, NULL, NULL, 1, 19, 1, 2, '1', '2025-10-10 07:50:57', '8', NULL),
+(10, 'antomeis@als.com', '$2y$12$k9jesEBse1MvbaTDs4X0Yuv5kHXcsKaFF82a6ORd0CVfvaeEwzetK', 'ANTO MEI SURYONO', NULL, 4, NULL, 1, 25, 1, NULL, '8', '2025-10-10 08:04:23', NULL, NULL),
+(11, '3525130501680017', '$2y$12$WQjplLR8teGtVJjX5n0aF.itk27upr3ie7DK1ZY2ftGv6r8n6a4Qe', 'MARDIYANTO', NULL, 2, NULL, 1, 26, 4, NULL, NULL, '2025-10-23 21:39:03', '1', NULL),
+(12, '3510212510840004', '$2y$12$ir4bKGAwwcQT2daGufeRbOh6woAB.iuFWDYiqm3YJFdPSH133R3Ti', 'ARIF MUHAZALIN', NULL, 2, NULL, 1, 27, 3, NULL, NULL, '2025-10-24 10:34:23', '1', NULL),
+(13, '1214062702890002', '$2y$12$qF5TBJ.Mx5wDZ20VCJUtaOEqbTatt9qAAJLcvY0gsz0c9U9tEZAUO', 'BENAR HATI LOI ', NULL, 3, NULL, 1, 28, 1, 2, NULL, '2025-10-24 10:04:57', '1', NULL),
+(14, '3672020908840001', '$2y$12$w4A2PBDya.33zQv78VErousXa1o/OfaI1eLtqM3/bGhPNPsUXzBXW', 'DISMA ANDRI AGUSTIANTO', NULL, 4, NULL, 1, 86, 4, 5, NULL, '2025-10-23 15:07:22', NULL, NULL),
+(15, '67891012345', '$2y$12$bJqWpLQ1sv3anLs/H7KXfO2RH9BTBTMtgIrP8N7ey/VSDl91xApM.', 'USER KAPAL', NULL, 3, NULL, 1, 223, 1, 1, NULL, '2025-11-01 06:57:47', '1', NULL);
 INSERT INTO `view_prosedur` (`id`, `id_user`, `id_prosedur`, `jml_lihat`, `jml_download`, `update_lihat`, `update_download`) VALUES
 (1, 7, 2, 3, 1, '2025-10-07 08:17:43', '2025-10-07 08:27:24'),
 (2, 7, 19, 2, 0, '2025-10-07 08:17:21', NULL),

@@ -194,7 +194,7 @@ class KapalController extends Controller
                 })
                 ->where('a.type', 'K')
                 ->where('a.status', 'A')
-                ->select('a.*', 'b.file')
+                ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
                 ->orderBy('a.ket', 'ASC')
                 ->get();
         return view('kapal.profile',$data);
@@ -220,7 +220,7 @@ class KapalController extends Controller
     public function savefile(Request $request, $id)
     {
         $request->validate([
-            'file' => 'nullable|file|mimes:pdf|max:20480',
+            'file' => 'nullable|file|mimes:pdf|max:60480',
         ]);
 
         $cek = FileUpload::where('id_file', $id)->where('id_kapal', $request->input('id_kapal'))->first();
@@ -238,6 +238,10 @@ class KapalController extends Controller
             $save = FileUpload::insert([
                 'id_kapal' => $request->input('id_kapal'),
                 'id_file'  => $id,
+                'tgl_terbit' => $request->input('tgl_terbit'),
+                'tgl_expired' => $request->input('tgl_expired'),
+                'no' => $request->input('no'),
+                'penerbit' => $request->input('penerbit'),
                 'file' => $nama_file,
                 'status' => 'A',
                 'created_by' => Session::get('userid'),

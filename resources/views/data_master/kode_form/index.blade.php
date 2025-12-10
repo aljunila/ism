@@ -28,7 +28,9 @@
                         <th>No</th>
                         <th>Kode Form</th>
                         <th>Nama form</th>
-                        <th>Instruksi</th>
+                        <th>Tanggung Jawab</th>
+                        <th>Kode File</th>
+                        <th>Periode</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -58,6 +60,26 @@
                     <div class="col-md-12 mb-1">
                         <label class="form-label" for="nama_form">Nama Form</label>
                         <input type="text" class="form-control" name="nama_form" id="nama_form" placeholder="Masukkan nama form">
+                    </div>
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label" for="pj">Tanggung Jawab</label>
+                        <input type="text" class="form-control" id="pj" placeholder="Contoh: DPA, Nahkoda">
+                    </div>
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label" for="kode_file">Kode File</label>
+                        <input type="text" class="form-control" id="kode_file" placeholder="Contoh: HO, SH">
+                    </div>
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label" for="periode">Periode</label>
+                        <input type="text" class="form-control" id="periode" placeholder="Contoh: THN, SS">
+                    </div>
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label" for="id_perusahaan">Perusahaan</label>
+                        <select class="form-control" id="id_perusahaan">
+                            @foreach($perusahaan as $p)
+                            <option value="{{$p->id}}">{{$p->nama}}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-md-12">
                         <label class="form-label" for="instruksi">Instruksi</label>
@@ -114,16 +136,11 @@
             ajax: '{{ route('kode_form.data') }}',
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'kode', name: 'kode' },
+                { data: 'ket', name: 'ket' },
                 { data: 'nama', name: 'nama' },
-                {
-                    data: 'intruksi',
-                    name: 'intruksi',
-                    render: function (data) {
-                        const text = $('<div>').html(data || '').text();
-                        return text.length > 80 ? text.substring(0, 80) + '…' : text;
-                    }
-                },
+                { data: 'pj', name: 'pj' },
+                { data: 'kode_file', name: 'kode_file' },  
+                { data: 'periode', name: 'periode' },  
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -145,6 +162,9 @@
                 kode: $('#kode_form').val(),
                 nama: $('#nama_form').val(),
                 ket: $('#keterangan_kode').val(),
+                pj: $('#pj').val(),
+                kode_file: $('#kode_file').val(),
+                periode: $('#periode').val(),
                 intruksi: instruksi
             };
 
@@ -155,6 +175,7 @@
                 success: function () {
                     Swal.fire('Sukses', 'Data berhasil disimpan', 'success');
                     $('#tambah_master_kode').modal('hide');
+                    
                     table.ajax.reload(null, false);
                 },
                 error: function (xhr) {

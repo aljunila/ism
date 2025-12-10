@@ -16,6 +16,7 @@ use App\Models\Akses;
 use App\Models\StatusPTKP;
 use App\Models\MasterFile;
 use App\Models\FileUpload;
+use App\Models\Mutasi;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -123,6 +124,9 @@ class KaryawanController extends Controller
             'telp' => $request->input('telp'),
             'email' => $request->input('email'),
             'alamat' => $request->input('alamat'),
+            'kontak_darurat' => $request->input('kontak_darurat'),
+            'nama_kontak' => $request->input('nama_kontak'),
+            'telp_kontak' => $request->input('telp_kontak'),
             'nama_bank' => $request->input('nama_bank'),
             'no_rekening' => $request->input('no_rekening'),
             'nama_rekening' => $request->input('nama_rekening'),
@@ -256,7 +260,7 @@ class KaryawanController extends Controller
                 ->where('a.type', 'S')
                 ->where('a.status', 'A')
                 ->where('a.ket', $type)
-                ->select('a.*', 'b.file')
+                ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
                 ->get();
         $data['show'] = $show;
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
@@ -274,7 +278,8 @@ class KaryawanController extends Controller
         $data['roles'] = Role::orderBy('nama')->get();
         $data['menu'] = Akses::where('id_karyawan', $show->id)->get();
         $data['active'] = "karyawan";
-         $data['ptkp'] = StatusPTKP::get();
+        $data['ptkp'] = StatusPTKP::get();
+        $data['mutasi'] = Mutasi::where('id_karyawan', $show->id)->orderBy('tgl_naik', 'DESC')->get();
         return view('karyawan.profile',$data);
     }
 
@@ -335,6 +340,10 @@ class KaryawanController extends Controller
             $save = FileUpload::insert([
                 'id_karyawan' => $request->input('id_karyawan'),
                 'id_file'  => $id,
+                'tgl_terbit' => $request->input('tgl_terbit'),
+                'tgl_expired' => $request->input('tgl_expired'),
+                'no' => $request->input('no'),
+                'penerbit' => $request->input('penerbit'),
                 'file' => $nama_file,
                 'status' => 'A',
                 'created_by' => Session::get('userid'),

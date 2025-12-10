@@ -74,16 +74,16 @@ class MutasiController extends Controller
     {
         $created = Session::get('userid');
         $date = date('Y-m-d H:i:s');
-        $kapal = Kapal::findorFail($request->input('ke_kapal'));
+        $kapal = Kapal::findorFail($request->input('id_kapal'));
         $karyawan = Karyawan::findorFail($request->input('id_karyawan'));
 
         $save = Mutasi::create([
           'uid' => Str::uuid()->toString(),
           'kode' => $request->input('kode'),
-          'dari_perusahaan' => $request->input('dari_perusahaan'),
-          'dari_kapal' => $request->input('dari_kapal'),
-          'ke_perusahaan' => $kapal->pemilik,
-          'ke_kapal' => $request->input('ke_kapal'),
+          'dari_perusahaan' => $karyawan->id_perusahaan,
+          'dari_kapal' => $karyawan->id_kapal,
+          'ke_perusahaan' => $request->input('id_perusahaan'),
+          'ke_kapal' => $request->input('id_kapal'),
           'id_karyawan' => $request->input('id_karyawan'),
           'id_jabatan' => $karyawan->id_jabatan,
           'tgl_naik' => $request->input('tgl_naik'),
@@ -93,6 +93,12 @@ class MutasiController extends Controller
           'created_by' => $created,
           'created_date' => $date
         ]);
+
+         $save = Karyawan::where('id',$save->id_karyawan)->update([
+          'id_perusahaan' => $save->ke_perusahaan,
+          'id_kapal' => $save->ke_kapal,
+          'changed_by' => Session::get('userid'),
+        ]); 
         if($save) {
             return response()->json(['success' => true]);
         } else {

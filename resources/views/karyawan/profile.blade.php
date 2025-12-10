@@ -18,7 +18,7 @@
     <script src="{{ url('/vuexy/app-assets/vendors/js/forms/cleave/cleave.min.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/forms/cleave/addons/cleave-phone.us.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"></script>
-    <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/moment.min.js')}}"></script> -->
+    <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/moment.min.js')}}"></script> 
     <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/sweetalert2.all.min.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/polyfill.min.js')}}"></script>
     <!-- END: Page Vendor JS-->
@@ -129,6 +129,38 @@
                         icon: 'error',
                         title: 'Error',
                         text: 'Gagal menyimpan file'
+                    });
+                }
+            });
+        });
+
+         $('#form_mutasi').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let formData = new FormData(this);
+
+            $.ajax({
+                 url: "{{ url('/mutasi/store') }}",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'Data berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#FormEdit').modal('hide');
+                            window.location.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan data'
                     });
                 }
             });
@@ -357,6 +389,43 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                <br><br>
+                                <div class="card-header border-bottom">
+                                <h5 class="fw-bolder">Data Mutasi</h5>
+                                @if(Session::get('previllage')!=4)
+                                <button class="btn btn-primary btn-sm float-right me-1" data-bs-toggle="modal" data-bs-target="#FormMutasi">Mutasi Crew</button>
+                                @endif
+                            </div>
+                                <table class="table table-bordered table-striped" width="100%">
+                                    <thead>
+                                        <tr align="center">
+                                            <th rowspan="2">No</th>
+                                            <th rowspan="2">Tgl Mutasi</th>
+                                            <th colspan="2">Mutasi</th>
+                                            <th rowspan="2">Aksi</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Dari</th>
+                                            <th>Ke</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($mutasi as $m)
+                                        <tr>
+                                            <td>{{$loop->iteration}}</td>
+                                            <td>{{ \Carbon\Carbon::parse($m->tgl_naik)->format('d-m-Y') }}</td>
+                                            <td>{{ $m->get_dari_perusahaan()->nama }} <br>
+                                                {!! ($m->dari_kapal) ? $m->get_dari_kapal()->nama : '-' !!}</td>
+                                            <td>{{ $m->get_ke_perusahaan()->nama }} <br>
+                                                {!! ($m->ke_kapal) ? $m->get_ke_kapal()->nama : '-' !!}</td>
+                                            <td> <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-danger delmutasi-btn" 
+                                                title="Hapus Mutasi" data-id="{{$m->id}}">
+                                                <i data-feather='trash'></i>
+                                            </button></td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                         {{-- Tab akses dihapus --}}
@@ -404,12 +473,23 @@
                 <div class="card-body">
                     <h5 class="fw-bolder border-bottom pb-50 mb-1">Crew Documents</h5>
                         <div class="table-responsive">
-                            <table class="table" width="100%">
+                            <table class="table" width="100%" border="1">
+                                <tr>
+                                    <th>Nama Dokumen</th>
+                                    <th>No</th>
+                                    <th>Penerbit</th>
+                                    <th>Tgl Terbit</th>
+                                    <th>Tgl Expired</th>
+                                    <th>Aksi</th>
+                                </tr>
                                 @foreach($file as $f)
                                 <tr>
-                                    <td width="70%">{{$f->nama}}</td>
-                                    <td width="5%">:</td>
-                                    <td width="25%">
+                                    <td width="30%">{{$f->nama}}</td>
+                                    <td width="15%">{{ ($f->no) ? $f->no : '-' }}</td>
+                                    <td width="15%">{{$f->penerbit}}</td>
+                                    <td width="10%">{{$f->tgl_terbit}}</td>
+                                    <td width="10%">{{$f->tgl_expired}}</td>
+                                    <td width="20%">
                                             <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
                                                 title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
                                                 <i data-feather='upload'></i>
@@ -440,7 +520,7 @@
                 <form id="form_karyawan" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        <div class="mb-1 row">
+                        <!-- <div class="mb-1 row">
                             <div class="col-sm-3">
                                 <label class="col-form-label" for="first-name">Perusahaan</label>
                             </div>
@@ -477,7 +557,7 @@
                                         @endforeach
                                     </select>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="mb-1 row">
                             <div class="col-sm-3">
                                 <label class="col-form-label" for="first-name">Jabatan</label>
@@ -527,6 +607,81 @@
         </div>
     </div>
 
+    <div class="modal fade text-start" id="FormMutasi" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel33">Mutasi Crew</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form_mutasi" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Perusahaan</label>
+                            </div>
+                            <div class="col-sm-9">
+                                @if(Session::get('previllage')==1)
+                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                        @foreach($perusahaan as $ph)
+                                            @if($show->id_perusahaan==$ph->id)
+                                                    <option value="{{$ph->id}}" selected>{{$ph->nama}}</option>
+                                                @else
+                                                    <option value="{{$ph->id}}">{{$ph->nama}}</option>
+                                                @endif
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <input type="hidden" name="id_perusahaan" id="id_perusahaan" value="{{$show->id_perusahaan}}">
+                                    {{$show->perusahaan}}
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Ditempatkan di</label>
+                            </div>
+                            <div class="col-sm-9">
+                                    <select name="id_kapal" id="id_kapal"  class="form-control">
+                                        <option value="">Office</option>
+                                        @foreach($kapal as $k)
+                                            @if($show->id_kapal==$k->id)
+                                                <option value="{{$k->id}}" selected>{{$k->nama}}</option>
+                                            @else
+                                                <option value="{{$k->id}}">{{$k->nama}}</option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Tgl Mutasi</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" name="tgl_naik" id="tgl_naik">
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Keterangan</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <textarea class="form-control" name="ket" id="ket"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" name="id_karyawan" id="id_karyawan" value="{{$show->id}}">
+                        <input type="hidden" name="kode" id="kode" value="el0610">
+                        <button type="submit" class="btn btn-primary" id="edit_data">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade text-start" id="FormTtd" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -561,10 +716,31 @@
             <form id="form_file" enctype="multipart/form-data">
                     @csrf
                 <div class="modal-header">
-                    <h4 class="modal-title" id="file">Edit Data</h4>
+                    <h4 class="modal-title" id="file">Upload Dokumen</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                        @if($show->kel==1)
+                        <label>Tgl Terbit</label>
+                        <div class="mb-1">
+                            <input type="date" class="form-control" name="tgl_terbit" id="tgl_terbit"/>
+                        </div>
+
+                        <label>Tgl Expired</label>
+                        <div class="mb-1">
+                            <input type="date" class="form-control" name="tgl_expired" id="tgl_expired"/>
+                        </div>
+
+                        <label>No Dokumen</label>
+                        <div class="mb-1">
+                            <input type="text" class="form-control" name="no" id="no"/>
+                        </div>
+
+                        <label>Penerbit</label>
+                        <div class="mb-1">
+                            <input type="text" class="form-control" name="penerbit" id="penerbit"/>
+                        </div>
+                        @endif
                         <label>Format file: PDF</label>
                         <div class="mb-1">
                             <input type="file" class="form-control" name="file" id="file"/>

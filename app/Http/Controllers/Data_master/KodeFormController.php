@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Data_master;
 
 use App\Http\Controllers\Controller;
 use App\Models\KodeForm;
+use App\Models\Perusahaan;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,6 +16,7 @@ class KodeFormController extends Controller
     public function index()
     {
         $data['active'] = "/data_master/kode_form";
+        $data['perusahaan'] = Perusahaan::where('status', 'A')->get();
         return view('data_master.kode_form.index', $data);
     }
 
@@ -37,6 +39,10 @@ class KodeFormController extends Controller
             'kode' => 'required|string|max:20',
             'nama' => 'required|string|max:100',
             'ket' => 'nullable|string|max:50',
+            'ket' => 'nullable|string|max:50',
+            'pj' => 'nullable|string|max:20',
+            'kode_file' => 'nullable|string|max:20',
+            'periode' => 'nullable|string|max:20',
             'intruksi' => 'nullable|string',
         ]);
 
@@ -64,6 +70,9 @@ class KodeFormController extends Controller
             'nama' => 'required|string|max:100',
             'ket' => 'nullable|string|max:50',
             'intruksi' => 'nullable|string',
+            'pj' => 'nullable|string|max:20',
+            'kode_file' => 'nullable|string|max:20',
+            'periode' => 'nullable|string|max:20',
         ]);
 
         $kodeForm = KodeForm::findOrFail($id);

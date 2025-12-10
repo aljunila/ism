@@ -95,12 +95,7 @@
                     {{$show->get_menyetujui()->nama}}
                 </td>
                 <td colspan="3" width="50%">Pemeriksa<br>
-                @if($show->get_periksa()->tanda_tangan)
-                <img src="file://{{ public_path('ttd_karyawan/' . $show->get_periksa()->tanda_tangan) }}" width="100px" height="75px"><br>
-                @else
-                <br><br><br>
-                @endif
-                    {{$show->get_periksa()->nama}}
+                
                 </td>
             </tr>
         </table>

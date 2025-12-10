@@ -69,7 +69,6 @@ class InterviewController extends Controller
     {
         $created = Session::get('userid');
         $date = date('Y-m-d H:i:s');
-        $periksa::
 
         $save = Interview::create([
           'uid' => Str::uuid()->toString(),

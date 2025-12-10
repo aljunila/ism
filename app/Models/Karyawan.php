@@ -13,7 +13,7 @@ class Karyawan extends Model
     protected $fillable = ['id', 'uid', 'nama', 'nik', 'nip', 'telp', 'email', 'alamat', 'tgl_lahir', 'tmp_lahir', 'jk', 'status_kawin', 'status_ptkp',
                            'agama', 'gol_darah', 'pend', 'institusi_pend', 'jurusan', 'sertifikat', 'tgl_mulai', 'id_jabatan', 'id_perusahaan', 'id_kapal', 
                            'tanda_tangan', 'foto', 'status', 'resign', 'created_by', 'created_date', 'changed_by', 'changed_date', 'status_karyawan', 'npwp', 
-                           'nama_bank', 'no_rekening', 'nama_rekening', 'cabang_bank', 'bpjs_kes', 'bpjs_tk'];
+                           'kontak_darurat', 'nama_kontak', 'telp_kontak', 'nama_bank', 'no_rekening', 'nama_rekening', 'cabang_bank', 'bpjs_kes', 'bpjs_tk'];
 
     public function get_jabatan()
     {

@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'auth' => \App\Http\Middleware\AuthMiddleware::class,
+            'auth.api' => \App\Http\Middleware\AuthApiMiddleware::class,
+            'active.role' => \App\Http\Middleware\EnsureActiveRole::class,
+            'menu.access' => \App\Http\Middleware\CheckMenuAccess::class,
+            'auth.token' => \App\Http\Middleware\TokenAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

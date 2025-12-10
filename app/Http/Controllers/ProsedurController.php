@@ -21,7 +21,7 @@ class ProsedurController extends Controller
 {
     public function show()
     {
-        $data['active'] = "prosedur";
+        $data['active'] = "procedures";
         return view('prosedur.show', $data);
     }
 
@@ -42,7 +42,8 @@ class ProsedurController extends Controller
     public function add() 
     {
         $data['active'] = "prosedur";
-        if(Session::get('previllage')==1) {
+        $roleJenis = Session::get('previllage');
+        if($roleJenis==1) { // superadmin
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
         } else {
             $id_perusahaan = Session::get('id_perusahaan');
@@ -95,7 +96,8 @@ class ProsedurController extends Controller
         $data['show'] = $show;
         $data['active'] = "prosedur";
         $data['perusahaan'] = Perusahaan::get();
-        if(Session::get('previllage')==1) {
+        $roleJenis = Session::get('previllage');
+        if($roleJenis==1) { // superadmin
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
         } else {
             $id_perusahaan = Session::get('id_perusahaan');
@@ -118,7 +120,8 @@ class ProsedurController extends Controller
     public function prosedurPdf($uid) {  
         $show = Prosedur::where('uid', $uid)->first();
 
-        if(Session::get('previllage')==4){
+        $roleJenis = Session::get('previllage');
+        if($roleJenis==4){
             $id_user = Session::get('userid');
             $id_prosedur = $show->id;
 
@@ -174,7 +177,7 @@ class ProsedurController extends Controller
 
     public function pdfdownload($uid) {
         $show = Prosedur::where('uid', $uid)->first();
-        if(Session::get('previllage')==4){
+        if($roleJenis==4){
             $id_user = Session::get('userid');
             $id_prosedur = $show->id;
 

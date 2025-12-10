@@ -24,11 +24,12 @@ class RefrensiDocController extends Controller
         $data['active'] = "el0101";
         $data['refrensi'] = KodeForm::where('kode', 'el0101')->first();
         $id_perusahaan = Session::get('id_perusahaan');
-        if(Session::get('previllage')==1) {
+        $roleJenis = Session::get('previllage'); // mapped dari role.jenis
+        if($roleJenis==1) { // superadmin
             $data['perusahaan'] = Perusahaan::where('status','A')->get();
             $data['kapal'] = Kapal::where('status', 'A')->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        } elseif(Session::get('previllage')==2) {
+        } elseif($roleJenis==2) { // admin perusahaan
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();

@@ -247,6 +247,38 @@
                                     <textarea class="form-control" id="alamat" name="alamat" required></textarea>
                                 </div>
                             </div>
+                            <hr>
+                            <label for="col-form-label">Kontak Darurat</label>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Hubungan</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="kontak_darurat" name="kontak_darurat">
+                                        <option value="Suami/Istri">Suami/Istri</option>
+                                        <option value="Anak">Anak</option>
+                                        <option value="Orangtua">Orangtua</option>
+                                        <option value="Saudara">Saudara</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Nama</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="nama_kontak" name="nama_kontak">
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">No Telp</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="number" class="form-control" id="telp_kontak" name="telp_kontak">
+                                </div>
+                            </div>
+                            <hr>
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Nama Bank</label>
@@ -402,8 +434,8 @@
                                     <label class="col-form-label" for="first-name">Level Akses</label>
                                 </div>
                                 <div class="col-sm-9">
-                                     <select name="id_previllage" id="id_previllage"  class="form-control">
-                                    @foreach($previllage as $p)
+                                     <select name="role_id" id="role_id"  class="form-control">
+                                    @foreach($roles as $p)
                                         <option value="{{$p->id}}">{{$p->nama}}</option>
                                     @endforeach
                                     </select>

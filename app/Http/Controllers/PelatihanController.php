@@ -13,6 +13,7 @@ use Session;
 \Carbon\Carbon::setLocale('id');
 use Str;
 use DB;
+use App\Support\RoleContext;
 
 class PelatihanController extends Controller
 {
@@ -20,15 +21,17 @@ class PelatihanController extends Controller
     {
         $data['active'] = "el0602";
         $data['form'] = KodeForm::where('kode', 'el0602')->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $id_perusahaan = Session::get('id_perusahaan');
-        if(Session::get('previllage')==1) {
+        $ctx = RoleContext::get();
+        $id_perusahaan = $ctx['perusahaan_id'];
+        if($ctx['is_superadmin']) {
             $data['perusahaan'] = Perusahaan::where('status','A')->get();
-        } elseif(Session::get('previllage')==2) {
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif($ctx['jenis']==2) {
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
         } else {
-            $id_kapal = Session::get('id_kapal');
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $ctx['kapal_id'])->get();
         }
         return view('refrensi.pelatihan', $data);
     }
@@ -37,15 +40,17 @@ class PelatihanController extends Controller
     {
         $data['active'] = "el0603";
         $data['form'] = KodeForm::where('kode', 'el0603')->first();
-        $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $id_perusahaan = Session::get('id_perusahaan');
-        if(Session::get('previllage')==1) {
+        $ctx = RoleContext::get();
+        $id_perusahaan = $ctx['perusahaan_id'];
+        if($ctx['is_superadmin']) {
             $data['perusahaan'] = Perusahaan::where('status','A')->get();
-        } elseif(Session::get('previllage')==2) {
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
+        } elseif($ctx['jenis']==2) {
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
         } else {
-            $id_kapal = Session::get('id_kapal');
             $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_kapal', $ctx['kapal_id'])->get();
         }
         return view('refrensi.pelatihan', $data);
     }
@@ -53,6 +58,7 @@ class PelatihanController extends Controller
     public function getData(Request $request)
     {
         $perusahaan = $request->input('id_perusahaan');
+        $ctx = RoleContext::get();
 
         $daftar = DB::table('pelatihan')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'pelatihan.id_perusahaan')
@@ -60,9 +66,8 @@ class PelatihanController extends Controller
                 ->select('pelatihan.*', 'perusahaan.nama as perusahaan', 'karyawan.nama as karyawan')
                 ->where('pelatihan.kode', $request->input('kode'))
                 ->where('pelatihan.status','A')
-                ->when($perusahaan, function($query, $perusahaan) {
-                    return $query->where('pelatihan.id_perusahaan', $perusahaan);
-                })
+                ->when($perusahaan, fn($query, $perusahaan) => $query->where('pelatihan.id_perusahaan', $perusahaan))
+                ->when($ctx['jenis']==2 && $ctx['perusahaan_id'], fn($q) => $q->where('pelatihan.id_perusahaan', $ctx['perusahaan_id']))
                 ->orderBy('pelatihan.id', 'DESC')
                 ->get();
 

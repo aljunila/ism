@@ -8,6 +8,6 @@ class KodeForm extends Model
 {
     public $timestamps = false;
     protected $table = 'kode_form';
-    protected $fillable = ['id', 'kode',  'nama', 'ket', 'intruksi'];
+    protected $fillable = ['id', 'kode',  'nama', 'ket', 'intruksi', 'is_delete', 'pj', 'kode_file', 'periode'];
 
 }

@@ -248,6 +248,38 @@
                                     <textarea class="form-control" id="alamat" name="alamat" required>{!! $show->alamat !!}</textarea>
                                 </div>
                             </div>
+                            <hr>
+                            <label for="col-form-label">Kontak Darurat</label>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Hubungan</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="kontak_darurat" name="kontak_darurat" >
+                                        <option value="Suami/Istri" @selected ($show->kontak_darurat=='Suami/Istri')>Suami/Istri</option>
+                                        <option value="Anak" @selected ($show->kontak_darurat=='Anak')>Anak</option>
+                                        <option value="Orangtua" @selected ($show->kontak_darurat=='Orangtua')>Orangtua</option>
+                                        <option value="Saudara" @selected ($show->kontak_darurat=='Saudara')>Saudara</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Nama</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="nama_kontak" name="nama_kontak" value="{{$show->nama_kontak}}">
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">No Telp</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="number" class="form-control" id="telp_kontak" name="telp_kontak" value="{{$show->telp_kontak}}">
+                                </div>
+                            </div>
+                            <hr>
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Nama Bank</label>

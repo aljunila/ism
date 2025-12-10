@@ -296,17 +296,23 @@
                 <div class="card-body">
                     <h5 class="fw-bolder border-bottom pb-50 mb-1">Ship Documents</h5>
                         <div class="table-responsive">
-                            <table class="table table-bordered" width="100%">
+                            <table class="table table-bordered" width="100%" border="1">
                                 <tr>
-                                    <td width="50%">Nama File</td>
-                                    <td width="25%">Kelompok</td>
-                                    <td width="25%">Aksi</td>
+                                    <th>Nama Dokumen</th>
+                                    <th>No</th>
+                                    <th>Penerbit</th>
+                                    <th>Tgl Terbit</th>
+                                    <th>Tgl Expired</th>
+                                    <th>Aksi</th>
                                 </tr>
                                 @foreach($file as $f)
                                 <tr>
-                                    <td width="50%">{{$f->nama}}</td>
-                                    <td width="25%">{{$f->ket}}</td>
-                                    <td width="25%">
+                                    <td width="30%">{{$f->nama}}</td>
+                                    <td width="15%">{{$f->no}}</td>
+                                    <td width="15%">{{$f->penerbit}}</td>
+                                    <td width="10%">{{$f->tgl_terbit}}</td>
+                                    <td width="10%">{{$f->tgl_expired}}</td>
+                                    <td width="20%">
                                             <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
                                                 title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
                                                 <i data-feather='upload'></i>
@@ -336,10 +342,30 @@
             <form id="form_file" enctype="multipart/form-data">
                     @csrf
                 <div class="modal-header">
-                    <h4 class="modal-title" id="file">Edit Data</h4>
+                    <h4 class="modal-title" id="file">Upload Document</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <label>Tgl Terbit</label>
+                        <div class="mb-1">
+                            <input type="date" class="form-control" name="tgl_terbit" id="tgl_terbit"/>
+                        </div>
+
+                        <label>Tgl Expired</label>
+                        <div class="mb-1">
+                            <input type="date" class="form-control" name="tgl_expired" id="tgl_expired"/>
+                        </div>
+
+                        <label>No Dokumen</label>
+                        <div class="mb-1">
+                            <input type="text" class="form-control" name="no" id="no"/>
+                        </div>
+
+                        <label>Penerbit</label>
+                        <div class="mb-1">
+                            <input type="text" class="form-control" name="penerbit" id="penerbit"/>
+                        </div>
+                        
                         <label>Format file: PDF</label>
                         <div class="mb-1">
                             <input type="file" class="form-control" name="file" id="file"/>

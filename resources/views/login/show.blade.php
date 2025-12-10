@@ -9,6 +9,7 @@
     <meta name="description" content="Vuexy admin is super flexible, powerful, clean &amp; modern responsive bootstrap 4 admin template with unlimited possibilities.">
     <meta name="keywords" content="admin template, Vuexy admin template, dashboard template, flat admin template, responsive admin template, web app">
     <meta name="author" content="PIXINVENT">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>TFM - Trimas Ferries Management</title>
     <link rel="apple-touch-icon" href="{{ url('/vuexy/app-assets/images/ico/apple-icon-120.png')}}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ url('/img/trimas.png')}}">
@@ -61,7 +62,7 @@
                                 </a>
                                 <p class="card-text mb-2">Silahkan masukkan Username dan Password Anda</p></center>
 
-                                <form class="auth-login-form mt-2" action="{{ route('actionlogin') }}" method="POST">
+                                <form class="auth-login-form mt-2">
                                 @csrf
                                     @if ($errors->any())
                                         <div class="alert alert-danger">
@@ -92,7 +93,7 @@
                                     <p class="text-center mt-2">
                                         <a href="/buatakun"><span>Belum punya akun?</span></a>
                                     </p>
-                                    <button class="btn btn-primary w-100" tabindex="4" type="submit">Log In</button>
+                                    <button class="btn btn-primary w-100" id="btn-login" tabindex="4" type="submit">Log In</button>
                                 </form>
                             </div>
                         </div>
@@ -122,6 +123,7 @@
     <!-- BEGIN: Page JS-->
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/auth-login.js')}}"></script>
     <!-- END: Page JS-->
+    <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/sweetalert2.all.min.js')}}"></script>
 
     <script>
         $(window).on('load', function() {
@@ -132,6 +134,55 @@
                 });
             }
         })
+
+        $(function () {
+            const form = $('.auth-login-form');
+            const btn = $('#btn-login');
+
+            const doLogin = () => {
+                btn.prop('disabled', true).text('Memproses...');
+                $.ajax({
+                    url: "{{ route('actionlogin') }}",
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        // simpan token jika ada
+                        if (response && response.access_token) {
+                            localStorage.setItem('access_token', response.access_token);
+                        }
+                        if (response && response.refresh_token) {
+                            localStorage.setItem('refresh_token', response.refresh_token);
+                        }
+                        window.location.href = '/dashboard';
+                    },
+                    error: function (xhr) {
+                        let msg = 'Login gagal';
+                        if (xhr.status === 401 || xhr.status === 403) {
+                            msg = 'Username atau password salah / tidak diizinkan';
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Gagal', msg, 'error');
+                        // bersihkan token jika gagal
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('refresh_token');
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false).text('Log In');
+                    }
+                });
+            };
+
+            btn.on('click', function (e) {
+                e.preventDefault();
+                doLogin();
+            });
+
+            form.on('submit', function (e) {
+                e.preventDefault();
+                doLogin();
+            });
+        });
     </script>
 </body>
 <!-- END: Body-->

@@ -20,14 +20,30 @@ class KapalController extends Controller
 {
     public function show()
     {
-        $data['daftar'] = Kapal::where('status', 'A')->get();
+        $roleJenis = Session::get('previllage');
+        $activeCompany = Session::get('id_perusahaan');
+        $activeShip = Session::get('id_kapal');
+
+        $data['daftar'] = Kapal::where('status', 'A')
+            ->when($roleJenis == 1, function ($q) {
+                return $q;
+            })
+            ->when($roleJenis == 2 && $activeCompany, function ($q) use ($activeCompany) {
+                return $q->where('pemilik', $activeCompany);
+            })
+            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
+                return $q->where('id', $activeShip);
+            })
+            ->get();
         $data['active'] = "kapal";
         return view('kapal.show', $data);
     }
 
     public function getData(Request $request) {
         $perusahaan = $request->input('id_perusahaan');
-        $kapal = Session::get('previllage') >= 3 ? Session::get('id_kapal') : null;
+        $roleJenis = Session::get('previllage');
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : null;
+        $activeCompany = Session::get('id_perusahaan');
         $get = DB::table('kapal')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'kapal.pemilik')
                 ->select('kapal.*', 'perusahaan.nama as perusahaan')
@@ -35,9 +51,8 @@ class KapalController extends Controller
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('perusahaan.id', $perusahaan);
                 })
-                ->when($kapal, function($query, $kapal) {
-                    return $query->where('kapal.id', $kapal);
-                })
+                ->when($roleJenis == 2 && $activeCompany, fn($query) => $query->where('perusahaan.id', $activeCompany))
+                ->when($kapal, fn($query) => $query->where('kapal.id', $kapal))
                 ->get();
         return response()->json(['data' => $get]);
     }
@@ -45,12 +60,14 @@ class KapalController extends Controller
     public function add() 
     {
         $data['active'] = "kapal";
-        if(Session::get('previllage')==1) {
-            $data['perusahaan'] = Perusahaan::where('status','A')->get();
-        } else {
-            $id_perusahaan = Session::get('id_perusahaan');
-            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
-        }
+        $roleJenis = Session::get('previllage');
+        $id_perusahaan = Session::get('id_perusahaan');
+        $data['perusahaan'] = Perusahaan::where('status','A')
+            ->when($roleJenis == 1, function ($q) { return $q; })
+            ->when($roleJenis != 1 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                return $q->where('id', $id_perusahaan);
+            })
+            ->get();
         return view('kapal.add', $data);
     }
   
@@ -105,12 +122,14 @@ class KapalController extends Controller
         $show = Kapal::where('uid', $uid)->first();
         $data['show'] = $show;
         $data['active'] = "Kapal";
-        if(Session::get('previllage')==1) {
-            $data['perusahaan'] = Perusahaan::where('status','A')->get();
-        } else {
-            $id_perusahaan = Session::get('id_perusahaan');
-            $data['perusahaan'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
-        }
+        $roleJenis = Session::get('previllage');
+        $id_perusahaan = Session::get('id_perusahaan');
+        $data['perusahaan'] = Perusahaan::where('status','A')
+            ->when($roleJenis == 1, function ($q) { return $q; })
+            ->when($roleJenis != 1 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                return $q->where('id', $id_perusahaan);
+            })
+            ->get();
         return view('kapal.edit',$data);
     }
 
@@ -175,7 +194,7 @@ class KapalController extends Controller
                 })
                 ->where('a.type', 'K')
                 ->where('a.status', 'A')
-                ->select('a.*', 'b.file')
+                ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
                 ->orderBy('a.ket', 'ASC')
                 ->get();
         return view('kapal.profile',$data);
@@ -201,7 +220,7 @@ class KapalController extends Controller
     public function savefile(Request $request, $id)
     {
         $request->validate([
-            'file' => 'nullable|file|mimes:pdf|max:20480',
+            'file' => 'nullable|file|mimes:pdf|max:60480',
         ]);
 
         $cek = FileUpload::where('id_file', $id)->where('id_kapal', $request->input('id_kapal'))->first();
@@ -219,6 +238,10 @@ class KapalController extends Controller
             $save = FileUpload::insert([
                 'id_kapal' => $request->input('id_kapal'),
                 'id_file'  => $id,
+                'tgl_terbit' => $request->input('tgl_terbit'),
+                'tgl_expired' => $request->input('tgl_expired'),
+                'no' => $request->input('no'),
+                'penerbit' => $request->input('penerbit'),
                 'file' => $nama_file,
                 'status' => 'A',
                 'created_by' => Session::get('userid'),

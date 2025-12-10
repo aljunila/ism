@@ -27,6 +27,6 @@ class Interview extends Model
 
     public function get_jabatan()
     {
-        return  $this->hasOne(Karyawan::class, 'id', 'id_jabatan')->first();
+        return  $this->hasOne(Jabatan::class, 'id', 'id_jabatan')->first();
     }
 }

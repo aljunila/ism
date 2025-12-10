@@ -12,141 +12,163 @@
 
 @endsection
 @section('content')
+<style>
+    .dash-hero {
+        background: linear-gradient(135deg, #0d6efd, #3a8df7);
+        border-radius: 16px;
+        color: #fff;
+        padding: 28px;
+        box-shadow: 0 10px 25px rgba(0, 60, 136, 0.2);
+    }
+    .stat-card {
+        border: 1px solid #e6ebf1;
+        border-radius: 14px;
+        padding: 16px 18px;
+        box-shadow: 0 12px 18px -12px rgba(13, 110, 253, 0.35);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 26px -14px rgba(13,110,253,0.55);
+    }
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(13,110,253,0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+    }
+    .stat-value {
+        font-size: 26px;
+        font-weight: 700;
+        color: #1f2d3d;
+    }
+    .stat-label {
+        margin: 0;
+        color: #6c7a8a;
+        font-size: 13px;
+    }
+    .table-minimal thead {
+        background: #e9f2ff;
+        color: #0d3a6e;
+    }
+    .table-minimal td, .table-minimal th {
+        vertical-align: middle;
+    }
+    .text-blue {
+        color: #0d6efd !important;
+    }
+</style>
 <section id="dashboard-ecommerce">
-                    <div class="row match-height">
-                        <!-- Statistics Card -->
-                        <div class="col-12">
-                            <div class="card card-congratulations">
-                                <div class="card-body text-center">
-                                    <img src="{{ url('/vuexy/app-assets/images/elements/decore-left.png')}}" class="congratulations-img-left" alt="card-img-left" />
-                                    <img src="{{ url('/vuexy/app-assets/images/elements/decore-right.png')}}" class="congratulations-img-right" alt="card-img-right" />
-                                    <div class="avatar avatar-xl bg-primary shadow">
-                                        <div class="avatar-content">
-                                            <i data-feather="award" class="font-large-1"></i>
-                                        </div>
-                                    </div>
-                                    <div class="text-center">
-                                        <h1 class="mb-1 text-white">Hallo {{Session::get('name') }}</h1>
-                                        <p class="card-text m-auto w-75">
-                                            Selamat datang di sistem TFM (Trimas Ferries Management)<br>
-                                            <h5 class="text-white">{{$com->nama}}</h5>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @if(Session::get('previllage')!=4)
-                        <div class="col-12">
-                            <div class="card card-statistics">
-                                <div class="card-header">
-                                    <h4 class="card-title">Statistics</h4>
-                                    <div class="d-flex align-items-center">
-                                        <p class="card-text font-small-2 me-25 mb-0">Updated Today</p>
-                                    </div>
-                                </div>
-                                <div class="card-body statistics-body">
-                                    <div class="row">
-                                        @if(!empty($perusahaan))
-                                        <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
-                                            <div class="d-flex flex-row">
-                                                <div class="avatar bg-light-primary me-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="home" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">{{$perusahaan}}</h4>
-                                                    <p class="card-text font-small-3 mb-0">Perusahaan</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                        @if(!empty($kapal))
-                                        <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
-                                            <div class="d-flex flex-row">
-                                                <div class="avatar bg-light-info me-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="anchor" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">{{$kapal}}</h4>
-                                                    <p class="card-text font-small-3 mb-0">Kapal</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                        @if(!empty($karyawan))
-                                        <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-sm-0">
-                                            <div class="d-flex flex-row">
-                                                <div class="avatar bg-light-danger me-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="user" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">{{$karyawan}}</h4>
-                                                    <p class="card-text font-small-3 mb-0">Karyawan</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                        @if(!empty($user))
-                                        <div class="col-xl-3 col-sm-6 col-12">
-                                            <div class="d-flex flex-row">
-                                                <div class="avatar bg-light-success me-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="user-check" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="my-auto">
-                                                    <h4 class="fw-bolder mb-0">{{$user}}</h4>
-                                                    <p class="card-text font-small-3 mb-0">User Aktif</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @else
-                        @if(Session::get('id_kapal')!=0)
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <p>Frekuensi Akses Prosedur</p>
-                                        <table id="tabledetail" class="table table-bordered table-striped">
-                                            <thead>
-                                            <tr>
-                                                <td>Prosedur</td>
-                                                <td>Lihat</td>
-                                                <td>Terakhir Lihat</td>
-                                                <td>Download</td>
-                                                <td>Terakhir Download</td>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @foreach($prosedur as $show)
-                                            <tr>
-                                                <td>{{$show->kode}}</td>
-                                                <td>{{$show->jml_lihat}}x</td>
-                                                <td>@if($show->update_lihat) {{ \Carbon\Carbon::parse($show->update_lihat)->addHours(7)->format('d-m-Y H:i') }} @else - @endif</td>
-                                                <td>{{$show->jml_download}}x</td>
-                                                 <td>@if($show->update_download) {{ \Carbon\Carbon::parse($show->update_download)->addHours(7)->format('d-m-Y H:i') }} @else - @endif</td>
-                                            </tr>
-                                            @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                        @endif
-                        <!--/ Statistics Card -->
-                    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:1rem;padding-left:1rem;padding-right:1rem;">
+        <div>
+            <h2>Selamat Datang Kembali, {{ Session::get('name') }}</h2>
+            <p class="mb-0 text-white-75">{{$com->nama}}</p>
+        </div>
 
+        <div class="d-flex align-items-center mt-3 mt-md-0">
+            <div class="stat-icon me-2">
+                <i data-feather="award"></i>
+            </div>
+            <div class="text-white-75 small">Akses aktif • {{ date('d M Y') }}</div>
+        </div>
+    </div>
+
+    @if(Session::get('previllage')!=4)
+        <div class="row g-2">
+            @if(!empty($perusahaan))
+            <div class="col-lg-3 col-sm-6 col-12">
+                <div class="stat-card h-100 d-flex align-items-center">
+                    <div class="stat-icon me-2">
+                        <i data-feather="home"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bolder text-xl">{{$perusahaan}}</h4>
+                        <p class="fw-bolder">Perusahaan</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+            @if(!empty($kapal))
+            <div class="col-lg-3 col-sm-6 col-12">
+                <div class="stat-card h-100 d-flex align-items-center">
+                    <div class="stat-icon me-2">
+                        <i data-feather="anchor"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bolder text-xl">{{$kapal}}</h4>
+                        <p class="fw-bolder">Kapal</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+            @if(!empty($karyawan))
+            <div class="col-lg-3 col-sm-6 col-12">
+                <div class="stat-card h-100 d-flex align-items-center">
+                    <div class="stat-icon me-2">
+                        <i data-feather="user"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bolder text-xl">{{$karyawan}}</h4>
+                        <p class="fw-bolder">Karyawan</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+            @if(!empty($user))
+            <div class="col-lg-3 col-sm-6 col-12">
+                <div class="stat-card h-100 d-flex align-items-center">
+                    <div class="stat-icon me-2">
+                        <i data-feather="user-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bolder text-xl">{{$user}}</h4>
+                        <p class="fw-bolder">User Aktif</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+    @else
+        @if(Session::get('id_kapal')!=0)
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h5 class="mb-0 text-blue">Frekuensi Akses Prosedur</h5>
+                            <span class="text-muted small">Live</span>
+                        </div>
+                        <table id="tabledetail" class="table table-minimal table-striped">
+                            <thead>
+                            <tr>
+                                <th>Prosedur</th>
+                                <th>Lihat</th>
+                                <th>Terakhir Lihat</th>
+                                <th>Download</th>
+                                <th>Terakhir Download</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($prosedur as $show)
+                            <tr>
+                                <td>{{$show->kode}}</td>
+                                <td>{{$show->jml_lihat}}x</td>
+                                <td>@if($show->update_lihat) {{ \Carbon\Carbon::parse($show->update_lihat)->addHours(7)->format('d-m-Y H:i') }} @else - @endif</td>
+                                <td>{{$show->jml_download}}x</td>
+                                <td>@if($show->update_download) {{ \Carbon\Carbon::parse($show->update_download)->addHours(7)->format('d-m-Y H:i') }} @else - @endif</td>
+                            </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
 </section>
 @endsection

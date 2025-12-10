@@ -20,11 +20,14 @@ class PerusahaanController extends Controller
 {
     public function show()
     {
-        if(Session::get('previllage')==1) {
+        $roleJenis = Session::get('previllage'); // mapped dari role.jenis
+        $id_perusahaan = Session::get('id_perusahaan');
+        if($roleJenis==1) { // superadmin
             $data['daftar'] = Perusahaan::where('status','A')->get();
         } else {
-            $id_perusahaan = Session::get('id_perusahaan');
-            $data['daftar'] = Perusahaan::where('status','A')->where('id', $id_perusahaan)->get();
+            $data['daftar'] = Perusahaan::where('status','A')
+                ->when($id_perusahaan, fn($q) => $q->where('id', $id_perusahaan))
+                ->get();
         }
         $data['active'] = "perusahaan";
         return view('perusahaan.show', $data);

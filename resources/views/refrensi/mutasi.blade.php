@@ -312,7 +312,7 @@ $(document).on('click', '#btn-pdf', function() {
                             </div>
                                 @include('filter')
                             <div class="col-3">
-                                <button type="button" class="btn btn-primary btn-sm float-right" data-bs-toggle="modal" data-bs-target="#FormTambah">Tambah Data</button>
+                                <!-- <button type="button" class="btn btn-primary btn-sm float-right" data-bs-toggle="modal" data-bs-target="#FormTambah">Tambah Data</button> -->
                                 <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#FormDownload">Cetak Laporan</button>
                             </div>
                     </div>

@@ -9,6 +9,9 @@ use App\Models\User;
 use App\Models\Menu;
 use App\Models\Karyawan;
 use App\Models\ResetPassword;
+use App\Models\Role;
+use App\Models\RoleMenu;
+use App\Support\TokenService;
 use Session;
 use Validator;
 use DB;
@@ -22,63 +25,100 @@ class LoginController extends Controller
 
     public function actionlogin(Request $request)
     {
-        $rules = [
-            'username'              => 'required|string',
-            'password'              => 'required|string'
-        ];
-        $messages = [
-            'username.required'     => 'Username wajib diisi',
-            'username.username'     => 'Username tidak valid',
-            'password.required'     => 'Password wajib diisi',
-            'password.string'       => 'Password harus berupa string'
-        ];
-
         $username = $request->input('username');
         $password = $request->input('password');
         $data = User::where('username', $username)->first();
 
         try {
             if ($data && Hash::check($password, $data->password)) {
-                if($data->id_previllage!=1) {
+                $roleId = $data->role_id ?? $data->id_previllage;
+                $role = Role::find($roleId);
+                $isSuper = $role && (int)($role->is_superadmin ?? 0) === 1;
+
+                // Tolak login jika bukan superadmin dan jenis belum di-set
+                if (!$role || (!$isSuper && is_null($role->jenis))) {
+                    return response()->json(['message' => 'Role belum diatur, tidak dapat login'], 403);
+                }
+
+                if(!$isSuper) {
                     $cek = Karyawan::where('id', $data->id_karyawan)
                                     ->where('karyawan.status', 'A')
                                     ->where('karyawan.resign', 'N')
                                     ->first();
-                    if($cek) {  
-                        Session::put('userid',$data->id);
-                        Session::put('username',$data->username);
-                        Session::put('name',$data->nama);
-                        Session::put('userid',$data->id);
-                        Session::put('previllage',$data->id_previllage);
-                        Session::put('id_karyawan',$data->id_karyawan);
-                        Session::put('id_perusahaan',$data->id_perusahaan);
-                        Session::put('id_kapal',$data->id_kapal);
-                        Session::put('pic',$data->pic);
-                        Session::put('login',TRUE);
-                        return redirect('/dashboard');
-                    } else {
-                        $messages = ['Maaf akun Anda sudah tidak aktif'];
-                        return redirect()->back()->withErrors($messages);
+                    if(!$cek) {
+                        return response()->json(['message' => 'Maaf akun Anda sudah tidak aktif'], 403);
                     }
-                } else {
-                    Session::put('userid',$data->id);
-                    Session::put('username',$data->username);
-                    Session::put('name',$data->nama);
-                    Session::put('userid',$data->id);
-                    Session::put('previllage',$data->id_previllage);
-                    Session::put('id_karyawan',$data->id_karyawan);
-                    Session::put('id_perusahaan',$data->id_perusahaan);
-                    Session::put('pic',$data->pic);
-                    Session::put('login',TRUE);
-                    return redirect('/dashboard');
                 }
+
+                Auth::login($data);
+                $request->session()->regenerate();
+
+                $jenis = (int) ($role->jenis ?? 0);
+                $previllageLegacy = 4;
+                if ($isSuper) {
+                    $previllageLegacy = 1;
+                } elseif ($jenis === 1) {
+                    $previllageLegacy = 2;
+                } elseif ($jenis === 2) {
+                    $previllageLegacy = 3;
+                } elseif ($jenis === 3) {
+                    $previllageLegacy = 4;
+                }
+
+                Session::put('userid',$data->id);
+                Session::put('username',$data->username);
+                Session::put('name',$data->nama);
+                Session::put('userid',$data->id);
+                Session::put('role_id',$roleId);
+                Session::put('previllage',$previllageLegacy); // legacy mapping
+                Session::put('id_karyawan',$data->id_karyawan);
+                Session::put('id_perusahaan',$data->id_perusahaan);
+                Session::put('id_kapal',$data->id_kapal);
+                Session::put('pic',$data->pic);
+                Session::put('login',TRUE);
+                // set context role/perusahaan aktif
+                Session::put('active_role_id', $roleId);
+                Session::put('active_perusahaan_id', $data->id_perusahaan);
+                // issue tokens
+                $tokens = TokenService::issue($data);
+                return response()->json([
+                    'redirect' => '/dashboard',
+                    'access_token' => $tokens['access_token'],
+                    'refresh_token' => $tokens['refresh_token'],
+                    'access_token_expires_at' => $tokens['access_token_expires_at'],
+                    'refresh_token_expires_at' => $tokens['refresh_token_expires_at'],
+                ]);
             } else { 
-                $messages = ['Username atau password tidak sesuai'];
-                return redirect()->back()->withErrors($messages);
+                return response()->json(['message' => 'Username atau password tidak sesuai'], 401);
             }
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['Username atau password tidak sesuai']);
+            return response()->json(['message' => 'Login gagal'], 500);
         }
+    }
+
+    public function refreshToken(Request $request)
+    {
+        $request->validate([
+            'refresh_token' => 'required|string',
+            'username' => 'required|string',
+        ]);
+
+        $user = User::where('username', $request->input('username'))->first();
+        if (!$user) {
+            return response()->json(['message' => 'User tidak ditemukan'], 404);
+        }
+
+        $tokens = TokenService::refresh($user, $request->input('refresh_token'));
+        if (!$tokens) {
+            return response()->json(['message' => 'Refresh token invalid atau kedaluwarsa'], 401);
+        }
+
+        return response()->json([
+            'access_token' => $tokens['access_token'],
+            'refresh_token' => $tokens['refresh_token'],
+            'access_token_expires_at' => $tokens['access_token_expires_at'],
+            'refresh_token_expires_at' => $tokens['refresh_token_expires_at'],
+        ]);
     }
 
     public function logout(){
@@ -143,20 +183,20 @@ class LoginController extends Controller
 
     public function getMenu()
     {
-        $previllage = Session::get('previllage');
-        $id = Session::get('id_karyawan');
+        $roleId = Session::get('active_role_id', Session::get('previllage'));
+        $role = Role::find($roleId);
+        $isSuper = $role && (int)($role->is_superadmin ?? 0) === 1;
 
-        if ($previllage == 1) {
+        if ($isSuper) {
             $menus = Menu::where('status', 'A')
                 ->orderBy('no', 'ASC')
                 ->get();
         } else {
-            $menus = DB::table('akses')
-                ->leftJoin('menu', 'menu.id', '=', 'akses.id_menu')
+            $menus = DB::table('role_menu')
+                ->leftJoin('menu', 'menu.id', '=', 'role_menu.menu_id')
+                ->where('role_menu.role_id', $roleId)
                 ->where('menu.status', 'A')
-                ->where('akses.id_karyawan', $id)
-                ->where('menu_user', 'N')
-                ->orderBy('no', 'ASC')
+                ->orderBy('menu.no', 'ASC')
                 ->select('menu.*')
                 ->get();
             $dashboard = Menu::where('kode', 'dashboard')->first();
@@ -212,6 +252,7 @@ class LoginController extends Controller
                 'username' => $get->nik,
                 'password' => Hash::make($request->input('password1')),
                 'id_previllage' => 4,
+                'role_id' => 4,
                 'id_perusahaan' => $get->id_perusahaan,
                 'id_kapal' => $get->id_kapal,
                 'id_karyawan'=> $get->id,

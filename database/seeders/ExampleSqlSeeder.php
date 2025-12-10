@@ -32,6 +32,7 @@ class ExampleSqlSeeder extends Seeder
         $orderedTables = [
             'status_ptkp',
             'previllage',
+            'roles',
             'perusahaan',
             'jabatan',
             'kapal',

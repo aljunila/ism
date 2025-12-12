@@ -52,6 +52,15 @@
                     </select>
                 </div>
                 <div class="mb-1">
+                    <label class="form-label">Jenis</label>
+                    <select name="jenis_role" class="form-select" id="jenis_role">
+                        <option value="">Pilih Jenis</option>
+                        <option value="1">Admin Perusahaan</option>
+                        <option value="2">Admin Kapal</option>
+                        <option value="3">Karyawan</option>
+                    </select>
+                </div>
+                <div class="mb-1">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="role_superadmin">
                         <label class="form-check-label" for="role_superadmin">Superadmin (akses semua perusahaan, tanpa mapping menu)</label>
@@ -100,6 +109,7 @@
             $('#role_kode').val('');
             $('#role_nama').val('');
             $('#role_status').val('A');
+            $('#jenis_role').val('');
             $('#role_superadmin').prop('checked', false);
             $('#btn-save-role').data('mode', 'create').data('id', '');
         };
@@ -116,6 +126,7 @@
                 kode: $('#role_kode').val(),
                 nama: $('#role_nama').val(),
                 status: $('#role_status').val(),
+                jenis: $('#jenis_role').val(),
                 is_superadmin: $('#role_superadmin').is(':checked') ? 1 : 0,
             };
             const ajaxOpts = {
@@ -139,6 +150,7 @@
             $('#role_kode').val(btn.data('kode'));
             $('#role_nama').val(btn.data('nama'));
             $('#role_status').val(btn.data('status'));
+            $('#jenis_role').val(btn.data('jenis'));
             $('#role_superadmin').prop('checked', btn.data('superadmin') == 1);
             $('#btn-save-role').data('mode', 'edit').data('id', btn.data('id'));
             $('#modal-role').modal('show');

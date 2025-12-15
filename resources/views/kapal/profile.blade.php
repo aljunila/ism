@@ -9,6 +9,7 @@
     <!-- END: Vendor CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/extensions/ext-component-sweet-alerts.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/forms/form-validation.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/dataTables.bootstrap5.min.css')}}">
     
 @endsection
 
@@ -26,8 +27,55 @@
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/modal-edit-user.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/app-user-view-account.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/app-user-view.js')}}"></script>
+    <script src="{{ url('/assets/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
 
     <script>
+        let table;
+        $(function () {
+            table = $('#table').DataTable({
+                processing: true,
+                ordering: false,
+                searchable: false,
+                ajax:{
+                url: "/kapal/datafile",
+                type: "POST",
+                data: function(d){
+                    d.id_kapal= "{{$show->id}}",
+                    d._token= "{{ csrf_token() }}"
+                },
+            },
+            columns: [
+                { data: 'nama' },
+                { data: 'ket' },
+                { data: 'penerbit' },
+                { data: 'tgl_terbit' },
+                { 
+                    data: null,
+                    render: function(data, type, row){
+                        return `
+                            <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
+                                title="Upload File" data-id="${data.id}" data-file="${data.nama}">
+                                <i data-feather='upload'></i>
+                            </button>
+                            ${row.file ? `
+                            <a href="{{ asset('file_upload') }}/${row.file}"class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
+                                title="Buka File" target="_blank">
+                                <i data-feather="file"></i>
+                            </a>
+                            ` : ''}
+                        `;
+                    }
+                }
+            ],
+            drawCallback: function(settings) {
+            feather.replace(); // supaya icon feather muncul ulang
+            }
+            });
+        });
+
         $(document).on('click', '.upload-btn', function(){
             let id = $(this).attr('data-id');
             let file = $(this).attr('data-file');
@@ -70,13 +118,45 @@
                 }
             });
         });
+
+         $('#form_docking').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let formData = new FormData(this);
+                id= "{{$show->id}}"
+            $.ajax({
+                url: "/kapal/docking_store/" + id,
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'Data berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#FormDocking').modal('hide');
+                            window.location.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan data'
+                    });
+                }
+            });
+        });
     </script>
 @endsection
 @section('content')
 <section class="app-user-view-account">
     <div class="row">
         <!-- User Sidebar -->
-        <div class="col-xl-3 col-lg-5 col-md-5 order-1 order-md-0">
+        <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0">
             <!-- User Card -->
             <div class="card">
                 <div class="card-body">
@@ -130,13 +210,45 @@
                         </ul>
                     </div>
                 </div>
-            </div>                            
+            </div>
+            
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h5 class="fw-bolder">Riwayat Docking</h5>
+                    <button class="btn btn-primary btn-sm float-right me-1" data-bs-toggle="modal" data-bs-target="#FormDocking">Tambah Data</button>
+                </div><br>
+                <div class="card-body">
+                    <div class="info-container">
+                        <table class="table table-bordered table-striped" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Tgl Mulai</th>
+                                    <th>Tgl Selesai</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($docking as $d)
+                                    <tr>
+                                        <td>{{$d->tgl_mulai}}</td>
+                                        <td>{{$d->tgl_selesai}}</td>
+                                        <td><a type="button" href="{{ asset('file_docking/'.$d->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
+                                                title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">
+                                                <i data-feather='file'></i>
+                                            </a></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <!-- /User Card -->
         </div>
         <!--/ User Sidebar -->
 
         <!-- User Content -->
-        <div class="col-xl-9 col-lg-7 col-md-7 order-0 order-md-1">
+        <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
             <!-- Project table -->
             <div class="card">
                 <div class="card-header border-bottom">
@@ -296,36 +408,18 @@
                 <div class="card-body">
                     <h5 class="fw-bolder border-bottom pb-50 mb-1">Ship Documents</h5>
                         <div class="table-responsive">
-                            <table class="table table-bordered" width="100%" border="1">
+                            <table class="table table-bordered" width="100%" id="table">
+                                <thead>
                                 <tr>
                                     <th>Nama Dokumen</th>
-                                    <th>No</th>
+                                    <th>Keterangan</th>
                                     <th>Penerbit</th>
-                                    <th>Tgl Terbit</th>
-                                    <th>Tgl Expired</th>
+                                    <th>Tgl Terbit/Expired</th>
                                     <th>Aksi</th>
                                 </tr>
-                                @foreach($file as $f)
-                                <tr>
-                                    <td width="30%">{{$f->nama}}</td>
-                                    <td width="15%">{{$f->no}}</td>
-                                    <td width="15%">{{$f->penerbit}}</td>
-                                    <td width="10%">{{$f->tgl_terbit}}</td>
-                                    <td width="10%">{{$f->tgl_expired}}</td>
-                                    <td width="20%">
-                                            <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
-                                                title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
-                                                <i data-feather='upload'></i>
-                                            </button>
-                                        @if(!empty($f->file))
-                                            <a type="button" href="{{ asset('file_upload/'.$f->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
-                                                title="Buka File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
-                                                <i data-feather='file'></i>
-                                            </a>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @endforeach
+                                </thead>
+                                <tbody></tbody>
+                                
                             </table>
                         </div>
                 </div>
@@ -342,7 +436,7 @@
             <form id="form_file" enctype="multipart/form-data">
                     @csrf
                 <div class="modal-header">
-                    <h4 class="modal-title" id="file">Upload Document</h4>
+                    <h4 class="modal-title">Upload Document</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -377,6 +471,49 @@
                     <button type="submit" class="btn btn-primary" id="save_file">Simpan</button>
                 </div>
             </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-start" id="FormDocking" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel33">Data Docking</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form_docking" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Tgl Mulai</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" name="tgl_mulai" id="tgl_mulai">
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Tgl Selesai</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" name="tgl_selesai" id="tgl_selesai">
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Upload File : PDF</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" name="file" id="file_docking">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="edit_data">Simpan</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

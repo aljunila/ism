@@ -25,6 +25,7 @@ class FileController extends Controller
                 ->when($kode, function($query, $kode) {
                     return $query->where('type', $kode);
                 })
+                ->orderBy('no_urut', 'ASC')
                 ->get();
 
         return response()->json([
@@ -55,6 +56,7 @@ class FileController extends Controller
           'type' => $request->input('type'),
           'nama' => $request->input('nama'),
           'ket' => $ket,
+          'no_urut' => $request->input('no'),
           'status' => 'A',
           ]);
         if($save) {
@@ -81,7 +83,7 @@ class FileController extends Controller
         } else{
             $ket = '';
         }
-      $post = MasterFile::where('id',$id)->update(['nama'=>$nama, 'ket'=>$ket]);     
+      $post = MasterFile::where('id',$id)->update(['nama'=>$nama, 'ket'=>$ket, 'no_urut' => $request->input('no')]);     
       return response()->json(['success' => true]);
     }
 

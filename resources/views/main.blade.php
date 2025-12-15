@@ -242,6 +242,14 @@
                             'link' => url('/acl/users'),
                             'icon' => "<i data-feather='circle'></i>",
                         ],
+                        (object) [
+                            'id' => 99994,
+                            'id_parent' => 9999,
+                            'kode' => '/acl/cabang',
+                            'nama' => 'Cabang',
+                            'link' => url('/acl/cabang'),
+                            'icon' => "<i data-feather='circle'></i>",
+                        ],
                     ];
                 }
 

@@ -8,6 +8,7 @@ use App\Models\Perusahaan;
 use App\Models\Kapal;
 use App\Models\MasterFile;
 use App\Models\FileUpload;
+use App\Models\Docking;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -187,16 +188,7 @@ class KapalController extends Controller
         $id_kapal = $show->id;
         $data['show'] = $show;
         $data['active'] = "kapal";
-        $data['file'] = DB::table('master_file as a')
-                ->leftJoin('file_upload as b', function($join) use ($id_kapal) {
-                    $join->on('a.id', '=', 'b.id_file')
-                        ->where('b.id_kapal', $id_kapal); 
-                })
-                ->where('a.type', 'K')
-                ->where('a.status', 'A')
-                ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
-                ->orderBy('a.ket', 'ASC')
-                ->get();
+        $data['docking'] = Docking::where('id_kapal', $id_kapal)->where('is_delete', 0)->get();
         return view('kapal.profile',$data);
     }
 
@@ -234,18 +226,32 @@ class KapalController extends Controller
             $file = $request->file('file');
             $nama_file = time() . "_" . str_replace(" ", "_", $file->getClientOriginalName());
             $file->move(public_path('file_upload'), $nama_file);
-
-            $save = FileUpload::insert([
-                'id_kapal' => $request->input('id_kapal'),
-                'id_file'  => $id,
-                'tgl_terbit' => $request->input('tgl_terbit'),
-                'tgl_expired' => $request->input('tgl_expired'),
-                'no' => $request->input('no'),
-                'penerbit' => $request->input('penerbit'),
-                'file' => $nama_file,
-                'status' => 'A',
-                'created_by' => Session::get('userid'),
-            ]); 
+            if($cek) {
+                $save = FileUpload::find($cek->id)->update([
+                    'id_kapal' => $request->input('id_kapal'),
+                    'id_file'  => $id,
+                    'tgl_terbit' => $request->input('tgl_terbit'),
+                    'tgl_expired' => $request->input('tgl_expired'),
+                    'no' => $request->input('no'),
+                    'penerbit' => $request->input('penerbit'),
+                    'file' => $nama_file,
+                    'status' => 'A',
+                    'changed_by' => Session::get('userid'),
+                ]); 
+            } else {
+                $save = FileUpload::insert([
+                    'id_kapal' => $request->input('id_kapal'),
+                    'id_file'  => $id,
+                    'tgl_terbit' => $request->input('tgl_terbit'),
+                    'tgl_expired' => $request->input('tgl_expired'),
+                    'no' => $request->input('no'),
+                    'penerbit' => $request->input('penerbit'),
+                    'file' => $nama_file,
+                    'status' => 'A',
+                    'created_by' => Session::get('userid'),
+                ]); 
+            }
+            
             return response()->json($save);
         }
     }
@@ -258,5 +264,45 @@ class KapalController extends Controller
                 ->setPaper('a3', 'portrait');
 
         return $pdf->stream($nama.'.pdf');
+    }
+
+    public function docking_store(Request $request, $id) {
+        $request->validate([
+            'file' => 'nullable|file|mimes:pdf|max:20480',
+        ]);
+
+        if ($request->hasFile('file')) {
+            // upload file baru
+            $file = $request->file('file');
+            $nama_file = time() . "_" . str_replace(" ", "_", $file->getClientOriginalName());
+            $file->move(public_path('file_docking'), $nama_file);
+
+            $save = Docking::insert([
+                'uid' => Str::uuid()->toString(),
+                'id_kapal' => $id,
+                'tgl_mulai' => $request->input('tgl_mulai'),
+                'tgl_selesai' => $request->input('tgl_selesai'),
+                'file' => $nama_file,
+                'is_delete' => 0,
+                'created_by' => Session::get('userid'),
+                'created_date' => date('Y-m-d')
+            ]); 
+            return response()->json($save);
+        }
+    }
+
+    public function getFile(Request $request) {
+        $id_kapal = $request->input('id_kapal');
+        $get = DB::table('master_file as a')
+                ->leftJoin('file_upload as b', function($join) use ($id_kapal) {
+                    $join->on('a.id', '=', 'b.id_file')
+                        ->where('b.id_kapal', $id_kapal); 
+                })
+                ->where('a.type', 'K')
+                ->where('a.status', 'A')
+                ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
+                ->orderBy('a.no_urut', 'ASC')
+                ->get();
+        return response()->json(['data' => $get]);
     }
 }

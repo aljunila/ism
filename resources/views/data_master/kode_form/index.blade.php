@@ -63,19 +63,33 @@
                     </div>
                     <div class="col-md-6 mb-1">
                         <label class="form-label" for="pj">Tanggung Jawab</label>
-                        <input type="text" class="form-control" id="pj" placeholder="Contoh: DPA, Nahkoda">
+                        <input type="text" class="form-control" id="pj" name="pj" placeholder="Contoh: DPA, Nahkoda">
                     </div>
                     <div class="col-md-6 mb-1">
                         <label class="form-label" for="kode_file">Kode File</label>
-                        <input type="text" class="form-control" id="kode_file" placeholder="Contoh: HO, SH">
+                        <input type="text" class="form-control" id="kode_file" name="kode_file" placeholder="Contoh: HO, SH">
                     </div>
                     <div class="col-md-6 mb-1">
                         <label class="form-label" for="periode">Periode</label>
-                        <input type="text" class="form-control" id="periode" placeholder="Contoh: THN, SS">
+                        <input type="text" class="form-control" id="periode" name="periode" placeholder="Contoh: THN, SS">
+                    </div>
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label" for="kel">Bagian</label>
+                        <select class="form-control" id="kel" name="kel">
+                            <option value=""></option>
+                            <option value="SDM">SDM</option>
+                            <option value="Operasional">Operasional</option>
+                            <option value="Teknik">Teknik</option>
+                            <option value="DPA">DPA</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label" for="link">Link</label>
+                        <input type="text" class="form-control" id="link" name="link">
                     </div>
                     <div class="col-md-6 mb-1">
                         <label class="form-label" for="id_perusahaan">Perusahaan</label>
-                        <select class="form-control" id="id_perusahaan">
+                        <select class="form-control" id="id_perusahaan" name="id_perusahaan">
                             @foreach($perusahaan as $p)
                             <option value="{{$p->id}}">{{$p->nama}}</option>
                             @endforeach
@@ -137,16 +151,21 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'ket', name: 'ket' },
-                { data: 'nama', name: 'nama' },
+                { 
+                    data: null,
+                    render: function(data, type, row){
+                        return `<a href="/${data.link}" target="_blank">${data.nama}</a>`;
+                    }
+                },
                 { data: 'pj', name: 'pj' },
                 { data: 'kode_file', name: 'kode_file' },  
-                { data: 'periode', name: 'periode' },  
+                { data: 'periode', name: 'periode' },   
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
 
         const resetForm = () => {
-            $('#kode_form, #nama_form, #keterangan_kode').val('');
+            $('#kode_form, #nama_form, #pj, #periode, #kode_file, #link, #kel, #id_perusahaan, #keterangan_kode').val('');
             tinymce.get('instruksi')?.setContent('');
             $('#tambah_data').data('mode', 'create').data('id', '');
         };
@@ -159,12 +178,15 @@
             const instruksi = tinymce.get('instruksi')?.getContent() || '';
 
             const payload = {
-                kode: $('#kode_form').val(),
+                kode: $('#keterangan_kode').val(),
                 nama: $('#nama_form').val(),
-                ket: $('#keterangan_kode').val(),
+                ket: $('#kode_form').val(),
                 pj: $('#pj').val(),
                 kode_file: $('#kode_file').val(),
                 periode: $('#periode').val(),
+                link: $('#link').val(),
+                kel: $('#kel').val(),
+                id_perusahaan: $('#id_perusahaan').val(),
                 intruksi: instruksi
             };
 
@@ -191,6 +213,12 @@
             $('#kode_form').val(btn.data('kode'));
             $('#keterangan_kode').val(btn.data('ket'));
             $('#nama_form').val(btn.data('nama'));
+            $('#pj').val(btn.data('pj'));
+            $('#periode').val(btn.data('periode'));
+            $('#kode_file').val(btn.data('kode_file'));
+            $('#link').val(btn.data('link'));
+            $('#kel').val(btn.data('kel')).trigger('change');
+            $('#id_perusahaan').val(btn.data('id_perusahaan')).trigger('change');
             const intruksiHtml = decodeHtml(btn.data('intruksi'));
             tinymce.get('instruksi')?.setContent(intruksiHtml || '');
             $('#tambah_data').data('mode', 'edit').data('id', btn.data('id'));

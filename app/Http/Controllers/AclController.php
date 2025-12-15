@@ -21,4 +21,10 @@ class AclController extends Controller
         $data['active'] = '/acl/users';
         return view('acl.users', $data);
     }
+
+    public function cabang()
+    {
+        $data['active'] = '/acl/cabang';
+        return view('acl.cabang', $data);
+    }
 }

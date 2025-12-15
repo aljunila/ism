@@ -138,7 +138,10 @@ $(document).on('click', '.edit-btn', function(){
          console.log(data);
         $('#id_file').val(data.id);
         $('#nama_file').val(data.nama);
+        $('#ket_kapal').val(data.ket).trigger('change');
+        $('#ket_karyawan').val(data.ket).trigger('change');
         $('#tipe').val(data.type);
+        $('#no_file').val(data.no_urut);
         let file = data.type; // atau ambil dari input
         if (file === 'S') {
             $('#file').html('Karyawan');
@@ -163,6 +166,7 @@ $(document).on('click', '#edit_data', function(){
     let id = $('#id_file').val()
     let type = $('#tipe').val();
     let kapal = $('#ket_kapal').val();
+    let no = $('#no_file').val();
     let karyawan = $('#ket_karyawan').val();
 
     if (!nama_file.trim()) {
@@ -182,6 +186,7 @@ $(document).on('click', '#edit_data', function(){
             type: type,
             kapal: kapal,
             karyawan: karyawan,
+            no: no,
             _token: "{{ csrf_token() }}"
         },
         success: function(response) {
@@ -319,12 +324,14 @@ $(document).on('change', '#type', function() {
                     </div>
                     <div class="mb-1">
                         <select name="ket" id="ket_kapal" class="kapal form-control" required>
+                            <option value="">-</option>
                             <option value="Perhubungan Laut">Perhubungan Laut</option>
                             <option value="BKI">BKI</option>
                         </select>
                     </div>
                     <div class="mb-1">
                         <select name="ket" id="ket_karyawan" class="karyawan form-control" required>
+                            <option value="">-</option>
                             <option value="Crew Laut">Crew Laut</option>
                             <option value="Crew Darat">Crew Darat</option>
                         </select>
@@ -332,6 +339,10 @@ $(document).on('change', '#type', function() {
                     <label>Nama File</label>
                     <div class="mb-1">
                         <input type="text" placeholder="Nama" class="form-control" name="nama" id="nama_file"/>
+                    </div>
+                    <label>No Urut</label>
+                    <div class="mb-1">
+                        <input type="number" placeholder="No Urut" class="form-control" name="no" id="no_file"/>
                     </div>
             </div>
             <div class="modal-footer">
@@ -361,12 +372,14 @@ $(document).on('change', '#type', function() {
                     </div>
                     <div class="mb-1">
                         <select name="ket" id="kapal" class="kapal form-control" required>
+                            <option value="">-</option>
                             <option value="Perhubungan Laut">Perhubungan Laut</option>
                             <option value="BKI">BKI</option>
                         </select>
                     </div>
                     <div class="mb-1">
                         <select name="ket" id="karyawan" class="karyawan form-control" required>
+                            <option value="">-</option>
                             <option value="Crew Laut">Crew Laut</option>
                             <option value="Crew Darat">Crew Darat</option>
                         </select>
@@ -374,6 +387,11 @@ $(document).on('change', '#type', function() {
                     <label>Nama File </label>
                     <div class="mb-1">
                         <input type="text" placeholder="Nama" class="form-control" name="nama" id="nama" required/>
+                    </div>
+
+                     <label>No Urut</label>
+                    <div class="mb-1">
+                        <input type="number" placeholder="No Urut" class="form-control" name="no" id="no"/>
                     </div>
                 </div>
                 <div class="modal-footer">

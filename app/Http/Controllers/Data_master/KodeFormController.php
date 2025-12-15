@@ -43,6 +43,9 @@ class KodeFormController extends Controller
             'pj' => 'nullable|string|max:20',
             'kode_file' => 'nullable|string|max:20',
             'periode' => 'nullable|string|max:20',
+            'link' => 'nullable|string|max:20',
+            'kel' => 'nullable|string|max:20',
+            'id_perusahaan' => 'nullable|integer|max:5',
             'intruksi' => 'nullable|string',
         ]);
 
@@ -73,6 +76,9 @@ class KodeFormController extends Controller
             'pj' => 'nullable|string|max:20',
             'kode_file' => 'nullable|string|max:20',
             'periode' => 'nullable|string|max:20',
+            'link' => 'nullable|string|max:20',
+            'kel' => 'nullable|string|max:20',
+            'id_perusahaan' => 'nullable|integer|max:5',
         ]);
 
         $kodeForm = KodeForm::findOrFail($id);
@@ -101,5 +107,12 @@ class KodeFormController extends Controller
         $kodeForm->update(['is_delete' => 1]);
 
         return response()->json(['message' => 'Berhasil menghapus kode form']);
+    }
+
+    
+    public function form()
+    {
+        $data['active'] = "/form_ism";
+        return view('data_master.kode_form.form', $data);
     }
 }

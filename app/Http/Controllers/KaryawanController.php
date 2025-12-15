@@ -259,8 +259,12 @@ class KaryawanController extends Controller
                 })
                 ->where('a.type', 'S')
                 ->where('a.status', 'A')
-                ->where('a.ket', $type)
+                ->where(function ($q) use ($type) {
+                    $q->where('a.ket', $type)
+                    ->orWhereNull('a.ket');
+                })
                 ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
+                ->orderBy('a.no_urut', 'ASC')
                 ->get();
         $data['show'] = $show;
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
@@ -276,7 +280,7 @@ class KaryawanController extends Controller
             $data['kapal'] = Kapal::where('status', 'A')->where('id', $id_kapal)->get();
         }
         $data['roles'] = Role::orderBy('nama')->get();
-        $data['menu'] = Akses::where('id_karyawan', $show->id)->get();
+        // $data['menu'] = Akses::where('id_karyawan', $show->id)->get();
         $data['active'] = "karyawan";
         $data['ptkp'] = StatusPTKP::get();
         $data['mutasi'] = Mutasi::where('id_karyawan', $show->id)->orderBy('tgl_naik', 'DESC')->get();

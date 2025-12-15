@@ -428,44 +428,7 @@
                                 </table>
                             </div>
                         </div>
-                        {{-- Tab akses dihapus --}}
-                            <div class="card-header border-bottom">
-                                <h5 class="fw-bolder">Informasi Akses</h5>
-                                <!-- <button class="btn btn-warning btn-sm float-right me-1" data-bs-toggle="modal" data-bs-target="#FormPassword">Ubah Password</button> -->
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table" width="100%">
-                                    <tbody>
-                                        <tr>
-                                            <th width="30%"> Level Akses</th>
-                                            <td width="5%">:</td>
-                                            <td width="65%">{{ $show->role_nama ?? '-' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th> Level Menu</th>
-                                            <td>:</td>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="3">
-                                            <table width="50%">
-                                                @foreach($menu as $m)
-                                                <tr>
-                                                    @if($m->get_menu()->id_parent==0)
-                                                        <td colspan="2">{!!$m->get_menu()->icon!!} {{$m->get_menu()->nama}}</td>
-                                                    @else
-                                                        <td>&nbsp;&nbsp;&nbsp;</td>
-                                                        <td>{!!$m->get_menu()->icon!!}   {{$m->get_menu()->nama}}</td>
-                                                    @endif
-                                                </tr>
-                                                @endforeach
-                                            </table>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>

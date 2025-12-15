@@ -33,6 +33,7 @@ use App\Http\Controllers\Data_master\MenuController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
+use App\Http\Controllers\Acl\CabangController;
 use App\Models\Perusahaan;
 use App\Models\Karyawan;
 
@@ -63,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('show');
+    Route::get('form_ism', [KodeFormController::class, 'form']);
     Route::post('upload-image', [UploadController::class, 'upload'])->name('upload.image');
 
     Route::prefix('perusahaan')->group(function () {
@@ -89,7 +91,9 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::post('delete/{id}', [KapalController::class, 'delete']);
         Route::post('export', [KapalController::class, 'export']);
         Route::post('savefile/{id}', [KapalController::class, 'savefile']);
+        Route::post('docking_store/{id}', [KapalController::class, 'docking_store']);
         Route::get('pdf/{id}', [KapalController::class, 'pdf'])->name('kapal.pdf');
+        Route::post('datafile', [KapalController::class, 'getFile']);
     });
     Route::get('get-kapal/{id_perusahaan}', [KapalController::class, 'getKapal']);
 
@@ -200,6 +204,14 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::get('users/{id}', [UserController::class, 'show'])->name('acl.users.show');
         Route::put('users/{id}', [UserController::class, 'update'])->name('acl.users.update');
         Route::delete('users/{id}', [UserController::class, 'destroy'])->name('acl.users.destroy');
+
+        Route::get('cabang', [AclController::class, 'cabang'])->name('acl.cabang');
+        Route::get('cabang/data', [CabangController::class, 'data'])->name('acl.cabang.data');
+        Route::post('cabang', [CabangController::class, 'store'])->name('acl.cabang.store');
+        Route::put('cabang/{id}/status', [CabangController::class, 'toggleStatus'])->name('acl.cabang.status');
+        Route::get('cabang/{id}', [CabangController::class, 'show'])->name('acl.cabang.show');
+        Route::put('cabang/{id}', [CabangController::class, 'update'])->name('acl.cabang.update');
+        Route::delete('cabang/{id}', [CabangController::class, 'destroy'])->name('acl.cabang.destroy');
 
         // Simple API helpers for select options
         Route::get('api/perusahaan/all', function () {

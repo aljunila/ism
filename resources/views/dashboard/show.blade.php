@@ -81,7 +81,7 @@
         <div class="row g-2">
             @if(!empty($perusahaan))
             <div class="col-lg-3 col-sm-6 col-12">
-                <div class="stat-card h-100 d-flex align-items-center">
+                <div class="stat-card h-100 d-flex align-items-center bg-white">
                     <div class="stat-icon me-2">
                         <i data-feather="home"></i>
                     </div>
@@ -94,7 +94,7 @@
             @endif
             @if(!empty($kapal))
             <div class="col-lg-3 col-sm-6 col-12">
-                <div class="stat-card h-100 d-flex align-items-center">
+                <div class="stat-card h-100 d-flex align-items-center bg-white">
                     <div class="stat-icon me-2">
                         <i data-feather="anchor"></i>
                     </div>
@@ -107,7 +107,7 @@
             @endif
             @if(!empty($karyawan))
             <div class="col-lg-3 col-sm-6 col-12">
-                <div class="stat-card h-100 d-flex align-items-center">
+                <div class="stat-card h-100 d-flex align-items-center bg-white">
                     <div class="stat-icon me-2">
                         <i data-feather="user"></i>
                     </div>
@@ -120,7 +120,7 @@
             @endif
             @if(!empty($user))
             <div class="col-lg-3 col-sm-6 col-12">
-                <div class="stat-card h-100 d-flex align-items-center">
+                <div class="stat-card h-100 d-flex align-items-center bg-white">
                     <div class="stat-icon me-2">
                         <i data-feather="user-check"></i>
                     </div>

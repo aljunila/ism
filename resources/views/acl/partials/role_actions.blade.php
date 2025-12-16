@@ -5,6 +5,7 @@
         data-nama="{{ $row->nama }}"
         data-status="{{ $row->status }}"
         data-superadmin="{{ $row->is_superadmin }}"
+        data-jenis="{{ $row->jenis }}"
     >
         Edit
     </button>

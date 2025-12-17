@@ -50,25 +50,58 @@
             columns: [
                 { data: 'nama' },
                 { data: 'ket' },
-                { data: 'penerbit' },
-                { data: 'tgl_terbit' },
                 { 
                     data: null,
-                    render: function(data, type, row){
+                    render: function(data, type, row) {
+                       return `
+                            ${row.penerbit ?? '-'}
+                            ${row.nomor ? `<br>No : ${row.nomor}` : ''}
+                        `; }
+                },
+                { 
+                    data: null,
+                    render: function(data, type, row) {
+                       return `
+                            ${row.tgl_terbit ? `Terbit : ${row.tgl_terbit} ` : '-'}
+                            ${row.tgl_expired ? `<br>Expired : ${row.tgl_expired}` : ''}
+                        `; }
+                },
+                { 
+                    data: null,
+                    render: function (data, type, row) {
+
+                        // JIKA ADA FILE
+                        if (row.file) {
+                            return `
+                                <a href="{{ asset('file_upload') }}/${row.file}"
+                                    class="btn btn-icon rounded-circle btn-xs btn-flat-success"
+                                    title="Buka File" target="_blank">
+                                    <i data-feather="file"></i>
+                                </a>
+
+                                <button type="button"
+                                    class="btn btn-icon rounded-circle btn-xs btn-flat-danger delete-btn"
+                                    title="Hapus File"
+                                    data-id="${row.id_upload}"
+                                    data-file="${row.file}">
+                                    <i data-feather="trash"></i>
+                                </button>
+                            `;
+                        }
+
+                        // JIKA TIDAK ADA FILE
                         return `
-                            <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
-                                title="Upload File" data-id="${data.id}" data-file="${data.nama}">
-                                <i data-feather='upload'></i>
+                            <button type="button"
+                                class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn"
+                                title="Upload File"
+                                data-id="${row.id}"
+                                data-file="${row.nama}">
+                                <i data-feather="upload"></i>
                             </button>
-                            ${row.file ? `
-                            <a href="{{ asset('file_upload') }}/${row.file}"class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
-                                title="Buka File" target="_blank">
-                                <i data-feather="file"></i>
-                            </a>
-                            ` : ''}
                         `;
                     }
                 }
+
             ],
             drawCallback: function(settings) {
             feather.replace(); // supaya icon feather muncul ulang
@@ -150,6 +183,40 @@
                 }
             });
         });
+
+        $(document).on('click', '.delete-btn', function () {
+            let id   = $(this).data('id');
+            let file = $(this).data('file');
+
+            Swal.fire({
+                title: 'Yakin hapus file?',
+                text: 'File yang dihapus tidak bisa dikembalikan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/kapal/delfile/" + id,
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            id: id,
+                            file: file
+                        },
+                        success: function (res) {
+                            Swal.fire('Berhasil!', res.message, 'success');
+                            $('#table').DataTable().ajax.reload(null, false);
+                        },
+                        error: function () {
+                            Swal.fire('Error!', 'Gagal menghapus file', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
     </script>
 @endsection
 @section('content')
@@ -412,8 +479,8 @@
                                 <thead>
                                 <tr>
                                     <th>Nama Dokumen</th>
-                                    <th>Keterangan</th>
                                     <th>Penerbit</th>
+                                    <th>Keterangan</th>
                                     <th>Tgl Terbit/Expired</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -455,7 +522,7 @@
                             <input type="text" class="form-control" name="no" id="no"/>
                         </div>
 
-                        <label>Penerbit</label>
+                        <label>Keterangan</label>
                         <div class="mb-1">
                             <input type="text" class="form-control" name="penerbit" id="penerbit"/>
                         </div>

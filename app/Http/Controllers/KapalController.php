@@ -215,30 +215,12 @@ class KapalController extends Controller
             'file' => 'nullable|file|mimes:pdf|max:60480',
         ]);
 
-        $cek = FileUpload::where('id_file', $id)->where('id_kapal', $request->input('id_kapal'))->first();
-
         if ($request->hasFile('file')) {
-            if ($cek) {
-                Storage::disk('public')->delete($cek->file);
-                $del = FileUpload::where('id', $cek->id)->delete();
-            }
             // upload file baru
             $file = $request->file('file');
             $nama_file = time() . "_" . str_replace(" ", "_", $file->getClientOriginalName());
             $file->move(public_path('file_upload'), $nama_file);
-            if($cek) {
-                $save = FileUpload::find($cek->id)->update([
-                    'id_kapal' => $request->input('id_kapal'),
-                    'id_file'  => $id,
-                    'tgl_terbit' => $request->input('tgl_terbit'),
-                    'tgl_expired' => $request->input('tgl_expired'),
-                    'no' => $request->input('no'),
-                    'penerbit' => $request->input('penerbit'),
-                    'file' => $nama_file,
-                    'status' => 'A',
-                    'changed_by' => Session::get('userid'),
-                ]); 
-            } else {
+            
                 $save = FileUpload::insert([
                     'id_kapal' => $request->input('id_kapal'),
                     'id_file'  => $id,
@@ -250,7 +232,6 @@ class KapalController extends Controller
                     'status' => 'A',
                     'created_by' => Session::get('userid'),
                 ]); 
-            }
             
             return response()->json($save);
         }
@@ -296,13 +277,27 @@ class KapalController extends Controller
         $get = DB::table('master_file as a')
                 ->leftJoin('file_upload as b', function($join) use ($id_kapal) {
                     $join->on('a.id', '=', 'b.id_file')
-                        ->where('b.id_kapal', $id_kapal); 
+                        ->where('b.id_kapal', $id_kapal)
+                        ->where('b.status', 'A');
                 })
                 ->where('a.type', 'K')
                 ->where('a.status', 'A')
-                ->select('a.*', 'b.file', 'b.no', 'b.penerbit', 'b.tgl_terbit', 'tgl_expired')
+                ->select(
+                    'a.*',
+                    'b.file',
+                    'b.no as nomor',
+                    'b.penerbit',
+                    'b.tgl_terbit',
+                    'b.tgl_expired',
+                    'b.id as id_upload'
+                )
                 ->orderBy('a.no_urut', 'ASC')
                 ->get();
         return response()->json(['data' => $get]);
+    }
+
+    public function delfile($id)
+    {
+       $post = FileUpload::where('id',$id)->update(['status' => 'D']);;
     }
 }

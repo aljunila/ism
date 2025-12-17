@@ -91,6 +91,7 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::post('delete/{id}', [KapalController::class, 'delete']);
         Route::post('export', [KapalController::class, 'export']);
         Route::post('savefile/{id}', [KapalController::class, 'savefile']);
+        Route::post('delfile/{id}', [KapalController::class, 'delfile']);
         Route::post('docking_store/{id}', [KapalController::class, 'docking_store']);
         Route::get('pdf/{id}', [KapalController::class, 'pdf'])->name('kapal.pdf');
         Route::post('datafile', [KapalController::class, 'getFile']);

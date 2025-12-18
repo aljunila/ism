@@ -256,7 +256,7 @@ class LoginController extends Controller
                 'id_perusahaan' => $get->id_perusahaan,
                 'id_kapal' => $get->id_kapal,
                 'id_karyawan'=> $get->id,
-                'status' => 'A',
+                'status' => 1,
                 'created_by' => Session::get('userid'),
                 'created_date' => date('Y-m-d H:i:s')
                 ]);

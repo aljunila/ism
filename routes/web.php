@@ -30,12 +30,16 @@ use App\Http\Controllers\KonditeController;
 use App\Http\Controllers\Purchasing\PurchasingController;
 use App\Http\Controllers\Data_master\KodeFormController;
 use App\Http\Controllers\Data_master\MenuController;
+use App\Http\Controllers\Data_master\KendaraanController;
+use App\Http\Controllers\Data_master\PelabuhanController;
+use App\Http\Controllers\Data_master\BiayaController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
 use App\Http\Controllers\Acl\CabangController;
 use App\Models\Perusahaan;
 use App\Models\Karyawan;
+use App\Http\Controllers\Data_kapal\TripController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -186,8 +190,27 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::post('menu', [MenuController::class, 'store'])->name('acl.menu.store');
         Route::put('menu/{id}', [MenuController::class, 'update'])->name('acl.menu.update');
         Route::delete('menu/{id}', [MenuController::class, 'destroy'])->name('acl.menu.destroy');
-    });
 
+        Route::get('kendaraan', [KendaraanController::class, 'index']);
+        Route::get('kendaraan/data', [KendaraanController::class, 'data'])->name('kendaraan.data');
+        Route::post('kendaraan', [KendaraanController::class, 'store'])->name('kendaraan.store');
+        Route::put('kendaraan/{id}', [KendaraanController::class, 'update'])->name('kendaraan.update');
+        Route::delete('kendaraan/{id}', [KendaraanController::class, 'destroy'])->name('kendaraan.destroy');
+
+        Route::get('pelabuhan', [PelabuhanController::class, 'index']);
+        Route::get('pelabuhan/data', [PelabuhanController::class, 'data'])->name('pelabuhan.data');
+        Route::post('pelabuhan', [PelabuhanController::class, 'store'])->name('pelabuhan.store');
+        Route::put('pelabuhan/{id}', [PelabuhanController::class, 'update'])->name('pelabuhan.update');
+        Route::delete('pelabuhan/{id}', [PelabuhanController::class, 'destroy'])->name('pelabuhan.destroy');
+
+        Route::get('biaya', [BiayaController::class, 'index']);
+        Route::get('biaya/data', [BiayaController::class, 'data'])->name('biaya.data');
+        Route::post('biaya', [BiayaController::class, 'store'])->name('biaya.store');
+        Route::put('biaya/{id}', [BiayaController::class, 'update'])->name('biaya.update');
+        Route::delete('biaya/{id}', [BiayaController::class, 'destroy'])->name('biaya.destroy');
+    });
+    
+    Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan']);
     Route::prefix('acl')->group(function () {
         Route::get('roles', [AclController::class, 'roles'])->name('acl.roles');
         Route::get('users', [AclController::class, 'users'])->name('acl.users');
@@ -227,6 +250,18 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         });
     });
 
+     Route::prefix('data_kapal')->group(function() {
+        Route::get('trip', [TripController::class, 'index']);
+        Route::get('trip/data', [TripController::class, 'data'])->name('trip.data');
+        Route::get('trip/form', [TripController::class, 'form'])->name('trip.form');
+        Route::get('/trip/form/{id}', [TripController::class, 'form'])->name('trip.edit');
+        Route::get('/trip/{id}/amount', [TripController::class, 'amount'])->name('trip.amount');
+        Route::post('trip', [TripController::class, 'store'])->name('trip.store');
+        Route::post('/trip/update/{uid}', [TripController::class, 'update'])->name('trip.update');
+        Route::delete('trip/{id}', [TripController::class, 'destroy'])->name('trip.destroy');
+        Route::get('/trip/{id}/excel', [TripController::class, 'TripExcel'])->name('trip.excel');
+     });
+
     Route::prefix('refrensi')->group(function () {
         Route::post('data', [RefrensiDocController::class, 'getData']);
         Route::get('add', [RefrensiDocController::class, 'add']);
@@ -245,6 +280,7 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     Route::prefix('purchasing')->group(function(){
         Route::get('/', [PurchasingController::class, 'index']);
     });
+
 
     Route::get('el0302', [ChecklistController::class, 'el0302'])->name('el0302');
     Route::get('el0303', [ChecklistController::class, 'el0303'])->name('el0303');
@@ -436,6 +472,16 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::post('update/{id}', [FileController::class, 'update']);
         Route::post('delete/{id}', [FileController::class, 'delete']);
     });
+
+    // Route::prefix('kendaraan')->group(function () {
+    //     Route::get('/', [KendaraanController::class, 'index'])->name('kendaraan');
+    //     Route::post('data', [KendaraanController::class, 'data']);
+    //     Route::get('add', [KendaraanController::class, 'add']);
+    //     Route::post('store', [KendaraanController::class, 'store'])->name('file.store');
+    //     Route::get('edit/{id}', [KendaraanController::class, 'edit']);
+    //     Route::post('update/{id}', [KendaraanController::class, 'update']);
+    //     Route::post('delete/{id}', [KendaraanController::class, 'delete']);
+    // });
 
     Route::prefix('prosedur')->group(function () {
         Route::get('/', [ProsedurController::class, 'show'])->name('prosedur');

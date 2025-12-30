@@ -33,6 +33,7 @@ class RoleController extends Controller
             'kode' => 'required|string|max:30',
             'nama' => 'required|string|max:50',
             'status' => 'required|in:A,D',
+            'jenis' => 'required|integer|max:50',
             'is_superadmin' => 'nullable|boolean',
         ]);
         $validated['is_superadmin'] = $request->boolean('is_superadmin');
@@ -46,6 +47,7 @@ class RoleController extends Controller
             'kode' => 'required|string|max:30',
             'nama' => 'required|string|max:50',
             'status' => 'required|in:A,D',
+            'jenis' => 'required|integer|max:50',
             'is_superadmin' => 'nullable|boolean',
         ]);
         $role = Role::findOrFail($id);

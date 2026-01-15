@@ -9,6 +9,7 @@ use App\Models\Kapal;
 use App\Models\MasterFile;
 use App\Models\FileUpload;
 use App\Models\Docking;
+use App\Models\Cabang;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -63,6 +64,7 @@ class KapalController extends Controller
         $data['active'] = "kapal";
         $roleJenis = Session::get('previllage');
         $id_perusahaan = Session::get('id_perusahaan');
+        $data['cabang'] = Cabang::where('is_delete', 0)->get();
         $data['perusahaan'] = Perusahaan::where('status','A')
             ->when($roleJenis == 1, function ($q) { return $q; })
             ->when($roleJenis != 1 && $id_perusahaan, function ($q) use ($id_perusahaan) {
@@ -111,6 +113,8 @@ class KapalController extends Controller
           'min_speed' => $request->input('min_speed'),
           'bahan_bakar' => $request->input('bahan_bakar'),
           'jml_butuh' => $request->input('jml_butuh'),
+          'id_cabang' => $request->input('id_cabang'),
+          'gol' => $request->input('gol'),
           'status' => 'A',
           'created_by' => Session::get('userid'),
           'created_date' => date('Y-m-d H:i:s'),
@@ -125,6 +129,7 @@ class KapalController extends Controller
         $data['active'] = "Kapal";
         $roleJenis = Session::get('previllage');
         $id_perusahaan = Session::get('id_perusahaan');
+        $data['cabang'] = Cabang::get();
         $data['perusahaan'] = Perusahaan::where('status','A')
             ->when($roleJenis == 1, function ($q) { return $q; })
             ->when($roleJenis != 1 && $id_perusahaan, function ($q) use ($id_perusahaan) {
@@ -170,6 +175,8 @@ class KapalController extends Controller
           'min_speed' => $request->input('min_speed'),
           'bahan_bakar' => $request->input('bahan_bakar'),
           'jml_butuh' => $request->input('jml_butuh'),
+          'id_cabang' => $request->input('id_cabang'),
+          'gol' => $request->input('gol'),
           'status' => 'A',
           'changed_by' => Session::get('userid'),
       ]);     

@@ -17,7 +17,7 @@
             <div class="col-md-12" style="display:flex;justify-content:space-between;align-items:center;">
                 <h3><b>Form ISM</b></h3>
 
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambah_master_kode">Tambah Data</button>
+                <!-- <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#tambah_master_kode">Tambah Data</button> -->
             </div>
         </div>
 
@@ -28,10 +28,7 @@
                         <th>No</th>
                         <th>Kode Form</th>
                         <th>Nama form</th>
-                        <th>Tanggung Jawab</th>
-                        <th>Kode File</th>
-                        <th>Periode</th>
-                        <th>Bagian</th>
+                        <th>Perusahaan</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -80,20 +77,17 @@
         const table = $('#table').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('kode_form.data') }}',
+            ajax: '{{ route('kode_form.ism') }}',
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'ket', name: 'ket' },
+                { data: 'judul', name: 'judul' },
                 { 
                     data: null,
                     render: function(data, type, row){
-                        return `<a href="/${data.link}" target="_blank">${data.nama}</a>`;
+                        return `<a href="${data.link}/${data.uid}" target="_blank">${data.nama}</a>`;
                     }
                 },
-                { data: 'pj', name: 'pj' },
-                { data: 'kode_file', name: 'kode_file' },  
-                { data: 'periode', name: 'periode' },
-                { data: 'kel', name: 'kel' }
+                { data: 'perusahaan', name: 'perusahaan' },
             ]
         });
 

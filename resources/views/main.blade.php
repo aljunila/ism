@@ -191,6 +191,7 @@
                     if ($isSuper) {
                         return Menu::where('status', 'A')
                                     ->where('id_parent', $parentId)
+                                    ->where('menu_user', 'N')
                                     ->orderBy('no', 'ASC')
                                     ->get();
                     }

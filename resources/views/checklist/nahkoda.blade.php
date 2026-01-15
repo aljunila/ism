@@ -36,10 +36,10 @@
         processing: true,
         searchable: true,
         ajax:{
-            url: "/checklist/listGanti",
+            url: "/data_crew/ganti/getData",
             type: "POST",
             data: function(d){
-                d.kode= "el0307",
+                d.kode= "13",
                 d.id_perusahaan = $('#id_perusahaan').val(),
                 d.id_kapal = $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"

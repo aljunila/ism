@@ -88,6 +88,29 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Cabang</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <select name="id_cabang" class="form-control">
+                                            @foreach ($cabang as $c)
+                                            <option value="{{ $c->id }}" @selected($show->id_cabang==$c->id)>{{ $c->cabang }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
+                                        <label class="col-form-label" for="first-name">Kelas</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <select name="gol" class="form-control">
+                                            <option value="Reguler" @selected ($show->gol=='Reguler')>Reguler</option>
+                                            <option value="Express" @selected ($show->gol=='Express')>Express</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-1 row">
+                                    <div class="col-sm-3">
                                         <label class="col-form-label" for="first-name">Pendaftaran</label>
                                     </div>
                                     <div class="col-sm-9">

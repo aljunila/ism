@@ -242,6 +242,7 @@ class ProsedurController extends Controller
         $id_perusahaan = Session::get('id_perusahaan');
         $id_kapal = Session::get('id_kapal');
         $id_karyawan = Session::get('id_karyawan');
+        $year = date('Y');
         
         $show = Prosedur::where('uid', $uid)->first();
         if(Session::get('id_kapal')!=0){
@@ -264,10 +265,7 @@ class ProsedurController extends Controller
             }
 
             $cek = DB::table('prosedur as a')
-                ->leftJoin('view_prosedur as b', function($join) use ($id_user) {
-                    $join->on('a.id', '=', 'b.id_prosedur')
-                        ->where('b.id_user', '=', $id_user);
-                })
+                ->leftJoin('view_prosedur as b', 'a.id_user', '=', 'b.id' )
                 ->select(
                     'a.kode',
                     'b.jml_lihat',
@@ -277,11 +275,11 @@ class ProsedurController extends Controller
                 )
                 ->where('a.status', 'A')
                 ->where('a.id_perusahaan', $id_perusahaan)
-                ->where('b.jml_lihat', NULL)
+                ->where('a.update_lihat', 'like', '$year%')
                 ->orderBy('a.id')
                 ->get();
             if(empty($cek)){
-                $get = DB::table('notulena as a')
+                $get = DB::table('notulen as a')
                         ->leftjoin('daftar_hadir as b', 'b.id_notulen', '=', 'a.id')
                         ->select('b.*')
                         ->where('a.id_perusahaan', $id_perusahaan)

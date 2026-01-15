@@ -239,6 +239,14 @@
                     <div class="info-container">
                         <ul class="list-unstyled">
                             <li class="mb-75">
+                                <span class="fw-bolder me-25">Lokasi Cabang:</span>
+                                <span>{{$show->get_cabang()->cabang}}</span>
+                            </li>
+                            <li class="mb-75">
+                                <span class="fw-bolder me-25">Kelas:</span>
+                                <span>{{$show->gol}}</span>
+                            </li>
+                            <li class="mb-75">
                                 <span class="fw-bolder me-25">Call Sign:</span>
                                 <span>{{$show->call_sign}}</span>
                             </li>

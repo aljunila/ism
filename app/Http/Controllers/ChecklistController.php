@@ -34,7 +34,7 @@ class ChecklistController extends Controller
                 ->leftjoin('jabatan', 'jabatan.id', '=', 'karyawan.id_jabatan')
                 ->leftjoin('kapal', 'kapal.id', '=', 'checklist_data.id_kapal')
                 ->select('checklist_data.*', 'karyawan.nama as nama', 'jabatan.nama as jabatan', 'kapal.nama as kapal')
-                ->where('checklist_data.kode', $request->input('kode'))
+                ->where('checklist_data.id_form', $request->input('kode'))
                 ->where('checklist_data.status','A')
                 ->when($perusahaan, fn($query, $perusahaan) => $query->where('checklist_data.id_perusahaan', $perusahaan))
                 ->when($kapal, fn($query, $kapal) => $query->where('checklist_data.id_kapal', $kapal))
@@ -335,12 +335,12 @@ class ChecklistController extends Controller
         $perusahaan = $request->input('id_perusahaan');
         $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
 
-        $daftar = DB::table('checklist_penggantian as a')
+        $daftar = DB::table('checklist_data as a')
                 ->leftjoin('karyawan as b', 'b.id', '=', 'a.id_dari')
                 ->leftjoin('karyawan as c', 'c.id', '=', 'a.id_kepada')
                 ->leftjoin('kapal as d', 'd.id', '=', 'a.id_kapal')
                 ->select('a.*', 'b.nama as dari', 'c.nama as kepada', 'd.nama as kapal')
-                ->where('a.kode', $request->input('kode'))
+                ->where('a.id_form', $request->input('kode'))
                 ->where('a.status','A')
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('a.id_perusahaan', $perusahaan);

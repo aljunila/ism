@@ -74,27 +74,41 @@
                         <input type="text" class="form-control" id="periode" name="periode" placeholder="Contoh: THN, SS">
                     </div>
                     <div class="col-md-6 mb-1">
-                        <label class="form-label" for="kel">Bagian</label>
-                        <select class="form-control" id="kel" name="kel">
+                        <label class="form-label" for="bagian">Bagian</label>
+                        <select class="form-control" id="bagian" name="bagian">
                             <option value=""></option>
                             <option value="SDM">SDM</option>
                             <option value="Operasional">Operasional</option>
                             <option value="Teknik">Teknik</option>
                             <option value="DPA">DPA</option>
+                            <option value="Kapal">Kapal</option>
+                        </select>
+                    </div>
+                    <!-- <div class="col-md-6 mb-1">
+                        <label class="form-label" for="link">Link</label>
+                        <input type="text" class="form-control" id="link" name="link">
+                    </div> -->
+                    <div class="col-md-6 mb-1">
+                        <label class="form-label">Dari</label>
+                        <select id="id_menu" class="form-control">
+                            <option value="">-Pilih-</option>
+                            @foreach($menu as $m)
+                                <option value="{{$m->id}}">{{$m->nama}}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-6 mb-1">
-                        <label class="form-label" for="link">Link</label>
-                        <input type="text" class="form-control" id="link" name="link">
+                        <label class="form-label" for="kel">Group (Jika Dibutuhkan)</label>
+                        <input type="text" class="form-control" id="kel" name="kel">
                     </div>
-                    <div class="col-md-6 mb-1">
+                    <!-- <div class="col-md-6 mb-1">
                         <label class="form-label" for="id_perusahaan">Perusahaan</label>
                         <select class="form-control" id="id_perusahaan" name="id_perusahaan">
                             @foreach($perusahaan as $p)
                             <option value="{{$p->id}}">{{$p->nama}}</option>
                             @endforeach
                         </select>
-                    </div>
+                    </div> -->
                     <div class="col-md-12">
                         <label class="form-label" for="instruksi">Instruksi</label>
                         <textarea class="form-control tinymce" id="instruksi" name="instruksi"></textarea>
@@ -144,6 +158,14 @@
             }
         });
 
+        new TomSelect('#id_menu', {
+            placeholder: 'Menu...',
+            allowEmptyOption: true,
+            maxItems: 1,
+            searchField: ['text'],   // bisa diketik
+            create: false            // tidak boleh input baru
+        });
+
         const table = $('#table').DataTable({
             processing: true,
             serverSide: true,
@@ -165,7 +187,7 @@
         });
 
         const resetForm = () => {
-            $('#kode_form, #nama_form, #pj, #periode, #kode_file, #link, #kel, #id_perusahaan, #keterangan_kode').val('');
+            $('#kode_form, #nama_form, #pj, #periode, #kode_file, #id_menu, #kel, #bagian, #keterangan_kode').val('');
             tinymce.get('instruksi')?.setContent('');
             $('#tambah_data').data('mode', 'create').data('id', '');
         };
@@ -184,9 +206,9 @@
                 pj: $('#pj').val(),
                 kode_file: $('#kode_file').val(),
                 periode: $('#periode').val(),
-                link: $('#link').val(),
+                id_menu: $('#id_menu').val(),
                 kel: $('#kel').val(),
-                id_perusahaan: $('#id_perusahaan').val(),
+                bagian: $('#bagian').val(),
                 intruksi: instruksi
             };
 
@@ -216,9 +238,9 @@
             $('#pj').val(btn.data('pj'));
             $('#periode').val(btn.data('periode'));
             $('#kode_file').val(btn.data('kode_file'));
-            $('#link').val(btn.data('link'));
-            $('#kel').val(btn.data('kel')).trigger('change');
-            $('#id_perusahaan').val(btn.data('id_perusahaan')).trigger('change');
+            $('#id_menu').val(btn.data('id_menu')).trigger('change');
+            $('#kel').val(btn.data('kel'));
+            $('#bagian').val(btn.data('bagian')).trigger('change');
             const intruksiHtml = decodeHtml(btn.data('intruksi'));
             tinymce.get('instruksi')?.setContent(intruksiHtml || '');
             $('#tambah_data').data('mode', 'edit').data('id', btn.data('id'));

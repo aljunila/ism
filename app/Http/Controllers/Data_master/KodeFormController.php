@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Data_master;
 
 use App\Http\Controllers\Controller;
 use App\Models\KodeForm;
+use App\Models\FormISM;
 use App\Models\Perusahaan;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -17,6 +19,7 @@ class KodeFormController extends Controller
     {
         $data['active'] = "/data_master/kode_form";
         $data['perusahaan'] = Perusahaan::where('status', 'A')->get();
+        $data['menu'] = Menu::where('status', 'A')->where('menu_user', 'N')->get();
         return view('data_master.kode_form.index', $data);
     }
 
@@ -35,6 +38,7 @@ class KodeFormController extends Controller
 
     public function store(Request $request)
     {
+        $menu = Menu::find($request->input('id_menu'));
         $validated = $request->validate([
             'kode' => 'required|string|max:20',
             'nama' => 'required|string|max:100',
@@ -43,12 +47,12 @@ class KodeFormController extends Controller
             'pj' => 'nullable|string|max:20',
             'kode_file' => 'nullable|string|max:20',
             'periode' => 'nullable|string|max:20',
-            'link' => 'nullable|string|max:20',
+            'id_menu' => 'nullable|integer|max:100',
+            'bagian' => 'nullable|string|max:20',
             'kel' => 'nullable|string|max:20',
-            'id_perusahaan' => 'nullable|integer|max:5',
             'intruksi' => 'nullable|string',
         ]);
-
+        $validated['link'] = $menu->link;
         $exists = KodeForm::where('is_delete', 0)
             ->where(function ($q) use ($validated) {
                 $q->where('kode', $validated['kode']);
@@ -68,6 +72,7 @@ class KodeFormController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $menu = Menu::find($request->input('id_menu'));
         $validated = $request->validate([
             'kode' => 'required|string|max:20',
             'nama' => 'required|string|max:100',
@@ -76,10 +81,11 @@ class KodeFormController extends Controller
             'pj' => 'nullable|string|max:20',
             'kode_file' => 'nullable|string|max:20',
             'periode' => 'nullable|string|max:20',
-            'link' => 'nullable|string|max:20',
+            'id_menu' => 'nullable|string|max:100',
+            'bagian' => 'nullable|string|max:20',
             'kel' => 'nullable|string|max:20',
-            'id_perusahaan' => 'nullable|integer|max:5',
         ]);
+        $validated['link'] = $menu->link;
 
         $kodeForm = KodeForm::findOrFail($id);
 
@@ -114,5 +120,30 @@ class KodeFormController extends Controller
     {
         $data['active'] = "/form_ism";
         return view('data_master.kode_form.form', $data);
+    }
+
+    public function ism()
+    {
+        $query = FormISM::where('is_delete', 0)->orderBy('id_perusahaan', 'asc')->orderBy('judul', 'asc');
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('nama', function ($row) {
+                $form = KodeForm::find($row->id_form);
+                return $form ? $form->nama : '-';
+            })
+            ->addColumn('perusahaan', function ($row) {
+                $perusahaan = Perusahaan::find($row->id_perusahaan);
+                return $perusahaan ? $perusahaan->nama : '-';
+            })
+             ->addColumn('link', function ($row) {
+                $form = KodeForm::find($row->id_form);
+                return $form ? $form->link : '-';
+            })
+            ->addColumn('aksi', function ($row) {
+                return view('data_master.kode_form.partials.actions', compact('row'))->render();
+            })
+            ->rawColumns(['aksi'])
+            ->make(true);
     }
 }

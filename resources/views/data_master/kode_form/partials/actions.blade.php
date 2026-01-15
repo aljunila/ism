@@ -8,7 +8,7 @@
         data-link="{{ $row->link }}"
         data-kode_file="{{ $row->kode_file }}"
         data-kel="{{ $row->kel }}"
-        data-id_perusahaan="{{ $row->id_perusahaan }}"
+        data-bagian="{{ $row->bagian }}"
         data-ket="{{ $row->kode }}"
         data-intruksi="{{ htmlentities($row->intruksi ?? '', ENT_QUOTES, 'UTF-8') }}"
     >

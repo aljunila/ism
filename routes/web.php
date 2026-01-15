@@ -25,7 +25,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\EvaluasiController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\MutasiController;
-use App\Http\Controllers\InterviewController;
+// use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\KonditeController;
 use App\Http\Controllers\Purchasing\PurchasingController;
 use App\Http\Controllers\Data_master\KodeFormController;
@@ -40,6 +40,9 @@ use App\Http\Controllers\Acl\CabangController;
 use App\Models\Perusahaan;
 use App\Models\Karyawan;
 use App\Http\Controllers\Data_kapal\TripController;
+use App\Http\Controllers\Data_crew\RecruitmentController;
+use App\Http\Controllers\Data_crew\FamiliarisasiController;
+use App\Http\Controllers\Data_crew\GantiController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -180,6 +183,7 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     Route::prefix('data_master')->group(function() {
         Route::get('kode_form', [KodeFormController::class, 'index']);
         Route::get('kode_form/data', [KodeFormController::class, 'data'])->name('kode_form.data');
+        Route::get('kode_form/ism', [KodeFormController::class, 'ism'])->name('kode_form.ism');
         Route::post('kode_form', [KodeFormController::class, 'store'])->name('kode_form.store');
         Route::put('kode_form/{id}', [KodeFormController::class, 'update'])->name('kode_form.update');
         Route::delete('kode_form/{id}', [KodeFormController::class, 'destroy'])->name('kode_form.destroy');
@@ -250,7 +254,7 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         });
     });
 
-     Route::prefix('data_kapal')->group(function() {
+    Route::prefix('data_kapal')->group(function() {
         Route::get('trip', [TripController::class, 'index']);
         Route::get('trip/data', [TripController::class, 'data'])->name('trip.data');
         Route::get('trip/form', [TripController::class, 'form'])->name('trip.form');
@@ -260,7 +264,43 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::post('/trip/update/{uid}', [TripController::class, 'update'])->name('trip.update');
         Route::delete('trip/{id}', [TripController::class, 'destroy'])->name('trip.destroy');
         Route::get('/trip/{id}/excel', [TripController::class, 'TripExcel'])->name('trip.excel');
-     });
+    });
+
+    Route::prefix('data_crew')->group(function() {
+        Route::get('recruitment', [RecruitmentController::class, 'index']);
+        Route::get('recruitment/data', [RecruitmentController::class, 'data'])->name('recruitment.data');
+        Route::get('recruitment/form', [RecruitmentController::class, 'form'])->name('recruitment.form');
+        Route::get('/recruitment/form/{id}', [RecruitmentController::class, 'form'])->name('recruitment.form');
+        Route::post('recruitment', [RecruitmentController::class, 'store'])->name('recruitment.store');
+        Route::put('recruitment/{id}', [RecruitmentController::class, 'update'])->name('recruitment.update');
+        Route::post('recruitment/savedata/{id}', [RecruitmentController::class, 'savedata'])->name('recruitment.savedata');
+        Route::delete('recruitment/{id}', [RecruitmentController::class, 'destroy'])->name('recruitment.destroy');
+        Route::get('/recruitment/pdf/{id}', [RecruitmentController::class, 'pdf'])->name('recruitment.pdf');
+
+        Route::get('familiarisasi', [FamiliarisasiController::class, 'index']);
+        Route::get('familiarisasi/data', [FamiliarisasiController::class, 'data'])->name('familiarisasi.data');
+        Route::get('familiarisasi/form', [FamiliarisasiController::class, 'form'])->name('familiarisasi.form');
+        Route::get('/familiarisasi/form/{id}', [FamiliarisasiController::class, 'form'])->name('familiarisasi.form');
+        Route::post('familiarisasi', [FamiliarisasiController::class, 'store'])->name('familiarisasi.store');
+        Route::put('familiarisasi/{id}', [FamiliarisasiController::class, 'update'])->name('familiarisasi.update');
+        Route::post('familiarisasi/savedata/{id}', [FamiliarisasiController::class, 'savedata'])->name('familiarisasi.savedata');
+        Route::delete('familiarisasi/{id}', [FamiliarisasiController::class, 'destroy'])->name('familiarisasi.destroy');
+        Route::get('/familiarisasi/pdf/{id}', [FamiliarisasiController::class, 'pdf'])->name('familiarisasi.pdf');
+        Route::get('/familiarisasi/{id}', [FamiliarisasiController::class, 'elemen'])->name('familiarisasi.elemen');
+        Route::post('/familiarisasi/getData', [FamiliarisasiController::class, 'getData'])->name('familiarisasi.getData');
+
+        Route::get('ganti', [GantiController::class, 'index']);
+        Route::get('ganti/data', [GantiController::class, 'data'])->name('ganti.data');
+        Route::get('ganti/form', [GantiController::class, 'form'])->name('ganti.form');
+        Route::get('/ganti/form/{id}', [GantiController::class, 'form'])->name('ganti.form');
+        Route::post('ganti', [GantiController::class, 'store'])->name('ganti.store');
+        Route::put('ganti/{id}', [GantiController::class, 'update'])->name('ganti.update');
+        Route::post('ganti/savedata/{id}', [GantiController::class, 'savedata'])->name('ganti.savedata');
+        Route::delete('ganti/{id}', [GantiController::class, 'destroy'])->name('ganti.destroy');
+        Route::get('/ganti/pdf/{id}', [GantiController::class, 'pdf'])->name('ganti.pdf');
+        Route::get('/ganti/{id}', [GantiController::class, 'elemen'])->name('ganti.elemen');
+        Route::post('/ganti/getData', [GantiController::class, 'getData'])->name('ganti.getData');
+    });
 
     Route::prefix('refrensi')->group(function () {
         Route::post('data', [RefrensiDocController::class, 'getData']);
@@ -441,14 +481,14 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     Route::post('/mutasi/delete/{id}', [MutasiController::class, 'delete']);
     Route::get('/mutasi/pdf', [MutasiController::class, 'pdf'])->name('mutasi.pdf')->middleware('auth');
 
-    Route::get('/el0607', [InterviewController::class, 'el0607'])->name('el0607')->middleware('auth');
-    Route::post('/interview/data', [InterviewController::class, 'getData'])->middleware('auth');
-    Route::get('/interview/add/{kode}', [InterviewController::class, 'add' ])->middleware('auth');
-    Route::post('/interview/store', [InterviewController::class, 'store'])->name('store');
-    Route::get('/interview/edit/{id}', [InterviewController::class, 'edit'])->middleware('auth');
-    Route::post('/interview/update/{id}', [InterviewController::class, 'update']);
-    Route::post('/interview/delete/{id}', [InterviewController::class, 'delete']);
-    Route::get('/interview/pdf/{id}', [InterviewController::class, 'pdf'])->name('interview.pdf')->middleware('auth');
+    // Route::get('/el0607', [InterviewController::class, 'el0607'])->name('el0607')->middleware('auth');
+    // Route::post('/interview/data', [InterviewController::class, 'getData'])->middleware('auth');
+    // Route::get('/interview/add/{kode}', [InterviewController::class, 'add' ])->middleware('auth');
+    // Route::post('/interview/store', [InterviewController::class, 'store'])->name('store');
+    // Route::get('/interview/edit/{id}', [InterviewController::class, 'edit'])->middleware('auth');
+    // Route::post('/interview/update/{id}', [InterviewController::class, 'update']);
+    // Route::post('/interview/delete/{id}', [InterviewController::class, 'delete']);
+    // Route::get('/interview/pdf/{id}', [InterviewController::class, 'pdf'])->name('interview.pdf')->middleware('auth');
 
     Route::get('/el0608', [KonditeController::class, 'el0608'])->name('el0608')->middleware('auth');
     Route::post('/kondite/data', [KonditeController::class, 'getData'])->middleware('auth');

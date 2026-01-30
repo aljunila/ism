@@ -80,6 +80,10 @@
             });
         }
     });
+
+    function formatTgl(d) {
+        return d ? d.substring(0,10).split('-').reverse().join('-') : '-';
+    }
     </script>
 </head>
 <!-- END: Head-->

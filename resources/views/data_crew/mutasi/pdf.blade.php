@@ -54,10 +54,18 @@
     <div>
         <table class="table-bordered" width="100%">
             <tr>
-                <td colspan="2" width="25%"><img src="{{ public_path('img/'.$perusahaan->logo) }}" alt="" width="50%"></td>
-                <td style="text-transform: uppercase;" colspan="5" width="50%"><h3>{{$form->nama}}</h3></td>
-                <td width="25%" style="text-align: center;"><b>{{$form->ket}}</b><br> Hal <span class="page-number"></span></td>
+                <td width="25%" style="text-align: center;" rowspan="3"><img src="{{ public_path('img/'.$perusahaan->logo) }}" alt="" width="50%"></td>
+                <td style="text-transform: uppercase;" width="50%" rowspan="3"><h3>{{$form->nama}}</h3></td>
+                <td width="25%" style="text-align: center;" colspan="3"><b>{{$form->judul}}</b></td>
             </tr>
+            <tr>
+                <td>{{$form->pj}}</td>
+                <td>{{$form->kode_file}}</td>
+                <td>{{$form->periode}}</td>
+            </tr>
+            <tr style="text-align: left;"><td colspan="3"> Hal <span class="page-number"></span></td></tr>
+        </table>
+        <table class="table-bordered" width="100%">
             <tr style="font-weight: bold;">
                 <td width="5%" rowspan="2">No</td>
                 <td width="25%" rowspan="2"> Nama</td>

@@ -36,11 +36,11 @@ let table;
         processing: true,
         serverSide: false, // kalau data sedikit cukup false, kalau ribuan bisa true
         ajax:{
-            url: "/mutasi/data",
+            url: "/data_crew/mutasi/getData",
             type: "POST",
             data: function(d){
                 d.kode= "{{ $form->kode}}",
-                d.id_perusahaan= $('#id_perusahaan').val(),
+                d.id_perusahaan = "{{$id_perusahaan}}",
                 d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
@@ -52,7 +52,7 @@ let table;
                     return meta.row + 1; // auto numbering
                 }
             },
-            { data: 'karyawan' },
+            { data: 'nama' },
             { data: 'jabatan' },
             { data: 'dari_kapal' },
             { data: 'ke_kapal' },
@@ -71,21 +71,6 @@ let table;
                 }
             },
             { data: 'ket' },
-            { 
-                data: 'id',
-                render: function(data, type, row){
-                    return `
-                        <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning edit-btn" 
-                            title="Edit" data-id="${data}">
-                            <i data-feather="edit"></i>
-                        </button>
-                        <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-danger delete-btn" 
-                            title="Hapus" data-id="${data}">
-                            <i data-feather="trash-2"></i>
-                        </button>
-                    `;
-                }
-            }
         ],
         drawCallback: function(settings) {
             feather.replace(); // supaya icon feather muncul ulang
@@ -228,27 +213,6 @@ $(document).on("click", ".delete-btn", function(){
     });
 });
 
-$(document).on('change', '.perusahaan', function() {
-    var perusahaanID = $(this).val();
-    if (perusahaanID) {
-        $.ajax({
-            url: '/get-kapal/' + perusahaanID,
-            type: "GET",
-            dataType: "json",
-            success: function(data) {
-                $('.kapal').empty().append('<option value="">Semua</option>');           
-                $.each(data, function(key, value) {
-                    $('.kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
-                });
-                table.ajax.reload();
-            }
-        });
-    } else {
-        $('.kapal').empty().append('<option value="">Tidak ada data</option>');
-        table.ajax.reload();
-    }
-});
-
 $(document).on('change', '.kapal', function() {
     var kapalID = $(this).val();
     if (kapalID) {
@@ -272,21 +236,12 @@ $(document).on('change', '.kapal', function() {
 });
 
 $(document).on('click', '#btn-pdf', function() {
-    let id_perusahaan = $('#id_perusahaan').val();
+    let id_perusahaan = "{{$id_perusahaan}}";
     let id_kapal = $('#id_kapal').val();
     let start = $('#start').val();
     let end = $('#end').val();
     let kode = "{{ $form->kode}}";
 
-    if (!id_perusahaan.trim()) {
-        Swal.fire({
-            icon: "warning",
-            title: "Oops...",
-            text: "Silahkan pilih perusahaan terlebih dahulu"
-        });
-        return;
-    }
-    
     if (!start.trim()) {
         Swal.fire({
             icon: "warning",
@@ -296,7 +251,7 @@ $(document).on('click', '#btn-pdf', function() {
         return;
     }
 
-    let url = "{{ url('/mutasi/pdf') }}" + "?id_perusahaan=" + id_perusahaan + "&start=" + start + "&end=" + end;
+    let url = "{{ url('/data_crew/mutasi/pdf') }}" + "?id_perusahaan=" + id_perusahaan + "&start=" + start + "&end=" + end;
     window.open(url, '_blank');
 });
 </script>
@@ -310,7 +265,7 @@ $(document).on('click', '#btn-pdf', function() {
                             <div class="col-12">
                                 <h4 class="card-title">{{$form->nama}}</h4>
                             </div>
-                                @include('filter')
+                                @include('kapal')
                             <div class="col-3">
                                 <!-- <button type="button" class="btn btn-primary btn-sm float-right" data-bs-toggle="modal" data-bs-target="#FormTambah">Tambah Data</button> -->
                                 <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#FormDownload">Cetak Laporan</button>
@@ -319,7 +274,7 @@ $(document).on('click', '#btn-pdf', function() {
                     <div class="card-body">
                     <table id="table" class="table table-bordered table-striped" width="100%">
                       <thead>
-                        <tr>
+                        <tr align="center">
                           <th width="5%" rowspan="2">No.</th>
                           <th width="25%" rowspan="2">Nama</th>
                           <th width="10%" rowspan="2">Jabatan</th>
@@ -327,9 +282,8 @@ $(document).on('click', '#btn-pdf', function() {
                           <th width="10%" rowspan="2">Tgl Naik</th>
                           <th width="10%" rowspan="2">Tgl Turun</th>
                           <th width="15%" rowspan="2">Keterangan</th>
-                          <th width="5%" rowspan="2">Aksi</th>
                         </tr>
-                        <tr>
+                        <tr align="center">
                             <th>Dari</th>
                             <th>Ke</th>
                         </tr>
@@ -341,151 +295,6 @@ $(document).on('click', '#btn-pdf', function() {
                 </div>
             </div>
         </div>
-<div class="modal fade text-start" id="FormEdit" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel33">Edit Data</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="form_edit" enctype="multipart/form-data">
-                    @csrf
-            <div class="modal-body">
-                <label>Perusahaan </label>
-                <div class="mb-1">
-                    <select name="dari_perusahaan" id="dari_perusahaan" class="form-control" required>
-                        <option value="">Pilih</option>
-                        @foreach($perusahaan as $p)
-                            <option value="{{$p->id}}">{{$p->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <label>Kapal </label>
-                <div class="mb-1">
-                    <select name="dari_kapal" id="dari_kapal" class="form-control" required>
-                        <option value="">Pilih</option>
-                        @foreach($kapal as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <label>Nama Crew</label>
-                <div class="mb-1">
-                    <select name="id_karyawan" id="id_karyawan" class="form-control" required>
-                        @foreach($karyawan as $ky)
-                            <option value="{{$ky->id}}">{{$ky->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <label>Pindah Ke </label>
-                <div class="mb-1">
-                    <select name="ke_kapal" id="ke_kapal" class="form-control" required>
-                        <option value="">Pilih</option>
-                        @foreach($kapal as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <label>Tanggal Naik</label>
-                <div class="mb-1">
-                    <input type="date" id="tgl_naik" class="form-control" name="tgl_naik"/>
-                </div>
-
-                <label>Tanggal Turun</label>
-                <div class="mb-1">
-                    <input type="date" class="form-control" id="tgl_turun"  name="tgl_turun"/>
-                </div>
-
-                <label>Keterangan</label>
-                <div class="mb-1">
-                    <input type="text" class="form-control" name="ket" id="ket"/>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <input type="hidden" name="id" id="id">
-                <button type="submit" class="btn btn-primary" id="edit_data">Simpan</button>
-            </div>
-        </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade text-start" id="FormTambah" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel33">Tambah Data</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="form_refrensi" enctype="multipart/form-data">
-                    @csrf
-                <div class="modal-body">
-                    <label>Perusahaan </label>
-                    <div class="mb-1">
-                        <select name="dari_perusahaan" class="form-control perusahaan" required>
-                            <option value="">Pilih</option>
-                            @foreach($perusahaan as $p)
-                                <option value="{{$p->id}}">{{$p->nama}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <label>Kapal </label>
-                    <div class="mb-1">
-                        <select name="dari_kapal" class="form-control kapal" required>
-                            <option value="">Pilih</option>
-                            @foreach($kapal as $k)
-                                <option value="{{$k->id}}">{{$k->nama}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <label>Nama Crew</label>
-                    <div class="mb-1">
-                        <select name="id_karyawan" class="form-control karyawan" required>
-                            @foreach($karyawan as $ky)
-                                <option value="{{$ky->id}}">{{$ky->nama}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <label>Pindah Ke </label>
-                    <div class="mb-1">
-                        <select name="ke_kapal" class="form-control" required>
-                            <option value="">Pilih</option>
-                            @foreach($kapal as $k)
-                                <option value="{{$k->id}}">{{$k->nama}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <label>Tanggal Naik</label>
-                    <div class="mb-1">
-                        <input type="date" class="form-control" name="tgl_naik"/>
-                    </div>
-
-                    <label>Tanggal Turun</label>
-                    <div class="mb-1">
-                        <input type="date" class="form-control" name="tgl_turun"/>
-                    </div>
-
-                    <label>Keterangan</label>
-                    <div class="mb-1">
-                        <input type="text" class="form-control" name="ket"/>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <input type="hidden" name="kode" id="kode" value="{{$form->kode}}">
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade text-start" id="FormDownload" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

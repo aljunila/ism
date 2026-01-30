@@ -9,10 +9,12 @@ use App\Models\Karyawan;
 use App\Models\Jabatan;
 use App\Models\ChecklistItem;
 use App\Models\KodeForm;
+use App\Models\FormISM;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Str;
 use Session;
+use DB;
 
 class RecruitmentController extends Controller
 {
@@ -30,9 +32,13 @@ class RecruitmentController extends Controller
 
         return DataTables::of($query)
             ->addIndexColumn()
-             ->addColumn('jabatan', function ($row) {
+            ->addColumn('jabatan', function ($row) {
                 $jabatan = Jabatan::find($row->id_jabatan);
                 return $jabatan ? $jabatan->nama : '-';
+            })
+            ->addColumn('perusahaan', function ($row) {
+                $perusahaan = Perusahaan::find($row->id_perusahaan);
+                return $perusahaan ? $perusahaan->nama : '-';
             })
             ->addColumn('aksi', function ($row) {
                 return view('data_crew.recruitment.partials.actions', compact('row'))->render();
@@ -144,5 +150,35 @@ class RecruitmentController extends Controller
         $pdf = Pdf::loadView('data_crew.recruitment.pdf', $data)
                 ->setPaper('a3', 'portrait');
         return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
+    }
+
+    public function elemen($uid)
+    {   
+        
+        $data['active'] = "/data_master/kode_form";
+        $get = FormISM::where('uid', $uid)->first();; 
+        $roleJenis = Session::get('previllage');
+        $activeCompany = $get->id_perusahaan;
+        $activeShip = Session::get('id_kapal');  
+        $data['form'] = KodeForm::find($get->id_form);
+        $data['id_perusahaan'] = $get->id_perusahaan;
+        return view('data_crew.recruitment.elemen', $data);
+    }
+
+    public function getData(Request $request)
+    {
+        $perusahaan = $request->input('id_perusahaan');
+        
+        $daftar = DB::table('t_recruitment as a')
+                ->leftjoin('jabatan as b', 'b.id', '=', 'a.id_jabatan')
+                ->select('a.*', 'b.nama as jabatan')
+                ->where('a.is_delete',0)
+                ->when($perusahaan, fn($query, $perusahaan) => $query->where('a.id_perusahaan', $perusahaan))
+                ->orderBy('a.id', 'DESC')
+                ->get();
+
+        return response()->json([
+            'data' => $daftar
+        ]);
     }
 }

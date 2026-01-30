@@ -38,7 +38,6 @@ class KodeFormController extends Controller
 
     public function store(Request $request)
     {
-        $menu = Menu::find($request->input('id_menu'));
         $validated = $request->validate([
             'kode' => 'required|string|max:20',
             'nama' => 'required|string|max:100',
@@ -52,7 +51,10 @@ class KodeFormController extends Controller
             'kel' => 'nullable|string|max:20',
             'intruksi' => 'nullable|string',
         ]);
-        $validated['link'] = $menu->link;
+        if($request->input('id_menu')){
+            $menu = Menu::find($request->input('id_menu'));
+            $validated['link'] = $menu->link;
+        }
         $exists = KodeForm::where('is_delete', 0)
             ->where(function ($q) use ($validated) {
                 $q->where('kode', $validated['kode']);
@@ -72,7 +74,6 @@ class KodeFormController extends Controller
 
     public function update(Request $request, string $id)
     {
-        $menu = Menu::find($request->input('id_menu'));
         $validated = $request->validate([
             'kode' => 'required|string|max:20',
             'nama' => 'required|string|max:100',
@@ -85,7 +86,10 @@ class KodeFormController extends Controller
             'bagian' => 'nullable|string|max:20',
             'kel' => 'nullable|string|max:20',
         ]);
-        $validated['link'] = $menu->link;
+        if($request->input('id_menu')){
+            $menu = Menu::find($request->input('id_menu'));
+            $validated['link'] = $menu->link;
+        }
 
         $kodeForm = KodeForm::findOrFail($id);
 
@@ -124,7 +128,15 @@ class KodeFormController extends Controller
 
     public function ism()
     {
-        $query = FormISM::where('is_delete', 0)->orderBy('id_perusahaan', 'asc')->orderBy('judul', 'asc');
+        $id_perusahaan = Session::get('id_perusahaan');
+        $roleJenis = Session::get('previllage');
+
+        $query = FormISM::where('is_delete', 0)
+                ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                    return $q->where('id_perusahaan', $id_perusahaan);
+                })
+                ->orderBy('id_perusahaan', 'asc')->orderBy('judul', 'asc');
 
         return DataTables::of($query)
             ->addIndexColumn()

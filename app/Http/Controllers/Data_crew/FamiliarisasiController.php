@@ -25,16 +25,29 @@ class FamiliarisasiController extends Controller
         $data['active'] = "/data_crew/familiarisasi";
         $data['perusahaan'] = Perusahaan::where('status', 'A')->get();     
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['form'] = KodeForm::where('id_menu', 72)->get();
+        $data['form'] = KodeForm::where('id_menu', 57)->get();
         return view('data_crew.familiarisasi.index', $data);
     }
 
     public function data()
     {
+        $id_perusahaan = Session::get('id_perusahaan');
+        $id_kapal = Session::get('id_kapal');
+        $roleJenis = Session::get('previllage');
+        
         $query = DB::table('checklist_data as a')
                 ->leftjoin('kode_form as b', 'a.id_form', '=', 'b.id') 
+                ->leftjoin('karyawan as c', 'a.id_karyawan', '=', 'c.id')
                 ->select('a.*')       
-                ->where('a.status', 'A')->where('b.id_menu', 72)->orderBy('a.id', 'DESC');
+                ->where('a.status', 'A')->where('b.id_menu', 57)
+                ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                    return $q->where('a.id_perusahaan', $id_perusahaan);
+                })
+                ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
+                    return $q->where('c.id_kapal', $id_kapal);
+                })
+                ->orderBy('a.id', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()
@@ -177,7 +190,7 @@ class FamiliarisasiController extends Controller
      public function elemen($uid)
     {   
         
-        $data['active'] = "/data_master/kode_form";
+        $data['active'] = "/form_ism";
         $get = FormISM::where('uid', $uid)->first();; 
         $roleJenis = Session::get('previllage');
         $activeCompany = $get->id_perusahaan;

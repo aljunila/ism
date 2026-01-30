@@ -65,13 +65,13 @@
             { data: 'nama' },
             { data: 'jabatan' },
             { 
-                data: null, 
-                render: function (data, type, row) {
-                        return `
-                        <a href="/data_crew/familiarisasi/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" target="_blank" title="Cetak PDF">
-                                <i data-feather='printer'></i>
-                            </a>
-                        `;
+                data: null,
+                render: function(data, type, row){
+                    if(row.data) {
+                    return `<a type="button" href="/data_crew/recruitment/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                    >Cetak PDF</a>`;
+                    }
+                    return `-`;
                 }
             },
         ],

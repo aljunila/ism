@@ -26,16 +26,29 @@ class GantiController extends Controller
         $data['active'] = "/data_crew/ganti";
         $data['perusahaan'] = Perusahaan::where('status', 'A')->get();     
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['form'] = KodeForm::where('id_menu', 74)->select('kel')->distinct()->get();
+        $data['form'] = KodeForm::where('id_menu', 58)->select('kel')->distinct()->get();
         return view('data_crew.ganti.index', $data);
     }
 
     public function data()
     {
+        $id_perusahaan = Session::get('id_perusahaan');
+        $id_kapal = Session::get('id_kapal');
+        $roleJenis = Session::get('previllage');
+
         $query = DB::table('checklist_data as a')
                 ->leftjoin('kode_form as b', 'a.id_form', '=', 'b.id') 
+                ->leftjoin('karyawan as c', 'a.id_karyawan', '=', 'c.id')
                 ->select('a.*')       
-                ->where('a.status', 'A')->where('b.id_menu', 74)->orderBy('a.id', 'DESC');
+                ->where('a.status', 'A')->where('b.id_menu', 58)
+                ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                    return $q->where('a.id_perusahaan', $id_perusahaan);
+                })
+                ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
+                    return $q->where('c.id_kapal', $id_kapal);
+                })
+                ->orderBy('a.id', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()
@@ -68,7 +81,7 @@ class GantiController extends Controller
     {
         $dari = Karyawan::find($request->input('id_karyawan'));
         $kepada = Karyawan::find($request->input('id_karyawan2'));
-        $form = KodeForm::where('kel', $request->input('kode'))->get();
+        $form = KodeForm::where('kel', $request->input('kode'))->where('id_menu', 58)->get();
 
         foreach($form as $f) {
             $save = ChecklistData::create([
@@ -129,7 +142,11 @@ class GantiController extends Controller
         $data['pelabuhan'] = Pelabuhan::where('id_cabang', $get->id_cabang)->where('is_delete',0)->get();
         $data['dataItem'] = $show->data;
         $data['keterangan'] = $show->keterangan;
-        return view('data_crew.ganti.form', $data);
+        if($form->id==16){
+            return view('data_crew.ganti.handover', $data);
+        } else {
+            return view('data_crew.ganti.form', $data);
+        }
     }
 
     public function savedata(Request $request, $id)
@@ -141,12 +158,21 @@ class GantiController extends Controller
         } else {
             $wi = "WITA";
         }
-        $data = [];
-        foreach ($request->item as $iditem => $value) {
-            $data[$iditem] = [
-                'value' => (int) $value,
-                'ket'   => $request->ket[$iditem] ?? null,
+        if($show->id_form==16) {
+            $data = [
+                'no' => $request->input('no'),
+                'fo' => $request->input('fo'),
+                'do' => $request->input('do'),
+                'fw' => $request->input('fw'),
             ];
+        } else {
+            $data = [];
+            foreach ($request->item as $iditem => $value) {
+                $data[$iditem] = [
+                    'value' => (int) $value,
+                    'ket'   => $request->ket[$iditem] ?? null,
+                ];
+            }
         }
         $pj = [
             'lama' => $show->id_karyawan,
@@ -186,7 +212,8 @@ class GantiController extends Controller
         $data['item'] = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id',0)->get();   
         $data['dataItem'] = $show->data;
         $data['keterangan'] = $show->keterangan;
-        $pdf = Pdf::loadView('data_crew.ganti.pdf', $data)
+        if($show->id_form==16) { $page = "pdfover"; } else { $page = "pdf"; }
+        $pdf = Pdf::loadView('data_crew.ganti.'.$page, $data)
                 ->setPaper('a3', 'portrait');
         return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }
@@ -194,7 +221,7 @@ class GantiController extends Controller
     public function elemen($uid)
     {   
         
-        $data['active'] = "/data_master/kode_form";
+        $data['active'] = "/form_ism";
         $get = FormISM::where('uid', $uid)->first();; 
         $roleJenis = Session::get('previllage');
         $activeCompany = $get->id_perusahaan;

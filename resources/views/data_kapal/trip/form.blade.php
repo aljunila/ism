@@ -163,7 +163,7 @@
                                     <label class="col-form-label" for="first-name">{{$kr->kode}}</label>
                                 </div>
                                 <div class="col-sm-3">
-                                    <input type="number" class="form-control" id="{{$kr->id}}" name="gol[{{$kr->id}}]" value="{{ old('gol.'.$kr->id, $trip->data[$kr->id] ?? 0) }}">
+                                    <input type="number" class="form-control" id="{{$kr->id}}" name="gol[{{$kr->id}}]" value="{{ $gol[$kr->id]['jumlah'] ?? '' }}">
                                 </div>
                             </div>  
                             @endforeach

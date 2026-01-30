@@ -37,7 +37,7 @@
         processing: true,
         searchable: true,
         ajax:{
-            url: "/data_crew/ganti/getData",
+            url: "/kapal/data",
             type: "POST",
             data: function(d){
                 d.kode= "{{ $form->id}}",
@@ -54,24 +54,14 @@
                 orderable: false,
                 searchable: false
             },
-            { data: 'date',
-                render: function(data) {
-                    if (!data) return '';
-                    let parts = data.split(' ')[0].split('-'); 
-                    return parts[2] + '-' + parts[1] + '-' + parts[0]; 
-                }
-            },
-            { data: 'kapal' },
-            { data: 'dari' },
-            { data: 'kepada' },
+            { data: 'nama' },
+            { data: 'call_sign' },
+            { data: 'cabang' },
            { 
                 data: null,
                 render: function(data, type, row){
-                    if(row.data) {
-                    return `<a type="button" href="/data_crew/recruitment/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                    return `<a type="button" href="/kapal/pdfdoclist/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
                     >Cetak PDF</a>`;
-                    }
-                    return `-`;
                 }
             },
         ],
@@ -166,10 +156,9 @@
                         <thead>
                             <tr>
                             <th>No.</th>
-                            <th>Tanggal</th>
                             <th>Nama Kapal</th>
-                            <th>Dari</th>
-                            <th>Kepada</th>
+                            <th>Call Sign</th>
+                            <th>Lokasi</th>
                             <th>PDF</th>
                             </tr>
                         </thead>

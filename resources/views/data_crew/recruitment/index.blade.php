@@ -17,10 +17,12 @@
             <thead>
                 <tr>
                     <th>No</th>
+                    <th>Perusahaan</th>
                     <th>Nama</th>
                     <th>Jabatan</th>
                     <th>Catatan</th>
                     <th>Status</th>
+                    <th>PDF</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -98,6 +100,7 @@
             ajax: '{{ route('recruitment.data') }}',
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'perusahaan', name: 'perusahaan' },
                 { data: 'nama', name: 'nama' },
                 { data: 'jabatan', name: 'jabatan' },
                 { data: 'note', name: 'note' },
@@ -109,6 +112,16 @@
                         if (data === 'A') return 'Diterima';
                         if (data === 'D') return 'Ditolak';
                         return '-';
+                    }
+                },
+                { 
+                    data: null,
+                    render: function(data, type, row){
+                        if(row.data) {
+                        return `<a type="button" href="/data_crew/recruitment/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                        >Cetak PDF</a>`;
+                        }
+                        return `-`;
                     }
                 },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }

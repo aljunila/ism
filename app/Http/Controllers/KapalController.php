@@ -10,6 +10,8 @@ use App\Models\MasterFile;
 use App\Models\FileUpload;
 use App\Models\Docking;
 use App\Models\Cabang;
+use App\Models\FormISM;
+use App\Models\KodeForm;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -48,7 +50,8 @@ class KapalController extends Controller
         $activeCompany = Session::get('id_perusahaan');
         $get = DB::table('kapal')
                 ->leftjoin('perusahaan', 'perusahaan.id', '=', 'kapal.pemilik')
-                ->select('kapal.*', 'perusahaan.nama as perusahaan')
+                ->leftjoin('m_cabang', 'm_cabang.id', '=', 'kapal.id_cabang')
+                ->select('kapal.*', 'perusahaan.nama as perusahaan', 'm_cabang.cabang')
                 ->where('kapal.status', 'A')
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('perusahaan.id', $perusahaan);
@@ -307,4 +310,58 @@ class KapalController extends Controller
     {
        $post = FileUpload::where('id',$id)->update(['status' => 'D']);;
     }
+
+    public function doclist($uid)
+    {
+        $data['active'] = "form_ism";
+        $get = FormISM::where('uid', $uid)->first();
+        $roleJenis = Session::get('previllage');
+        $activeCompany = $get->id_perusahaan;
+        $activeShip = Session::get('id_kapal');
+        $data['kapal'] = Kapal::where('status', 'A')
+            ->when($roleJenis == 1 || $roleJenis == 2, function ($q) use ($activeCompany) {
+                return $q->where('pemilik', $activeCompany);
+            })
+            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
+                return $q->where('id', $activeShip);
+            })->get();    
+
+            
+        $data['form'] = KodeForm::find($get->id_form);
+        $data['id_perusahaan'] = $get->id_perusahaan;
+        return view('kapal.doclist', $data);
+    }
+
+    public function pdfdoclist($uid) {
+        $show =  Kapal::where('uid', $uid)->first();
+        $nama = $show->nama;
+        $id_perusahaan = $show->pemilik;
+        $form = DB::table('kode_form as a')
+                ->leftJoin('t_ism as b', function($join) use ($id_perusahaan) {
+                    $join->on('a.id', '=', 'b.id_form')
+                        ->where('b.id_perusahaan', $id_perusahaan)
+                        ->where('b.is_delete', 0);
+                })
+                ->select('a.*', 'b.judul')
+                ->where('a.id', 93)->first();
+        $doc = DB::table('file_upload as a')
+                ->leftJoin('master_file as b', 'a.id_file', '=', 'b.id')
+                ->select(
+                    'b.*',
+                    'a.no',
+                    'a.tgl_terbit',
+                    'a.tgl_expired',
+                    'a.penerbit'
+                )
+                ->where('a.id_kapal', $show->id)->where('b.status', 'A')->where('a.status', 'A')->where('b.type', 'K')
+                ->whereNotNull('a.tgl_expired')
+                ->orderBy('b.no_urut', 'ASC')->get();
+        $data['show'] = $show;
+        $data['form'] = $form;
+        $data['doc'] = $doc;   
+        $pdf = Pdf::loadView('kapal.pdfdoclist', $data)
+                ->setPaper('a3', 'portrait');
+        return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
+    }
+
 }

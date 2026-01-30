@@ -27,23 +27,15 @@ class TripbyIdExport implements FromView
         $result = [];
         $grandTotal = 0;
 
-        foreach ($data as $id => $jumlah) {
+        foreach ($data as $id => $row) {
             $kend = Kendaraan::where('id', $id)->first();
-            $biaya = BiayaPenumpang::where('id_pelabuhan', $trip->id_pelabuhan)
-                ->where('id_kendaraan', $id)
-                ->where('kelas', $kelas)
-                ->get()
-                ->keyBy('id_kendaraan');
-            $nominal = $biaya[$id]->nominal ?? 0;
-            $total   = $jumlah * $nominal;
-
-            $grandTotal += $total;
+            $grandTotal += $row['total'];
 
             $result[] = [
                 'gol'     => $kend->kode,
-                'jumlah'  => $jumlah,
-                'nominal' => $nominal,
-                'total'   => $total,
+                'jumlah'       => $row['jumlah'],
+                'nominal'      => $row['nominal'],
+                'total'        => $row['total']
             ];
         }
 

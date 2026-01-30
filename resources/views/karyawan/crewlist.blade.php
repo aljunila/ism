@@ -33,14 +33,15 @@
     let table;
 
     $(function () {
+        let idform = "{{ $form->id }}";
 		table = $('#table').DataTable({
         processing: true,
         searchable: true,
         ajax:{
-            url: "/data_crew/ganti/getData",
+            url: "/kapal/data",
             type: "POST",
             data: function(d){
-                d.kode= "{{ $form->id}}",
+                d.kode= idform,
                 d.id_perusahaan= "{{$id_perusahaan}}",
                 d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
@@ -54,24 +55,27 @@
                 orderable: false,
                 searchable: false
             },
-            { data: 'date',
-                render: function(data) {
-                    if (!data) return '';
-                    let parts = data.split(' ')[0].split('-'); 
-                    return parts[2] + '-' + parts[1] + '-' + parts[0]; 
-                }
-            },
-            { data: 'kapal' },
-            { data: 'dari' },
-            { data: 'kepada' },
-           { 
+            { data: 'nama' },
+            { data: 'call_sign' },
+            { data: 'cabang' },
+            { 
                 data: null,
                 render: function(data, type, row){
-                    if(row.data) {
-                    return `<a type="button" href="/data_crew/recruitment/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
-                    >Cetak PDF</a>`;
+                    if (idform == 44) {
+                        return `
+                            <a href="/karyawan/pdfcrewlist/${row.uid}" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-success">
+                               Cetak PDF
+                            </a>`;
+                    } else {
+                        return `
+                            <a href="/karyawan/pdfcontact/${row.uid}" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-success">
+                               Cetak PDF
+                            </a>`;
                     }
-                    return `-`;
                 }
             },
         ],
@@ -166,10 +170,9 @@
                         <thead>
                             <tr>
                             <th>No.</th>
-                            <th>Tanggal</th>
                             <th>Nama Kapal</th>
-                            <th>Dari</th>
-                            <th>Kepada</th>
+                            <th>Call Sign</th>
+                            <th>Lokasi</th>
                             <th>PDF</th>
                             </tr>
                         </thead>

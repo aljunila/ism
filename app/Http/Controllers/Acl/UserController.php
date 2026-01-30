@@ -68,7 +68,7 @@ class UserController extends Controller
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'nama' => $validated['nama'],
-            'id_previllage' => $role->id, // legacy mirror
+            'id_previllage' => $role->jenis, // legacy mirror
             'role_id' => $role->id,
             'id_perusahaan' => $perusahaanId,
             'id_karyawan' => $karyawanId,
@@ -161,7 +161,7 @@ class UserController extends Controller
         $karyawanId = $role->is_superadmin ? 0 : ($validated['karyawan_id'] ?? 0);
 
         $user->nama = $validated['nama'];
-        $user->id_previllage = $mainRoleId; // legacy mirror
+        $user->id_previllage = $role->jenis; // legacy mirror
         $user->role_id = $mainRoleId;
         $user->id_perusahaan = $perusahaanId;
         $user->id_karyawan = $karyawanId;

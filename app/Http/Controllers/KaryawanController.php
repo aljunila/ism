@@ -17,6 +17,10 @@ use App\Models\StatusPTKP;
 use App\Models\MasterFile;
 use App\Models\FileUpload;
 use App\Models\Mutasi;
+use App\Models\JenisCuti;
+use App\Models\Cuti;
+use App\Models\KodeForm;
+use App\Models\FormISM;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -269,7 +273,7 @@ class KaryawanController extends Controller
         $data['show'] = $show;
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
         $data['perusahaan'] = Perusahaan::get();
-         $roleJenis = Session::get('previllage');
+        $roleJenis = Session::get('previllage');
          if($roleJenis==1) {
             $data['kapal'] = Kapal::where('status', 'A')->get();
         } elseif($roleJenis==2) {
@@ -283,7 +287,9 @@ class KaryawanController extends Controller
         // $data['menu'] = Akses::where('id_karyawan', $show->id)->get();
         $data['active'] = "karyawan";
         $data['ptkp'] = StatusPTKP::get();
-        $data['mutasi'] = Mutasi::where('id_karyawan', $show->id)->orderBy('tgl_naik', 'DESC')->get();
+        $data['mutasi'] = Mutasi::where('id_karyawan', $show->id)->orderBy('tgl_naik', 'DESC')->where('status', 'A')->get();
+        $data['jeniscuti'] = JenisCuti::where('is_delete', 0)->get();
+        $data['karyawan'] = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('status', 'A')->where('resign', 'N')->get();
         return view('karyawan.profile',$data);
     }
 
@@ -364,5 +370,132 @@ class KaryawanController extends Controller
                 ->setPaper('a3', 'portrait');
 
         return $pdf->stream($nama.'.pdf');
+    }
+
+    public function crewlist($uid)
+    {
+        $data['active'] = "form_ism";
+        $get = FormISM::where('uid', $uid)->first();
+        $roleJenis = Session::get('previllage');
+        $activeCompany = $get->id_perusahaan;
+        $activeShip = Session::get('id_kapal');
+        $data['kapal'] = Kapal::where('status', 'A')
+            ->when($roleJenis == 1 || $roleJenis == 2, function ($q) use ($activeCompany) {
+                return $q->where('pemilik', $activeCompany);
+            })
+            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
+                return $q->where('id', $activeShip);
+            })->get();    
+
+            
+        $data['form'] = KodeForm::find($get->id_form);
+        $data['id_perusahaan'] = $get->id_perusahaan;
+        return view('karyawan.crewlist', $data);
+    }
+
+    public function pdfcrewlist($uid) {
+        $show =  Kapal::where('uid', $uid)->first();
+        $nama = $show->nama;
+        $id_perusahaan = $show->pemilik;
+        $form = DB::table('kode_form as a')
+                ->leftJoin('t_ism as b', function($join) use ($id_perusahaan) {
+                    $join->on('a.id', '=', 'b.id_form')
+                        ->where('b.id_perusahaan', $id_perusahaan)
+                        ->where('b.is_delete', 0);
+                })
+                ->select('a.*', 'b.judul')
+                ->where('a.id', 44)->first();
+        $crew = DB::table('karyawan as k')
+                ->leftJoin('jabatan as j', 'j.id', '=', 'k.id_jabatan')
+
+                // IJAZAH (id=27)
+                ->leftJoin('file_upload as ij', function ($join) {
+                    $join->on('ij.id_karyawan', '=', 'k.id')
+                        ->where('ij.id_file', 27);
+                })
+
+                // ENDORSEMENT (id=99)
+                ->leftJoin('file_upload as en', function ($join) {
+                    $join->on('en.id_karyawan', '=', 'k.id')
+                        ->where('en.id_file', 99);
+                })
+
+                // BUKU PELAUT (id=28)
+                ->leftJoin('file_upload as bp', function ($join) {
+                    $join->on('bp.id_karyawan', '=', 'k.id')
+                        ->where('bp.id_file', 28);
+                })
+
+                ->select(
+                    'k.id',
+                    'k.nama',
+                    'j.nama as jabatan',
+                    'ij.no as ijazah_no',
+                    'en.no as endorse_no',
+                    'en.tgl_expired as endorse_berlaku',
+                    'bp.no as buku_no',
+                    'bp.tgl_expired as buku_berlaku'
+                )
+                ->where('k.id_kapal', $show->id)->where('k.status', 'A')->where('k.resign', 'N')
+                ->orderBy('j.id', 'ASC')->get();
+        $data['show'] = $show;
+        $data['form'] = $form;
+        $data['crew'] = $crew;   
+        $pdf = Pdf::loadView('karyawan.pdfcrewlist', $data)
+                ->setPaper('a3', 'portrait');
+        return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
+    }
+
+    public function mutasi($uid)
+    {
+        $data['active'] = "form_ism";
+        $get = FormISM::where('uid', $uid)->first();
+        $roleJenis = Session::get('previllage');
+        $activeCompany = $get->id_perusahaan;
+        $activeShip = Session::get('id_kapal');
+        $data['kapal'] = Kapal::where('status', 'A')
+            ->when($roleJenis == 1 || $roleJenis == 2, function ($q) use ($activeCompany) {
+                return $q->where('pemilik', $activeCompany);
+            })
+            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
+                return $q->where('id', $activeShip);
+            })->get();    
+        $data['karyawan'] = Karyawan::where('status', 'A')->where('resign', 'N')
+            ->when($roleJenis == 1 || $roleJenis == 2, function ($q) use ($activeCompany) {
+                return $q->where('id_perusahaan', $activeCompany);
+            })
+            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
+                return $q->where('id_kapal', $activeShip);
+            })->get();  
+            
+        $data['form'] = KodeForm::find($get->id_form);
+        $data['perusahaan'] = Perusahaan::get();
+        $data['id_perusahaan'] = $get->id_perusahaan;
+        return view('karyawan.mutasi', $data);
+    }
+
+    public function pdfcontact($uid) {
+        $show =  Kapal::where('uid', $uid)->first();
+        $nama = $show->nama;
+        $id_perusahaan = $show->pemilik;
+        $form = DB::table('kode_form as a')
+                ->leftJoin('t_ism as b', function($join) use ($id_perusahaan) {
+                    $join->on('a.id', '=', 'b.id_form')
+                        ->where('b.id_perusahaan', $id_perusahaan)
+                        ->where('b.is_delete', 0);
+                })
+                ->select('a.*', 'b.judul')
+                ->where('a.id', 46)->first();
+        $crew = DB::table('karyawan as k')
+                ->leftJoin('jabatan as j', 'j.id', '=', 'k.id_jabatan')
+                ->select('k.nama', 'j.nama as jabatan', 'k.kontak_darurat', 'k.nama_kontak', 'k.telp_kontak')
+                ->where('k.id_kapal', $show->id)->where('k.status', 'A')->where('k.resign', 'N')
+                ->orderBy('j.id', 'ASC')->get();
+        $data['show'] = $show;
+        $data['form'] = $form;
+        $data['crew'] = $crew;   
+        $pdf = Pdf::loadView('karyawan.pdfcontact', $data)
+                ->setPaper('a3', 'portrait');
+        return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }
 }

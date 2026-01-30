@@ -37,12 +37,10 @@
         processing: true,
         searchable: true,
         ajax:{
-            url: "/data_crew/ganti/getData",
+            url: "/data_crew/recruitment/getData",
             type: "POST",
             data: function(d){
-                d.kode= "{{ $form->id}}",
                 d.id_perusahaan= "{{$id_perusahaan}}",
-                d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
             },
         },
@@ -54,22 +52,28 @@
                 orderable: false,
                 searchable: false
             },
-            { data: 'date',
-                render: function(data) {
-                    if (!data) return '';
-                    let parts = data.split(' ')[0].split('-'); 
-                    return parts[2] + '-' + parts[1] + '-' + parts[0]; 
+            { data: 'nama' },
+            { data: 'jabatan' },
+            { data: 'note' },
+            {
+                data: 'status',
+                name: 'status',
+                render: function (data, type, row) {
+                    if (data === 'N') return 'Baru';
+                    if (data === 'A') return 'Diterima';
+                    if (data === 'D') return 'Ditolak';
+                    return '-';
                 }
             },
-            { data: 'kapal' },
-            { data: 'dari' },
-            { data: 'kepada' },
-           { 
-                data: null,
-                render: function(data, type, row){
+            { 
+                data: null, 
+                render: function (data, type, row) {
                     if(row.data) {
-                    return `<a type="button" href="/data_crew/recruitment/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
-                    >Cetak PDF</a>`;
+                        return `
+                        <a href="/data_crew/recruitment/pdf/${row.uid}" type="button" class="btn btn-icon btn-xs btn-flat-primary download" target="_blank" title="Cetak PDF">
+                                <i data-feather='printer'></i>
+                            </a>
+                        `;
                     }
                     return `-`;
                 }
@@ -81,72 +85,6 @@
     });
     });
 
-    $(document).on("click", ".delete-btn", function(){
-        let id = $(this).data("id");
-
-        Swal.fire({
-            title: "Yakin mau hapus?",
-            text: "Data yang dihapus tidak bisa dikembalikan!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#6c757d",
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "/checklist/delete/" + id,
-                    type: "post",
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(res){
-                        Swal.fire({
-                            icon: "success",
-                            title: "Terhapus!",
-                            text: "Data berhasil dihapus",
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        table.ajax.reload();
-                    },
-                    error: function(err){
-                        Swal.fire({
-                            icon: "error",
-                            title: "Gagal!",
-                            text: "Data gagal dihapus"
-                        });
-                    }
-                });
-            }
-        });
-    });
-
-    $(document).on('change', '#id_perusahaan', function() {
-        var perusahaanID = $(this).val();
-        if (perusahaanID) {
-            $.ajax({
-                url: '/get-kapal/' + perusahaanID,
-                type: "GET",
-                dataType: "json",
-                success: function(data) {
-                    $('#id_kapal').empty().append('<option value="">Semua</option>');           
-                    $.each(data, function(key, value) {
-                        $('#id_kapal').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
-                    });
-                    table.ajax.reload();
-                }
-            });
-        } else {
-            $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
-            table.ajax.reload();
-        }
-    });
-
-    $('#id_kapal').on('change', function () {
-         table.ajax.reload();
-    });
 </script>
 @endsection
 @section('content')
@@ -156,7 +94,7 @@
                 <div class="card">
                     <div class="card-header border-bottom">
                         <div class="col-12"><h4 class="card-title">{{$form->nama}}</h4></div>
-                        @include('kapal')
+                        
                         <div class="col-3">
                             <!-- <a href="/checklist/add/{{$form->kode}}" class="btn btn-primary btn-sm">Tambah Data</a> -->
                         </div>
@@ -166,10 +104,10 @@
                         <thead>
                             <tr>
                             <th>No.</th>
-                            <th>Tanggal</th>
-                            <th>Nama Kapal</th>
-                            <th>Dari</th>
-                            <th>Kepada</th>
+                            <th>Nama</th>
+                            <th>Jabatan</th>
+                            <th>Catatan</th>
+                            <th>Status</th>
                             <th>PDF</th>
                             </tr>
                         </thead>

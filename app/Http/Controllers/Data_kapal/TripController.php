@@ -26,7 +26,21 @@ class TripController extends Controller
 
      public function data()
     {
-        $query = Trip::where('is_delete', 0);
+        $id_perusahaan = Session::get('id_perusahaan');
+        $id_kapal = Session::get('id_kapal');
+        $roleJenis = Session::get('previllage');
+
+        $query = DB::table('t_trip as a')
+                ->leftjoin('kapal as b', 'a.id_kapal', '=', 'b.id')
+                ->select('a.*')
+                ->where('a.is_delete', 0)
+                ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                    return $q->where('b.pemilik', $id_perusahaan);
+                })
+                ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
+                    return $q->where('a.id_kapal', $id_kapal);
+                });
 
         return DataTables::of($query)
             ->addIndexColumn()
@@ -53,7 +67,25 @@ class TripController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->gol;
+        //$data = $request->gol;
+        $id_pelabuhan = $request->input('id_pelabuhan');
+        $kapal = Kapal::find($request->input('id_kapal'));
+        $data = [];
+        foreach ($request->gol as $idgol => $value) {
+            $biaya = BiayaPenumpang::where('id_pelabuhan', $id_pelabuhan)
+                ->where('id_kendaraan', $idgol)
+                ->where('kelas', $kapal->gol)
+                ->first();
+
+            $nominal = $biaya ? $biaya->nominal : 0;
+
+            $data[$idgol] = [
+                'jumlah'       => (int) $value,
+                'nominal'      => $nominal,
+                'total'        => $value * $nominal
+            ];
+        }
+
         $save = Trip::create([
           'uid' => Str::uuid()->toString(),
           'id_kapal' => $request->input('id_kapal'),
@@ -70,8 +102,25 @@ class TripController extends Controller
 
     public function update(Request $request, $id)
     {
-         $data = $request->gol;
-        $up = Trip::find($id)->update([
+        //$data = $request->gol;
+        $up = Trip::find($id);
+        $kapal = Kapal::find($up->id_kapal);
+        $data = [];
+        foreach ($request->gol as $idgol => $value) {
+            $biaya = BiayaPenumpang::where('id_pelabuhan', $trip->id_pelabuhan)
+                ->where('id_kendaraan', $idgol)
+                ->where('kelas', $kapal->gol)
+                ->first();
+
+            $nominal = $biaya ? $biaya->nominal : 0;
+
+            $data[$idgol] = [
+                'jumlah'       => (int) $value,
+                'nominal'      => $nominal,
+                'total'        => $value * $nominal
+            ];
+        }
+        $up->update([
           'data' => $data,
           'changed_by' => Session::get('userid'),
         ]);
@@ -88,19 +137,25 @@ class TripController extends Controller
     public function form(Request $request, $uid = null) 
     {
         $id_perusahaan = Session::get('id_perusahaan');
+        $id_kapal = Session::get('id_kapal');
         $roleJenis = Session::get('previllage');
         $data['active'] = "/data_kapal/trip";
         $data['kapal'] = Kapal::where('status','A')
-            ->when($roleJenis == 1, function ($q) { return $q; })
-            ->when($roleJenis != 1 && $id_perusahaan, function ($q) use ($id_perusahaan) {
-                return $q->where('id', $id_perusahaan);
+            ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+            ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                return $q->where('pemilik', $id_perusahaan);
+            })
+            ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
+                return $q->where('id', $id_kapal);
             })
             ->get();
         $data['pelabuhan'] = Pelabuhan::where('is_delete', 0)->get();
         $data['kendaraan'] = Kendaraan::where('is_delete', 0)->get();
         $trip = null;
         if ($uid) {
-            $data['trip'] = Trip::where('uid', $uid)->first();
+            $trip = Trip::where('uid', $uid)->first();
+            $data['trip'] = $trip;
+            $data['gol'] = $trip->data;
         }
 
         return view('data_kapal.trip.form', $data);
@@ -113,21 +168,15 @@ class TripController extends Controller
         $kelas = $trip->get_kapal()->gol;
         $result = [];
 
-        foreach ($kendaraan as $id_kendaraan => $jumlah) {
-            $kend = Kendaraan::where('id', $id_kendaraan)->first();
-            $biaya = BiayaPenumpang::where('id_pelabuhan', $trip->id_pelabuhan)
-                ->where('id_kendaraan', $id_kendaraan)
-                ->where('kelas', $kelas)
-                ->first();
-
-            $nominal = $biaya ? $biaya->nominal : 0;
+        foreach ($kendaraan as $id => $row) {
+            $kend = Kendaraan::where('id', $id)->first();
 
             $result[] = [
-                'id_kendaraan' => $id_kendaraan,
+                'id_kendaraan' => $id,
                 'nama'         => $kend->kode,
-                'jumlah'       => $jumlah,
-                'nominal'      => $nominal,
-                'total'        => $jumlah * $nominal
+                'jumlah'       => $row['jumlah'],
+                'nominal'      => $row['nominal'],
+                'total'        => $row['total']
             ];
         }
 

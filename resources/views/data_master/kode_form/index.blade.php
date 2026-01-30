@@ -176,7 +176,7 @@
                 { 
                     data: null,
                     render: function(data, type, row){
-                        return `<a href="/${data.link}" target="_blank">${data.nama}</a>`;
+                        return `${data.nama}`;
                     }
                 },
                 { data: 'pj', name: 'pj' },

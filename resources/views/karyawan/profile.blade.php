@@ -9,11 +9,19 @@
     <!-- END: Vendor CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/extensions/ext-component-sweet-alerts.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/forms/form-validation.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/vendors/css/forms/select/tom-select.css')}}">
     
 @endsection
 
 @section('scriptfooter')
     <!-- BEGIN: Page Vendor JS-->
+    <script src="{{ url('/assets/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/forms/select/select2.full.min.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/forms/cleave/cleave.min.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/forms/cleave/addons/cleave-phone.us.js')}}"></script>
@@ -21,6 +29,7 @@
     <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/moment.min.js')}}"></script> 
     <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/sweetalert2.all.min.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/vendors/js/extensions/polyfill.min.js')}}"></script>
+    <script src="{{ url('/app-assets/vendors/js/tom-select.min.js') }}"></script>
     <!-- END: Page Vendor JS-->
 
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/modal-edit-user.js')}}"></script>
@@ -134,12 +143,12 @@
             });
         });
 
-         $('#form_mutasi').on('submit', function(e){
+        $('#form_mutasi').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
             let formData = new FormData(this);
 
             $.ajax({
-                 url: "{{ url('/mutasi/store') }}",
+                 url: "{{ url('/data_crew/mutasi') }}",
                 method: "POST",
                 data: formData,
                 processData: false,
@@ -162,6 +171,140 @@
                         title: 'Error',
                         text: 'Gagal menyimpan data'
                     });
+                }
+            });
+        });
+        
+        $(document).on("click", ".delmutasi-btn", function(){
+            let id = $(this).data("id");
+
+            Swal.fire({
+                title: "Yakin mau hapus?",
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Ya, hapus!",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/data_crew/mutasi/" + id,
+                        type: "delete",
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(res){
+                            Swal.fire({
+                                icon: "success",
+                                title: "Terhapus!",
+                                text: "Data berhasil dihapus",
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        window.location.reload();
+                        },
+                        error: function(err){
+                            Swal.fire({
+                                icon: "error",
+                                title: "Gagal!",
+                                text: "Data gagal dihapus"
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        new TomSelect('#id_pengganti', {
+            placeholder: 'Karyawan...',
+            allowEmptyOption: true,
+            maxItems: 1,
+            searchField: ['text'],   // bisa diketik
+            create: false            // tidak boleh input baru
+        });
+
+        $('#form_cuti').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "{{ url('/data_crew/cuti') }}",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'Data berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#FormCuti').modal('hide');
+                            table.ajax.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan data'
+                    });
+                }
+            });
+        });
+
+        let table;
+        $(function () {
+            table = $('#table').DataTable({
+                processing: true,
+                ordering: false,
+                searchable: false,
+                ajax:{
+                    url: "/data_crew/cuti/databyId",
+                    type: "POST",
+                    data: function(d){
+                        d.id= "{{ $show->id }}", 
+                        d._token= "{{ csrf_token() }}"
+                    },
+                },
+                columns: [
+                    { data: null, 
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1; 
+                        },
+                        orderable: false,
+                        searchable: false
+                    },
+                    { data: 'jenis' },
+                    {
+                        data: null,
+                        render: row => `
+                            <div>
+                                <div>${formatTgl(row.tgl_mulai)} s/d ${formatTgl(row.tgl_selesai)}</div>
+                            </div>
+                        `
+                    },
+                    { data: 'jml_hari' },
+                    { data: 'pengganti' },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        render: function (data, type, row) {
+                            if (data == 1) return '<a class="badge badge-light-primary">Pengajuan</a>';
+                            if (data == 2) return '<a class="badge badge-light-success">Diterima</a>';
+                            if (data == 3) return '<a class="badge badge-light-danger">Ditolak</a>';
+                            return '-';
+                        }
+                    },
+                    { data: 'approval' }
+
+                ],
+                drawCallback: function(settings) {
+                    feather.replace(); // supaya icon feather muncul ulang
                 }
             });
         });
@@ -216,8 +359,11 @@
                         <li class="nav-item">
                             <a class="nav-link" id="karyawan-tab" data-bs-toggle="tab" href="#karyawan" aria-controls="karyawan" role="tab" aria-selected="true"><i data-feather="user"></i>Profil Karyawan</a>
                         </li>
+                         <li class="nav-item">
+                            <a class="nav-link" id="dokumen-tab" data-bs-toggle="tab" href="#dokumen" aria-controls="dokumen" role="tab" aria-selected="true"><i data-feather="file"></i>Dokumen</a>
+                        </li>
                         <li class="nav-item">
-                            
+                            <a class="nav-link" id="cuti-tab" data-bs-toggle="tab" href="#cuti" aria-controls="cuti" role="tab" aria-selected="true"><i data-feather="log-out"></i>Cuti</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -391,11 +537,11 @@
                                 </table>
                                 <br><br>
                                 <div class="card-header border-bottom">
-                                <h5 class="fw-bolder">Data Mutasi</h5>
-                                @if(Session::get('previllage')!=4)
-                                <button class="btn btn-primary btn-sm float-right me-1" data-bs-toggle="modal" data-bs-target="#FormMutasi">Mutasi Crew</button>
-                                @endif
-                            </div>
+                                    <h5 class="fw-bolder">Data Mutasi</h5>
+                                    @if(Session::get('previllage')!=4)
+                                    <button class="btn btn-primary btn-sm float-right me-1" data-bs-toggle="modal" data-bs-target="#FormMutasi">Mutasi Crew</button>
+                                    @endif
+                                </div>
                                 <table class="table table-bordered table-striped" width="100%">
                                     <thead>
                                         <tr align="center">
@@ -428,46 +574,46 @@
                                 </table>
                             </div>
                         </div>
-                        
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="fw-bolder border-bottom pb-50 mb-1">Crew Documents</h5>
-                        <div class="table-responsive">
-                            <table class="table" width="100%" border="1">
-                                <tr>
-                                    <th>Nama Dokumen</th>
-                                    <th>No</th>
-                                    <th>Penerbit</th>
-                                    <th>Tgl Terbit</th>
-                                    <th>Tgl Expired</th>
-                                    <th>Aksi</th>
-                                </tr>
-                                @foreach($file as $f)
-                                <tr>
-                                    <td width="30%">{{$f->nama}}</td>
-                                    <td width="15%">{{ ($f->no) ? $f->no : '-' }}</td>
-                                    <td width="15%">{{$f->penerbit}}</td>
-                                    <td width="10%">{{$f->tgl_terbit}}</td>
-                                    <td width="10%">{{$f->tgl_expired}}</td>
-                                    <td width="20%">
-                                            <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
-                                                title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
-                                                <i data-feather='upload'></i>
-                                            </button>
-                                        @if(!empty($f->file))
-                                            <a type="button" href="{{ asset('file_upload/'.$f->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
-                                                title="Buka File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
-                                                <i data-feather='file'></i>
-                                            </a>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </table>
+                        <div class="tab-pane" id="dokumen" aria-labelledby="dokumen-tab" role="tabpanel">
+                            <h5 class="fw-bolder border-bottom pb-50 mb-1">Crew Documents</h5>
+                            <div class="table-responsive">
+                                <table class="table" width="100%" border="1">
+                                    <tr>
+                                        <th>Nama Dokumen</th>
+                                        <th>No</th>
+                                        <th>Penerbit</th>
+                                        <th>Tgl Terbit</th>
+                                        <th>Tgl Expired</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                    @foreach($file as $f)
+                                    <tr>
+                                        <td width="30%">{{$f->nama}}</td>
+                                        <td width="15%">{{ ($f->no) ? $f->no : '-' }}</td>
+                                        <td width="15%">{{$f->penerbit}}</td>
+                                        <td width="10%">{{$f->tgl_terbit}}</td>
+                                        <td width="10%">{{$f->tgl_expired}}</td>
+                                        <td width="20%">
+                                                <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
+                                                    title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
+                                                    <i data-feather='upload'></i>
+                                                </button>
+                                            @if(!empty($f->file))
+                                                <a type="button" href="{{ asset('file_upload/'.$f->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
+                                                    title="Buka File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
+                                                    <i data-feather='file'></i>
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </table>
+                            </div>
                         </div>
+                        <div class="tab-pane" id="cuti" aria-labelledby="cuti-tab" role="tabpanel">
+                           @include('karyawan/cuti')
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -586,7 +732,7 @@
                             </div>
                             <div class="col-sm-9">
                                 @if(Session::get('previllage')==1)
-                                    <select name="id_perusahaan" id="id_perusahaan"  class="form-control" required>
+                                    <select name="ke_perusahaan" id="ke_perusahaan"  class="form-control" required>
                                         @foreach($perusahaan as $ph)
                                             @if($show->id_perusahaan==$ph->id)
                                                     <option value="{{$ph->id}}" selected>{{$ph->nama}}</option>
@@ -596,7 +742,7 @@
                                         @endforeach
                                     </select>
                                 @else
-                                    <input type="hidden" name="id_perusahaan" id="id_perusahaan" value="{{$show->id_perusahaan}}">
+                                    <input type="hidden" name="ke_perusahaan" id="ke_perusahaan" value="{{$show->id_perusahaan}}">
                                     {{$show->perusahaan}}
                                 @endif
                             </div>
@@ -606,8 +752,8 @@
                                 <label class="col-form-label" for="first-name">Ditempatkan di</label>
                             </div>
                             <div class="col-sm-9">
-                                    <select name="id_kapal" id="id_kapal"  class="form-control">
-                                        <option value="">Office</option>
+                                    <select name="ke_kapal" id="ke_kapal"  class="form-control">
+                                        <option value="0">Office</option>
                                         @foreach($kapal as $k)
                                             @if($show->id_kapal==$k->id)
                                                 <option value="{{$k->id}}" selected>{{$k->nama}}</option>
@@ -636,9 +782,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="hidden" name="id_karyawan" id="id_karyawan" value="{{$show->id}}">
+                        <input type="hidden" name="id_karyawan" value="{{$show->id}}">
                         <input type="hidden" name="kode" id="kode" value="el0610">
-                        <button type="submit" class="btn btn-primary" id="edit_data">Simpan</button>
+                        <button type="submit" class="btn btn-primary" id="simpan_mutasi">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -665,7 +811,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="hidden" name="id_karyawan" id="id_karyawan" value="{{$show->id}}">
+                        <input type="hidden" name="id_karyawan" value="{{$show->id}}">
                         <button type="submit" class="btn btn-primary" id="upload_ttd">Simpan</button>
                     </div>
                 </form>

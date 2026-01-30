@@ -8,7 +8,7 @@ Use Carbon\Carbon;
 class Mutasi extends Model
 {
     public $timestamps = false;
-    protected $table = 'mutasi';
+    protected $table = 't_mutasi';
     protected $fillable = ['id', 'uid', 'kode', 'dari_perusahaan', 'dari_kapal', 'id_karyawan', 'id_jabatan', 'tgl_naik', 'tgl_turun', 'ke_perusahaan', 'ke_kapal', 'ket', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     public function get_karyawan()

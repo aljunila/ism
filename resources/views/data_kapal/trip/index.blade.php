@@ -9,7 +9,7 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Master - Pelabuhan</h4>
+        <h4 class="card-title">Data Trip Kapal</h4>
         <a href="/data_kapal/trip/form" class="btn btn-primary btn-sm">Tambah Data</a>
     </div>
     <div class="card-body">

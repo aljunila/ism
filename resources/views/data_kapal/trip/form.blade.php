@@ -128,7 +128,7 @@
                                 </div>
                                 <div class="col-sm-9">
                                     <select name="id_pelabuhan" id="id_pelabuhan" required class="form-control"  {{ isset($trip) ? 'disabled' : '' }}>
-                                        <option value="">Pilih Kapal</option>
+                                        <option value="">Pilih Pelabuhan</option>
                                             @foreach($pelabuhan as $p)
                                                 <option value="{{$p->id}}"  @selected (isset($trip) && $p->id==$trip->id_pelabuhan)>{{$p->nama}}</option>
                                             @endforeach

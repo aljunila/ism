@@ -107,7 +107,7 @@ class TripController extends Controller
         $kapal = Kapal::find($up->id_kapal);
         $data = [];
         foreach ($request->gol as $idgol => $value) {
-            $biaya = BiayaPenumpang::where('id_pelabuhan', $trip->id_pelabuhan)
+            $biaya = BiayaPenumpang::where('id_pelabuhan', $up->id_pelabuhan)
                 ->where('id_kendaraan', $idgol)
                 ->where('kelas', $kapal->gol)
                 ->first();

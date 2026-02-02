@@ -36,13 +36,13 @@
             processing: true,
             searchable: true,
             ajax:{
-            url: "/kapal/data",
-            type: "POST",
-            data: function(d){
-                d.id_perusahaan= $('#id_perusahaan').val(),
-                d._token= "{{ csrf_token() }}"
+                url: "/kapal/data",
+                type: "POST",
+                data: function(d){
+                    d.id_perusahaan= $('#id_perusahaan').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
             },
-        },
             columns: [
                 { data: null, 
                     render: function (data, type, row, meta) {

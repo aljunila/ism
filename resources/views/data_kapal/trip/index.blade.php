@@ -6,27 +6,43 @@
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/responsive.bootstrap5.min.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/buttons.bootstrap5.min.css')}}">
 @endsection
-
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Data Trip Kapal</h4>
-        <a href="/data_kapal/trip/form" class="btn btn-primary btn-sm">Tambah Data</a>
-    </div>
-    <div class="card-body">
-        <table id="table-pel" class="table table-striped w-100">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Kapal</th>
-                    <th>Tanggal</th>
-                    <th>Pelabuhan</th>
-                    <th>Trip</th>
-                    <th>Jam</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header border-bottom">
+                <div class="col-sm-12"><h4 class="card-title">Daftar Trip Kapal</h4></div>
+                <div class="col-sm-3">
+                    <select name="id_kapal" id="id_kapal" class="form-control">
+                        <option value="">Pilih Kapal</option>
+                    @foreach($kapal as $kp)
+                        <option value="{{$kp->id}}" @selected (isset($trip) && $kp->id==$trip->id_kapal)>{{$kp->nama}}</option>
+                    @endforeach
+                    </select>
+                </div>  
+                <div class="col-sm-3">
+                    <input type="date" name="tanggal" id="tanggal" class="form-control">
+                </div>
+                <div class="col-sm-3">
+                    <a href="/data_kapal/trip/form" class="btn btn-primary btn-sm pull-right">Tambah Data</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="table-pel" class="table table-striped w-100">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kapal</th>
+                            <th>Tanggal</th>
+                            <th>Pelabuhan</th>
+                            <th>Trip</th>
+                            <th>Jam</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal fade" id="kendaraanModal" tabindex="-1">
@@ -96,7 +112,15 @@
         const table = $('#table-pel').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('trip.data') }}',
+            ajax:{
+                url: "/data_kapal/trip/data",
+                type: "POST",
+                data: function(d){
+                    d.id_kapal= $('#id_kapal').val(),
+                    d.tanggal= $('#tanggal').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+            },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'kapal', name: 'kapal' },
@@ -108,6 +132,13 @@
             ]
         });
 
+        $('#id_kapal').on('change', function () {
+         table.ajax.reload();
+        });
+
+        $('#tanggal').on('change', function () {
+         table.ajax.reload();
+        });
 
         $(document).on('click', '.btn-delete-pel', function () {
             const id = $(this).data('id');

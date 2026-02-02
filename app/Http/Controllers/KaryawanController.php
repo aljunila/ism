@@ -42,9 +42,10 @@ class KaryawanController extends Controller
 
     public function getData(Request $request)
     {
-        $perusahaan = $request->input('id_perusahaan');
+        $roleJenis = Session::get('previllage');
+        $perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $kel = $request->input('kel');
-        $kapal = $request->input('id_kapal');
 
         $karyawan = DB::table('karyawan')
                 ->leftJoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')

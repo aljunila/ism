@@ -270,7 +270,7 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
 
     Route::prefix('data_kapal')->group(function() {
         Route::get('trip', [TripController::class, 'index']);
-        Route::get('trip/data', [TripController::class, 'data'])->name('trip.data');
+        Route::post('trip/data', [TripController::class, 'data'])->name('trip.data');
         Route::get('trip/form', [TripController::class, 'form'])->name('trip.form');
         Route::get('/trip/form/{id}', [TripController::class, 'form'])->name('trip.edit');
         Route::get('/trip/{id}/amount', [TripController::class, 'amount'])->name('trip.amount');

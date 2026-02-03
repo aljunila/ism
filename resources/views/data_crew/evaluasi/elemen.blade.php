@@ -37,10 +37,10 @@
         processing: true,
         searchable: true,
         ajax:{
-            url: "/data_crew/familiarisasi/getData",
+            url: "/data_crew/evaluasi/getData",
             type: "POST",
             data: function(d){
-                d.kode= "{{ $form->id}}",
+                d.id_form= "{{ $form->id}}",
                 d.id_perusahaan= "{{ $id_perusahaan}}",
                 d.id_kapal= $('#id_kapal').val(),
                 d._token= "{{ csrf_token() }}"
@@ -68,7 +68,7 @@
                 data: null,
                 render: function(data, type, row){
                     if(row.data) {
-                    return `<a type="button" href="/data_crew/familiarisasi/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                    return `<a type="button" href="/data_crew/evaluasi/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
                     >Cetak PDF</a>`;
                     }
                     return `-`;

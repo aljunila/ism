@@ -10,21 +10,22 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Crew - Penggantian Crew</h4>
+        <h4 class="card-title">Crew - Laporan Evaluasi</h4>
         <!-- <a type="button" href="/data_crew/familiarisasi/form" class="btn btn-primary btn-sm">Tambah Data</a> -->
-         <button class="btn btn-primary btn-sm" id="btn-add-ganti">Tambah Data</button>
+         <button class="btn btn-primary btn-sm" id="btn-add-evaluasi">Tambah Data</button>
     </div>
     <div class="card-body">
-        <table id="table-ganti" class="table table-striped w-100">
+        <table id="table-evaluasi" class="table table-striped w-100">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Form/Laporan</th>
-                    <th>Tanggal</th>
-                    <th>Dari</th>
-                    <th>Kepada</th>
-                    <th>PDF</th>
-                    <th>Aksi</th>
+                    <th width="5%">No</th>
+                    <th width="20%">Form/Laporan</th>
+                    <th width="15%">Kapal</th>
+                    <th width="10%">Tanggal</th>
+                    <th width="20%">Nama</th>
+                    <th width="10%">Jabatan</th>
+                    <th width="10%">PDF</th>
+                    <th width="10%">Aksi</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -32,26 +33,17 @@
     </div>
 </div>
 
-<div class="modal fade" id="modal-ganti" tabindex="-1" aria-labelledby="modal-ganti-label" aria-hidden="true">
+<div class="modal fade" id="modal-evaluasi" tabindex="-1" aria-labelledby="modal-evaluasi-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-ganti-label">Tambah Data</h5>
+                <h5 class="modal-title" id="modal-evaluasi-label">Tambah Data</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-1">
-                    <label class="form-label">Dari</label>
-                    <select id="ganti-id_karyawan" class="form-control">
-                        <option value="">-Pilih-</option>
-                        @foreach($karyawan as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Kepada</label>
-                    <select id="ganti-id_karyawan2" class="form-control">
+                    <label class="form-label">Nama Crew</label>
+                    <select id="evaluasi-id_karyawan" class="form-control">
                         <option value="">-Pilih-</option>
                         @foreach($karyawan as $k)
                             <option value="{{$k->id}}">{{$k->nama}}</option>
@@ -60,20 +52,20 @@
                 </div>
                 <div class="mb-1">
                     <label class="form-label">Tanggal</label>
-                    <input type="date" id="ganti-date" class="form-control">
+                    <input type="date" id="evaluasi-date" class="form-control">
                 </div>
                  <div class="mb-1">
-                    <label class="form-label">Jenis Penggantian</label>
-                    <select id="ganti-kode" class="form-control">
+                    <label class="form-label">Jenis Familiarisasi</label>
+                    <select id="evaluasi-id_form" class="form-control">
                         <option value="">-Pilih-</option>
-                         @foreach($form as $form)
-                            <option value="{{$form->kel}}">Ganti {{$form->kel}}</option>
+                        @foreach($form as $f)
+                            <option value="{{$f->id}}">{{$f->nama}}</option>
                         @endforeach
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="btn-save-ganti">Simpan</button>
+                <button class="btn btn-primary" id="btn-save-evaluasi">Simpan</button>
             </div>
         </div>
     </div>
@@ -98,13 +90,14 @@
             }
         });
 
-        const table = $('#table-ganti').DataTable({
+        const table = $('#table-evaluasi').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('ganti.data') }}',
+            ajax: '{{ route('evaluasi.data') }}',
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'kode', name: 'kode' },
+                { data: 'kapal', name: 'kapal' },
                 { data: 'date',
                     render: function(data) {
                         if (!data) return '';
@@ -112,13 +105,13 @@
                         return parts[2] + '-' + parts[1] + '-' + parts[0]; 
                     }
                 },
-                { data: 'dari', name: 'dari' },
-                { data: 'kepada', name: 'kepada' },
+                { data: 'nama', name: 'nama' },
+                { data: 'jabatan', name: 'jabatan' },
                 { 
                     data: null,
                     render: function(data, type, row){
                         if(row.data) {
-                        return `<a type="button" href="/data_crew/ganti/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                        return `<a type="button" href="/data_crew/evaluasi/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
                         >Cetak PDF</a>`;
                         }
                         return `-`;
@@ -129,15 +122,7 @@
             
         });
 
-        new TomSelect('#ganti-id_karyawan', {
-            placeholder: 'Karyawan...',
-            allowEmptyOption: true,
-            maxItems: 1,
-            searchField: ['text'],   // bisa diketik
-            create: false            // tidak boleh input baru
-        });
-
-         new TomSelect('#ganti-id_karyawan2', {
+        new TomSelect('#evaluasi-id_karyawan', {
             placeholder: 'Karyawan...',
             allowEmptyOption: true,
             maxItems: 1,
@@ -146,55 +131,52 @@
         });
 
         const resetForm = () => {
-            $('#modal-ganti-label').text('Tambah Data');
-            $('#ganti-id_karyawan').val('');
-            $('#ganti-kode').val('');
-            $('#ganti-date').val('');
-            $('#ganti-id_karyawan2').val('');
-            $('#btn-save-ganti').data('mode', 'create').data('id', '');
+            $('#modal-evaluasi-label').text('Tambah Data');
+            $('#evaluasi-id_karyawan').val('');
+            $('#evaluasi-id_form').val('');
+            $('#evaluasi-date').val('');
+            $('#btn-save-evaluasi').data('mode', 'create').data('id', '');
         };
 
-        $('#btn-add-ganti').on('click', function () {
+        $('#btn-add-evaluasi').on('click', function () {
             resetForm();
-            $('#modal-ganti').modal('show');
+            $('#modal-evaluasi').modal('show');
         });
 
-        $('#btn-save-ganti').on('click', function () {
+        $('#btn-save-evaluasi').on('click', function () {
             const mode = $(this).data('mode') || 'create';
             const id = $(this).data('id');
             const payload = {
-                id_karyawan: $('#ganti-id_karyawan').val(),
-                id_karyawan2: $('#ganti-id_karyawan2').val(),
-                kode: $('#ganti-kode').val(),
-                date: $('#ganti-date').val(),
+                id_karyawan: $('#evaluasi-id_karyawan').val(),
+                id_form: $('#evaluasi-id_form').val(),
+                date: $('#evaluasi-date').val(),
             };
             const ajaxOpts = {
-                url: mode === 'edit' ? '{{ url('data_crew/ganti') }}/' + id : '{{ route('ganti.store') }}',
+                url: mode === 'edit' ? '{{ url('data_crew/evaluasi') }}/' + id : '{{ route('evaluasi.store') }}',
                 type: mode === 'edit' ? 'PUT' : 'POST',
                 data: payload
             };
             $.ajax(ajaxOpts)
             .done(() => {
                 Swal.fire('Sukses', mode === 'edit' ? 'Data diperbarui' : 'Data ditambahkan', 'success');
-                $('#modal-ganti').modal('hide');
+                $('#modal-evaluasi').modal('hide');
                 table.ajax.reload(null, false);
                 loadCabang();
             })
             .fail(xhr => Swal.fire('Gagal', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error'));
         });
 
-        $(document).on('click', '.btn-edit-ganti', function () {
+        $(document).on('click', '.btn-edit-evaluasi', function () {
             const btn = $(this);
-            $('#modal-ganti-label').text('Edit Data');
-            $('#ganti-id_karyawan').val(btn.data('id_karyawan'));
-            $('#ganti-id_karyawan2').val(btn.data('id_karyawan2'));
-            $('#ganti-kode').val(btn.data('kode'));
-            $('#ganti-date').val(btn.data('date'));
-            $('#btn-save-ganti').data('mode', 'edit').data('id', btn.data('id'));
-            $('#modal-ganti').modal('show');
+            $('#modal-evaluasi-label').text('Edit Data');
+            $('#evaluasi-id_karyawan').val(btn.data('id_karyawan'));
+            $('#evaluasi-id_form').val(btn.data('id_form'));
+            $('#evaluasi-date').val(btn.data('date'));
+            $('#btn-save-evaluasi').data('mode', 'edit').data('id', btn.data('id'));
+            $('#modal-evaluasi').modal('show');
         });
 
-        $(document).on('click', '.btn-delete-ganti', function () {
+        $(document).on('click', '.btn-delete-evaluasi', function () {
             const id = $(this).data('id');
             Swal.fire({
                 title: 'Hapus data ini?',
@@ -205,7 +187,7 @@
             }).then((result) => {
                 if (!result.isConfirmed) return;
                 $.ajax({
-                    url: '{{ url('data_crew/ganti') }}/' + id,
+                    url: '{{ url('data_crew/evaluasi') }}/' + id,
                     type: 'DELETE',
                     success: function () {
                         Swal.fire('Terhapus', 'Data berhasil dihapus', 'success');
@@ -218,7 +200,6 @@
                 });
             });
         });
-
     });
 </script>
 @endsection

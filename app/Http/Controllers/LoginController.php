@@ -63,6 +63,8 @@ class LoginController extends Controller
                     $previllageLegacy = 3;
                 } elseif ($jenis === 3) {
                     $previllageLegacy = 4;
+                } elseif ($jenis === 4) {
+                    $previllageLegacy = 5;
                 }
 
                 Session::put('userid',$data->id);
@@ -252,7 +254,7 @@ class LoginController extends Controller
                 'username' => $get->nik,
                 'password' => Hash::make($request->input('password1')),
                 'id_previllage' => 4,
-                'role_id' => 4,
+                'role_id' => 6,
                 'id_perusahaan' => $get->id_perusahaan,
                 'id_kapal' => $get->id_kapal,
                 'id_karyawan'=> $get->id,

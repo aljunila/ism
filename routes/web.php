@@ -22,8 +22,6 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\BbmController;
 use App\Http\Controllers\AlarmController;
 use App\Http\Controllers\ReviewController;
-use App\Http\Controllers\EvaluasiController;
-
 // use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\KonditeController;
 use App\Http\Controllers\Purchasing\PurchasingController;
@@ -46,6 +44,7 @@ use App\Http\Controllers\Data_crew\GantiController;
 use App\Http\Controllers\Data_crew\CutiController;
 use App\Http\Controllers\Data_crew\MutasiController;
 use App\Http\Controllers\Data_crew\PelatihanController;
+use App\Http\Controllers\Data_crew\EvaluasiController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -72,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('active-context/set', [\App\Http\Controllers\ActiveContextController::class, 'set']);
 });
 
-Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
+Route::middleware(['auth', 'active.role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('show');
     Route::get('form_ism', [KodeFormController::class, 'form']);
     Route::post('upload-image', [UploadController::class, 'upload'])->name('upload.image');
@@ -228,7 +227,7 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::delete('mcuti/{id}', [JenisCutiController::class, 'destroy'])->name('mcuti.destroy');
     });
     
-    Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan']);
+    Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');
     Route::prefix('acl')->group(function () {
         Route::get('roles', [AclController::class, 'roles'])->name('acl.roles');
         Route::get('users', [AclController::class, 'users'])->name('acl.users');
@@ -342,6 +341,18 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
         Route::get('/pelatihan/pdf', [PelatihanController::class, 'pdf'])->name('pelatihan.pdf');
         Route::get('/pelatihan/{id}', [PelatihanController::class, 'elemen'])->name('pelatihan.elemen');
         Route::post('/pelatihan/getData', [PelatihanController::class, 'getData'])->name('pelatihan.getData');
+
+        Route::get('evaluasi', [EvaluasiController::class, 'index']);
+        Route::get('evaluasi/data', [EvaluasiController::class, 'data'])->name('evaluasi.data');
+        Route::get('evaluasi/form', [EvaluasiController::class, 'form'])->name('evaluasi.form');
+        Route::get('/evaluasi/form/{id}', [EvaluasiController::class, 'form'])->name('evaluasi.form');
+        Route::post('evaluasi', [EvaluasiController::class, 'store'])->name('evaluasi.store');
+        Route::put('evaluasi/{id}', [EvaluasiController::class, 'update'])->name('evaluasi.update');
+        Route::post('evaluasi/savedata/{id}', [EvaluasiController::class, 'savedata'])->name('evaluasi.savedata');
+        Route::delete('evaluasi/{id}', [EvaluasiController::class, 'destroy'])->name('evaluasi.destroy');
+        Route::get('/evaluasi/pdf/{id}', [EvaluasiController::class, 'pdf'])->name('evaluasi.pdf');
+        Route::get('/evaluasi/{id}', [EvaluasiController::class, 'elemen'])->name('evaluasi.elemen');
+        Route::post('/evaluasi/getData', [EvaluasiController::class, 'getData'])->name('evaluasi.getData');
     });
 
     Route::prefix('refrensi')->group(function () {
@@ -380,8 +391,8 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     // Route::post('checklist/update/{id}', [ChecklistController::class, 'update']);
     // Route::post('checklist/delete/{id}', [ChecklistController::class, 'delete']);
     // Route::get('checklist/pdf/{id}', [ChecklistController::class, 'pdf'])->name('checklist.pdf');
-    // Route::get('checklist/item/{kode}', [ChecklistController::class, 'item']);
-    // Route::post('checklist/dataitem', [ChecklistController::class, 'getItem']);
+     Route::get('checklist/item/{kode}', [ChecklistController::class, 'item']);
+     Route::post('checklist/dataitem', [ChecklistController::class, 'getItem']);
     // Route::post('checklist/listGanti', [ChecklistController::class, 'getGanti']);
     // Route::get('checklist/addganti/{kode}', [ChecklistController::class, 'addganti']);
     // Route::post('checklist/storeganti', [ChecklistController::class, 'storeganti'])->name('storeganti');
@@ -393,10 +404,10 @@ Route::middleware(['auth', 'active.role', 'menu.access'])->group(function () {
     // Route::post('checklist/save', [ChecklistController::class, 'save'])->name('save');
     // Route::get('checklist/nahkodapdf/{uid}/{kode}', [ChecklistController::class, 'nahkodapdf'])->name('checklist.nahkodapdf');
     // Route::post('form/intruksi', [ChecklistController::class, 'saveform']);
-    // Route::post('checklist/storeitem', [ChecklistController::class, 'storeitem']);
-    // Route::get('checklist/edititem/{id}', [ChecklistController::class, 'edititem']);
-    // Route::post('checklist/updateitem/{id}', [ChecklistController::class, 'updateitem']);
-    // Route::post('checklist/deleteitem/{id}', [ChecklistController::class, 'deleteitem']);
+     Route::post('checklist/storeitem', [ChecklistController::class, 'storeitem']);
+     Route::get('checklist/edititem/{id}', [ChecklistController::class, 'edititem']);
+     Route::post('checklist/updateitem/{id}', [ChecklistController::class, 'updateitem']);
+     Route::post('checklist/deleteitem/{id}', [ChecklistController::class, 'deleteitem']);
     Route::get('get-karyawan/{id_kapal}', [ChecklistController::class, 'getKaryawan']);
 
     Route::get('/el0501', [ChecklistController::class, 'el0501'])->name('el0501')->middleware('auth');

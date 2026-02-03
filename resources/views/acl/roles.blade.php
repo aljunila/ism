@@ -55,10 +55,10 @@
                     <label class="form-label">Jenis</label>
                     <select name="jenis_role" class="form-select" id="jenis_role">
                         <option value="">Pilih Jenis</option>
-                        <option value="2">Admin Perusahaan</option>
-                        <option value="3">Admin Kapal</option>
-                        <option value="4">Karyawan</option>
-                        <option value="5">Admin Pusat</option>
+                        <option value="1">Admin Perusahaan</option>
+                        <option value="2">Admin Kapal</option>
+                        <option value="3">Karyawan</option>
+                        <option value="4">Admin Pusat</option>
                     </select>
                 </div>
                 <div class="mb-1">

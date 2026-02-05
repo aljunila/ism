@@ -9,6 +9,7 @@ use App\Models\Perusahaan;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use Session;
 
 class KodeFormController extends Controller
 {

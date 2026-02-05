@@ -68,7 +68,7 @@
                 data: null,
                 render: function(data, type, row){
                     if(row.data) {
-                    return `<a type="button" href="/data_crew/recruitment/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                    return `<a type="button" href="/data_crew/familiarisasi/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
                     >Cetak PDF</a>`;
                     }
                     return `-`;

@@ -56,11 +56,13 @@
             });
         });
 
+        let getPelabuhanUrl = "{{ route('getPelabuhan', ':id') }}";
+
         $(document).on('change', '#id_kapal', function() {
             var kapalID = $(this).val();
             if (kapalID) {
                 $.ajax({
-                    url: '/get-pelabuhan/' + kapalID,
+                    url: getPelabuhanUrl.replace(':id', kapalID),
                     type: "GET",
                     dataType: "json",
                     success: function(data) {

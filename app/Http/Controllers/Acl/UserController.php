@@ -63,12 +63,13 @@ class UserController extends Controller
 
         $perusahaanId = $role->is_superadmin ? 0 : ($validated['perusahaan_id'] ?? 0);
         $karyawanId = $role->is_superadmin ? 0 : ($validated['karyawan_id'] ?? 0);
+        $prev = $role->jenis+1;
 
         $user = User::create([
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'nama' => $validated['nama'],
-            'id_previllage' => $role->jenis, // legacy mirror
+            'id_previllage' => $prev, // legacy mirror
             'role_id' => $role->id,
             'id_perusahaan' => $perusahaanId,
             'id_karyawan' => $karyawanId,
@@ -159,9 +160,10 @@ class UserController extends Controller
 
         $perusahaanId = $role->is_superadmin ? 0 : ($validated['perusahaan_id'] ?? 0);
         $karyawanId = $role->is_superadmin ? 0 : ($validated['karyawan_id'] ?? 0);
+        $prev = $role->jenis+1;
 
         $user->nama = $validated['nama'];
-        $user->id_previllage = $role->jenis; // legacy mirror
+        $user->id_previllage = $prev; // legacy mirror
         $user->role_id = $mainRoleId;
         $user->id_perusahaan = $perusahaanId;
         $user->id_karyawan = $karyawanId;

@@ -18,15 +18,15 @@ use Session;
 use DB;
 use App\Support\RoleContext;
 
-class FamiliarisasiController extends Controller
+class EvaluasiController extends Controller
 {
     public function index()
     {
-        $data['active'] = "/data_crew/familiarisasi";
+        $data['active'] = "/data_crew/evaluasi";
         $data['perusahaan'] = Perusahaan::where('status', 'A')->get();     
         $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
-        $data['form'] = KodeForm::where('id_menu', 57)->get();
-        return view('data_crew.familiarisasi.index', $data);
+        $data['form'] = KodeForm::where('id_menu', 69)->get();
+        return view('data_crew.evaluasi.index', $data);
     }
 
     public function data()
@@ -39,7 +39,7 @@ class FamiliarisasiController extends Controller
                 ->leftjoin('kode_form as b', 'a.id_form', '=', 'b.id') 
                 ->leftjoin('karyawan as c', 'a.id_karyawan', '=', 'c.id')
                 ->select('a.*')       
-                ->where('a.status', 'A')->where('b.id_menu', 57)
+                ->where('a.status', 'A')->where('b.id_menu', 69)
                 ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
                 ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
                     return $q->where('a.id_perusahaan', $id_perusahaan);
@@ -55,6 +55,10 @@ class FamiliarisasiController extends Controller
                 $karyawan = Karyawan::find($row->id_karyawan);
                 return $karyawan ? $karyawan->nama : '-';
             })
+             ->addColumn('kapal', function ($row) {
+                $kapal = Kapal::find($row->id_kapal);
+                return $kapal ? $kapal->nama : '-';
+            })
             ->addColumn('jabatan', function ($row) {
                 $jabatan = Jabatan::find($row->id_jabatan);
                 return $jabatan ? $jabatan->nama : '-';
@@ -64,7 +68,7 @@ class FamiliarisasiController extends Controller
                 return $kode ? $kode->nama : '-';
             })
             ->addColumn('aksi', function ($row) {
-                return view('data_crew.familiarisasi.partials.actions', compact('row'))->render();
+                return view('data_crew.evaluasi.partials.actions', compact('row'))->render();
             })
             ->rawColumns(['aksi'])
             ->make(true);
@@ -79,7 +83,7 @@ class FamiliarisasiController extends Controller
     public function store(Request $request)
     {
         $karyawan = Karyawan::find($request->input('id_karyawan'));
-        // $form = KodeForm::where('kode', $request->input('id_form'))->where('id_perusahaan', $karyawan->id_perusahaan)->first();
+        //$form = KodeForm::where('kode', $request->input('id_form'))->where('id_perusahaan', $karyawan->id_perusahaan)->first();
         // $data = $request->ck;
         $save = ChecklistData::create([
           'uid' => Str::uuid()->toString(),
@@ -120,16 +124,21 @@ class FamiliarisasiController extends Controller
 
     public function form(Request $request, $uid = null) 
     {
-        $data['active'] = "/data_crew/familiarisasi";
+        $data['active'] = "/data_crew/evaluasi";
         $show = ChecklistData::where('uid', $uid)->first();
         $form = KodeForm::find($show->id_form);
         $data['show'] = $show;
         $data['form'] = $form;
-        $data['item'] = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id',0)->get();
+        $item = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id',0)->get();
+        foreach ($item as $ck) {
+            $get[$ck->id] = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id', $ck->id)->get();
+        }
+        $data['item'] = $item;
+        $data['child'] = $get;
         $data['karyawan'] = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('status','A')->where('resign', 'N')->get();
         $data['dataItem'] = $show->data;
         $data['pj'] = $show->pj;
-        return view('data_crew.familiarisasi.form', $data);
+        return view('data_crew.evaluasi.form', $data);
     }
 
     public function savedata(Request $request, $id)
@@ -141,15 +150,13 @@ class FamiliarisasiController extends Controller
                 'value' => (int) $value,
             ];
         }
-        if($request->input('kode')=='el0302') { 
-            $mengetahui = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('status','A')->where('resign', 'N')->where('id_jabatan',4)->first();
-        } else {
-            $mengetahui = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('status','A')->where('resign', 'N')->where('id_jabatan',5)->first();   
-        }
+        $mengetahui = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('status','A')->where('resign', 'N')->where('id_jabatan',3)->first();
+        $menyetujui = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('id_kapal', $show->id_kapal)->where('status','A')->where('resign', 'N')->where('id_jabatan',5)->first();
+
         $pj = [
             'mengetahui' => $mengetahui->id,
-            'memberi'   => $request->input('id_memberi'),
-            'menerima'  => $show->id_karyawan
+            'menyetujui' => $menyetujui->id,
+            'membuat'   => $request->input('id_membuat'),
         ];
 
         $up = ChecklistData::find($id)->update([
@@ -176,13 +183,18 @@ class FamiliarisasiController extends Controller
                 ->where('a.id', $show->id_form)->first();
         $data['show'] = $show;
         $data['form'] = $form;
-        $data['item'] = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id',0)->get();   
+        $item = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id',0)->get();
+        foreach ($item as $ck) {
+            $get[$ck->id] = ChecklistItem::where('kode', $form->kode)->where('status', 'A')->where('parent_id', $ck->id)->get();
+        }
+        $data['item'] = $item;
+        $data['child'] = $get; 
         $data['dataItem'] = $show->data;
         $pj = $show->pj;
         $data['mengetahui'] = Karyawan::find($pj['mengetahui']);
-        $data['memberi'] = Karyawan::find($pj['memberi']);
-        $data['menerima'] = Karyawan::find($pj['menerima']);
-        $pdf = Pdf::loadView('data_crew.familiarisasi.pdf', $data)
+        $data['menyetujui'] = Karyawan::find($pj['menyetujui']);
+        $data['membuat'] = Karyawan::find($pj['membuat']);
+        $pdf = Pdf::loadView('data_crew.evaluasi.pdf', $data)
                 ->setPaper('a3', 'portrait');
         return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }
@@ -205,31 +217,48 @@ class FamiliarisasiController extends Controller
             })->get();    
         $data['form'] = KodeForm::find($get->id_form);
         $data['id_perusahaan'] = $get->id_perusahaan;
-        return view('data_crew.familiarisasi.elemen', $data);
+        return view('data_crew.evaluasi.elemen', $data);
     }
 
     public function getData(Request $request)
     {
-        $perusahaan = $request->input('id_perusahaan');
-        $kapal = $request->input('id_kapal') ? $request->input('id_kapal') : null;
-        $ctx = RoleContext::get();
-        
-        $daftar = DB::table('checklist_data')
-                ->leftjoin('karyawan', 'karyawan.id', '=', 'checklist_data.id_karyawan')
-                ->leftjoin('jabatan', 'jabatan.id', '=', 'karyawan.id_jabatan')
-                ->leftjoin('kapal', 'kapal.id', '=', 'checklist_data.id_kapal')
-                ->select('checklist_data.*', 'karyawan.nama as nama', 'jabatan.nama as jabatan', 'kapal.nama as kapal')
-                ->where('checklist_data.id_form', $request->input('kode'))
-                ->where('checklist_data.status','A')
-                ->when($perusahaan, fn($query, $perusahaan) => $query->where('checklist_data.id_perusahaan', $perusahaan))
-                ->when($kapal, fn($query, $kapal) => $query->where('checklist_data.id_kapal', $kapal))
-                ->when($ctx['jenis'] == 2 && $ctx['perusahaan_id'], fn($query) => $query->where('checklist_data.id_perusahaan', $ctx['perusahaan_id']))
-                ->when($ctx['jenis'] == 3 && $ctx['kapal_id'], fn($query) => $query->where('checklist_data.id_kapal', $ctx['kapal_id']))
-                ->orderBy('checklist_data.id', 'DESC')
-                ->get();
+        $roleJenis = Session::get('previllage');
+        $id_perusahaan = $request->input('id_perusahaan');
+        $id_form = $request->input('id_form');
+        $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
 
-        return response()->json([
-            'data' => $daftar
-        ]);
+        $query = DB::table('checklist_data as a')
+                ->leftjoin('kode_form as b', 'a.id_form', '=', 'b.id') 
+                ->leftjoin('karyawan as c', 'a.id_karyawan', '=', 'c.id')
+                ->select('a.*')       
+                ->where('a.status', 'A')->where('a.id_form', $id_form)
+                ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                    return $q->where('a.id_perusahaan', $id_perusahaan);
+                })
+                ->when($id_kapal, function($query, $id_kapal) {
+                    return $query->where('a.id_kapal', $id_kapal);
+                })
+                ->orderBy('a.id', 'DESC');
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('nama', function ($row) {
+                $karyawan = Karyawan::find($row->id_karyawan);
+                return $karyawan ? $karyawan->nama : '-';
+            })
+            ->addColumn('kapal', function ($row) {
+                $kapal = Kapal::find($row->id_kapal);
+                return $kapal ? $kapal->nama : '-';
+            })
+            ->addColumn('jabatan', function ($row) {
+                $jabatan = Jabatan::find($row->id_jabatan);
+                return $jabatan ? $jabatan->nama : '-';
+            })
+            ->addColumn('kode', function ($row) {
+                $kode = KodeForm::find($row->id_form);
+                return $kode ? $kode->nama : '-';
+            })
+            ->make(true);
     }
 }

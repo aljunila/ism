@@ -96,7 +96,13 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'kode', name: 'kode' },
-                { data: 'date', name: 'date' },
+                { data: 'date',
+                    render: function(data) {
+                        if (!data) return '';
+                        let parts = data.split(' ')[0].split('-'); 
+                        return parts[2] + '-' + parts[1] + '-' + parts[0]; 
+                    }
+                },
                 { data: 'nama', name: 'nama' },
                 { data: 'jabatan', name: 'jabatan' },
                 { 

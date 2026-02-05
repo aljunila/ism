@@ -38,7 +38,7 @@
             let formData = new FormData(this);
 
             $.ajax({
-                url: '/data_crew/familiarisasi/savedata/'+id,
+                url: '/data_crew/evaluasi/savedata/'+id,
                 method: "POST",
                 data: formData,
                 processData: false,
@@ -51,7 +51,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = "{{ url('/data_crew/familiarisasi') }}";
+                            window.location.href = "{{ url('/data_crew/evaluasi') }}";
                         });
                 },
                 error: function(xhr){
@@ -72,9 +72,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="col-sm-10"><h4 class="card-title">Checklist Familiarisasi</h4></div>
+                    <div class="col-sm-10"><h4 class="card-title">Checklist Evaluasi</h4></div>
                     <div class="col-sm-2">
-                    <a href="/data_crew/familiarisasi/pdf/{{$show->uid}}" type="button" target="_blank" class="btn btn-sm btn-primary download" title="Cetak PDF">
+                    <a href="/data_crew/evaluasi/pdf/{{$show->uid}}" type="button" target="_blank" class="btn btn-sm btn-primary download" title="Cetak PDF">
                         Unduh PDF
                     </a>
                     <a href="/checklist/item/{{$form->kode}}" class="btn btn-danger btn-sm">Setting Form</a>
@@ -142,24 +142,37 @@
                                         <table class="table table-bordered table-striped" border="1">
                                             <tr>
                                                 <td>No</td>
-                                                <td>Uraian</td>
-                                                <td>Ya</td>
-                                                <td>Tidak</td>
+                                                <td>Materi</td>
+                                                <td>Tingkatan</td>
                                             </tr>
-                                            @foreach($item as $ck)
-                                            <tr>
-                                                <td>{{$loop->iteration}}</td>
-                                                <td>{!!$ck->item!!}</td>
-                                                <td><input type="radio" class="form-check-input" name="item[{{$ck->id}}]" value="1" {{ ($dataItem[$ck->id]['value'] ?? null) == 1 ? 'checked' : '' }}></td>
-                                                <td><input type="radio" class="form-check-input" name="item[{{$ck->id}}]" value="0" {{ ($dataItem[$ck->id]['value'] ?? null) == 0 ? 'checked' : '' }}></td>
-                                            </tr>
-                                            @endforeach
+                                                @foreach($item as $ck)
+                                                @php
+                                                    $detail = $child[$ck->id] ?? [];
+                                                @endphp
+                                                <tr>
+                                                    <td></td>
+                                                    <td colspan="3">{!!$ck->item!!}</td>    
+                                                </tr>
+                                                @foreach($detail as $c)
+                                                <tr>
+                                                    <td>{{$loop->iteration}}</td>
+                                                    <td>{!!$c->item!!}</td>
+                                                    <td><select name="item[{{$c->id}}]" class="form-control">
+                                                        <option value="">Pilih</option>
+                                                        <option value="1" {{ ($dataItem[$c->id]['value'] ?? null) == 1 ? 'selected' : '' }}>1. Sangat Tidak memuaskan</option>
+                                                        <option value="2" {{ ($dataItem[$c->id]['value'] ?? null) == 2 ? 'selected' : '' }}>2. Tidak Memuaskan</option>
+                                                        <option value="3" {{ ($dataItem[$c->id]['value'] ?? null) == 3 ? 'selected' : '' }}>3. Cukup Memuaskan</option>
+                                                        <option value="4" {{ ($dataItem[$c->id]['value'] ?? null) == 4 ? 'selected' : '' }}>4. Sangat Memuaskan</option>
+                                                    </select></td>
+                                                </tr>
+                                                @endforeach
+                                                @endforeach
                                         </table>
                                     </div>
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-2">
-                                        <label class="col-form-label" for="first-name">Catatan</label>
+                                        <label class="col-form-label" for="first-name">Tanggapan</label>
                                     </div>
                                     <div class="col-sm-10">
                                         <textarea name="note" id="note" class="form-control">{!!$show->note!!}</textarea>
@@ -167,12 +180,12 @@
                                 </div>
                                 <div class="mb-1 row">
                                     <div class="col-sm-2">
-                                        <label class="col-form-label" for="first-name">Yang Memberikan Penyuluhan</label>
+                                        <label class="col-form-label" for="first-name">Instruktur</label>
                                     </div>
                                     <div class="col-sm-10">
-                                        <select name="id_memberi" id="id_memberi"  class="form-control karyawan" required>
+                                        <select name="id_membuat" id="id_membuat"  class="form-control karyawan" required>
                                         @foreach($karyawan as $k)
-                                            <option value="{{$k->id}}" {{ ($pj['memberi'] ?? null) == $k->id ? 'selected' : '' }}>{{$k->nama}}</option>
+                                            <option value="{{$k->id}}" {{ ($pj['membuat'] ?? null) == $k->id ? 'selected' : '' }}>{{$k->nama}}</option>
                                         @endforeach
                                         </select>
                                     </div>

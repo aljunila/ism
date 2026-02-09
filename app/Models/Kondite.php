@@ -8,9 +8,12 @@ Use Carbon\Carbon;
 class Kondite extends Model
 {
     public $timestamps = false;
-    protected $table = 'kondite';
-    protected $fillable = ['id', 'uid', 'id_periode', 'id_karyawan', 'id_jabatan', 'tgl_nilai', 'rekomendasi', 'note', 'id_penilai_1', 'id_penilai_2', 'id_mengetahui', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
-
+    protected $table = 't_kondite';
+    protected $fillable = ['id', 'uid', 'id_periode', 'id_karyawan', 'id_jabatan', 'tgl_nilai', 'data', 'rekomendasi', 'note', 'id_penilai_1', 'id_penilai_2', 'id_mengetahui', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $casts = [
+        'data' => 'array',
+    ];
+    
     public function get_karyawan()
     {
         return  $this->hasOne(Karyawan::class, 'id', 'id_karyawan')->first();

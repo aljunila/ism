@@ -23,7 +23,6 @@ use App\Http\Controllers\BbmController;
 use App\Http\Controllers\AlarmController;
 use App\Http\Controllers\ReviewController;
 // use App\Http\Controllers\InterviewController;
-use App\Http\Controllers\KonditeController;
 use App\Http\Controllers\Purchasing\PurchasingController;
 use App\Http\Controllers\Data_master\KodeFormController;
 use App\Http\Controllers\Data_master\MenuController;
@@ -45,6 +44,8 @@ use App\Http\Controllers\Data_crew\CutiController;
 use App\Http\Controllers\Data_crew\MutasiController;
 use App\Http\Controllers\Data_crew\PelatihanController;
 use App\Http\Controllers\Data_crew\EvaluasiController;
+use App\Http\Controllers\Data_crew\KonditeController;
+use App\Http\Controllers\Data_crew\KriteriaController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -306,7 +307,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
 
         Route::get('ganti', [GantiController::class, 'index']);
         Route::get('ganti/data', [GantiController::class, 'data'])->name('ganti.data');
-        Route::get('ganti/form', [GantiController::class, 'form'])->name('ganti.form');
+        //Route::get('ganti/form', [GantiController::class, 'form'])->name('ganti.form');
         Route::get('/ganti/form/{id}', [GantiController::class, 'form'])->name('ganti.form');
         Route::post('ganti', [GantiController::class, 'store'])->name('ganti.store');
         Route::put('ganti/{id}', [GantiController::class, 'update'])->name('ganti.update');
@@ -344,7 +345,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
 
         Route::get('evaluasi', [EvaluasiController::class, 'index']);
         Route::get('evaluasi/data', [EvaluasiController::class, 'data'])->name('evaluasi.data');
-        Route::get('evaluasi/form', [EvaluasiController::class, 'form'])->name('evaluasi.form');
+        //Route::get('evaluasi/form', [EvaluasiController::class, 'form'])->name('evaluasi.form');
         Route::get('/evaluasi/form/{id}', [EvaluasiController::class, 'form'])->name('evaluasi.form');
         Route::post('evaluasi', [EvaluasiController::class, 'store'])->name('evaluasi.store');
         Route::put('evaluasi/{id}', [EvaluasiController::class, 'update'])->name('evaluasi.update');
@@ -353,6 +354,29 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('/evaluasi/pdf/{id}', [EvaluasiController::class, 'pdf'])->name('evaluasi.pdf');
         Route::get('/evaluasi/{id}', [EvaluasiController::class, 'elemen'])->name('evaluasi.elemen');
         Route::post('/evaluasi/getData', [EvaluasiController::class, 'getData'])->name('evaluasi.getData');
+
+        Route::get('kondite', [KonditeController::class, 'index']);
+        Route::get('kondite/data', [KonditeController::class, 'data'])->name('kondite.data');
+        Route::get('/kondite/form/{id}', [KonditeController::class, 'form'])->name('kondite.form');
+        Route::post('kondite', [KonditeController::class, 'store'])->name('kondite.store');
+        Route::put('kondite/{id}', [KonditeController::class, 'update'])->name('kondite.update');
+        Route::delete('kondite/{id}', [KonditeController::class, 'destroy'])->name('kondite.destroy');
+        Route::get('/kondite/pdf/{id}', [KonditeController::class, 'pdf'])->name('kondite.pdf');
+        Route::get('/kondite/{id}', [KonditeController::class, 'elemen'])->name('kondite.elemen');
+        Route::post('kondite/savedata', [KonditeController::class, 'savedata'])->name('kondite.savedata');
+        // Route::post('/kondite/getData', [KonditeController::class, 'getData'])->name('kondite.getData');
+        // Route::post('/kondite/datadetail', [KonditeController::class, 'getDetail'])->middleware('auth');
+        // Route::post('/kondite/getChecklist', [KonditeController::class, 'getChecklist'])->middleware('auth');
+        // Route::post('/kondite/getKondite', [KonditeController::class, 'getKondite'])->middleware('auth');
+        Route::post('/kondite/datakondite', [KonditeController::class, 'datakondite'])->name('kondite.datakondite');
+
+        Route::get('/kriteria/pdf', [KriteriaController::class, 'pdf'])->name('kriteria.pdf');
+        Route::get('kriteria/{uid}', [KriteriaController::class, 'index']);
+        Route::post('kriteria/data', [KriteriaController::class, 'data'])->name('kriteria.data');
+        Route::get('/kriteria/form/{id}', [KriteriaController::class, 'form'])->name('kriteria.form');
+        Route::post('kriteria', [KriteriaController::class, 'store'])->name('kriteria.store');
+        Route::put('kriteria/{id}', [KriteriaController::class, 'update'])->name('kriteria.update');
+        Route::delete('kriteria/{id}', [KriteriaController::class, 'destroy'])->name('kriteria.destroy');
     });
 
     Route::prefix('refrensi')->group(function () {
@@ -432,15 +456,15 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::post('/checklist/deletepersonil/{id}', [ChecklistController::class, 'deletepersonil']);
     Route::post('/checklist/store09', [ChecklistController::class, 'store09'])->name('store09');
 
-    Route::get('el0604', [EvaluasiController::class, 'el0604'])->name('el0604');
-    Route::get('el0605', [EvaluasiController::class, 'el0605'])->name('el0605');
-    Route::post('evaluasi/data', [EvaluasiController::class, 'getData']);
-    Route::get('/evaluasi/add/{kode}', [EvaluasiController::class, 'add' ])->middleware('auth');
-    Route::post('/evaluasi/store', [EvaluasiController::class, 'store'])->name('store');
-    Route::get('/evaluasi/edit/{id}', [EvaluasiController::class, 'edit'])->middleware('auth');
-    Route::post('/evaluasi/update/{id}', [EvaluasiController::class, 'update']);
-    Route::post('/evaluasi/delete/{id}', [EvaluasiController::class, 'delete']);
-    Route::get('/evaluasi/pdf/{id}', [EvaluasiController::class, 'pdf'])->name('evaluasi.pdf')->middleware('auth');
+    // Route::get('el0604', [EvaluasiController::class, 'el0604'])->name('el0604');
+    // Route::get('el0605', [EvaluasiController::class, 'el0605'])->name('el0605');
+    // Route::post('evaluasi/data', [EvaluasiController::class, 'getData']);
+    // Route::get('/evaluasi/add/{kode}', [EvaluasiController::class, 'add' ])->middleware('auth');
+    // Route::post('/evaluasi/store', [EvaluasiController::class, 'store'])->name('store');
+    // Route::get('/evaluasi/edit/{id}', [EvaluasiController::class, 'edit'])->middleware('auth');
+    // Route::post('/evaluasi/update/{id}', [EvaluasiController::class, 'update']);
+    // Route::post('/evaluasi/delete/{id}', [EvaluasiController::class, 'delete']);
+    // Route::get('/evaluasi/pdf/{id}', [EvaluasiController::class, 'pdf'])->name('evaluasi.pdf')->middleware('auth');
 
     Route::get('el0301', [NotulenController::class, 'show'])->name('notulen');
     Route::get('el0404', [NotulenController::class, 'el0404'])->name('el0404');
@@ -526,18 +550,18 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::get('/pelatihan/pdf', [PelatihanController::class, 'pdf'])->name('pelatihan.pdf')->middleware('auth');
     Route::post('get-karyawanbyJab', [PelatihanController::class, 'getKaryawan']);
 
-    Route::get('/el0608', [KonditeController::class, 'el0608'])->name('el0608')->middleware('auth');
-    Route::post('/kondite/data', [KonditeController::class, 'getData'])->middleware('auth');
-    Route::post('/kondite/store', [KonditeController::class, 'store'])->name('store');
-    Route::get('/kondite/edit/{id}', [KonditeController::class, 'edit'])->middleware('auth');
-    Route::post('/kondite/update/{id}', [KonditeController::class, 'update']);
-    Route::post('/kondite/delete/{id}', [KonditeController::class, 'delete']);
-    Route::get('/kondite/pdf/{id}', [KonditeController::class, 'pdf'])->name('kondite.pdf')->middleware('auth');
-    Route::get('/kondite/detail/{uid}', [KonditeController::class, 'detail'])->middleware('auth');
-    Route::post('/kondite/datadetail', [KonditeController::class, 'getDetail'])->middleware('auth');
-    Route::post('/kondite/getChecklist', [KonditeController::class, 'getChecklist'])->middleware('auth');
-    Route::post('/kondite/getKondite', [KonditeController::class, 'getKondite'])->middleware('auth');
-    Route::post('/kondite/saveform', [KonditeController::class, 'saveform'])->name('saveform');
+    // Route::get('/el0608', [KonditeController::class, 'el0608'])->name('el0608')->middleware('auth');
+    // Route::post('/kondite/data', [KonditeController::class, 'getData'])->middleware('auth');
+    // Route::post('/kondite/store', [KonditeController::class, 'store'])->name('store');
+    // Route::get('/kondite/edit/{id}', [KonditeController::class, 'edit'])->middleware('auth');
+    // Route::post('/kondite/update/{id}', [KonditeController::class, 'update']);
+    // Route::post('/kondite/delete/{id}', [KonditeController::class, 'delete']);
+    // Route::get('/kondite/pdf/{id}', [KonditeController::class, 'pdf'])->name('kondite.pdf')->middleware('auth');
+    // Route::get('/kondite/detail/{uid}', [KonditeController::class, 'detail'])->middleware('auth');
+    // Route::post('/kondite/datadetail', [KonditeController::class, 'getDetail'])->middleware('auth');
+    // Route::post('/kondite/getChecklist', [KonditeController::class, 'getChecklist'])->middleware('auth');
+    // Route::post('/kondite/getKondite', [KonditeController::class, 'getKondite'])->middleware('auth');
+    // Route::post('/kondite/saveform', [KonditeController::class, 'saveform'])->name('saveform');
 
     Route::prefix('file')->group(function () {
         Route::get('/', [FileController::class, 'show'])->name('file');
@@ -574,5 +598,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('viewdetail', [ProsedurController::class, 'viewdetail']);       
         Route::get('view-file/{uid}', [ProsedurController::class, 'view_file'])->name('view_file');
         Route::get('download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file');
+        Route::get('download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file');
+        Route::get('kapallist/{uid}', [ProsedurController::class, 'kapallist'])->name('prosedur.kapallist');
+        Route::get('pdfchecklist/{id}', [KapalController::class, 'pdfchecklist'])->name('prosedur.pdfchecklist');
     });
 });

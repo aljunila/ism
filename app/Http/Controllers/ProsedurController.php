@@ -7,9 +7,10 @@ use App\Models\Perusahaan;
 use App\Models\Prosedur;
 use App\Models\Karyawan;
 use App\Models\ViewProsedur;
-use App\Models\DaftarHadir;
-use App\Models\DaftarHadirDetail;
-use App\Models\Notulen;
+use App\Models\ChecklistProsedur;
+use App\Models\FormISM;
+use App\Models\KodeForm;
+use App\Models\Kapal;
 use App\Models\User;
 use Alert;
 use Session;
@@ -264,40 +265,20 @@ class ProsedurController extends Controller
                 ]);
             }
 
-            $cek = DB::table('prosedur as a')
-                ->leftJoin('view_prosedur as b', 'a.id_user', '=', 'b.id' )
-                ->select(
-                    'a.kode',
-                    'b.jml_lihat',
-                    'b.jml_download',
-                    'b.update_lihat',
-                    'b.update_download'
-                )
-                ->where('a.status', 'A')
-                ->where('a.id_perusahaan', $id_perusahaan)
-                ->where('a.update_lihat', 'like', '$year%')
-                ->orderBy('a.id')
-                ->get();
-            if(empty($cek)){
-                $get = DB::table('notulen as a')
-                        ->leftjoin('daftar_hadir as b', 'b.id_notulen', '=', 'a.id')
-                        ->select('b.*')
-                        ->where('a.id_perusahaan', $id_perusahaan)
-                        ->where('a.id_kapal', $id_kapal)
-                        ->where('a.kode', 'el0301')
-                        ->where('a.status', 'A')
-                        ->first();
-                $hadir = DaftarHadirDetail::where('id_daftar_hadir', $get->id)->where('id_karyawan', $id_karyawan)->first();
-                if(empty($hadir)){
-                    $karyawan = Karyawan::findOrFail($id_karyawan);
-                    $save_hadir = DaftarHadirDetail::insert([
-                        'id_daftar_hadir'   => $get->id,
-                        'id_karyawan'       => $id_karyawan,
-                        'id_jabatan'        => $karyawan->id_jabatan,
-                        'tanggal'           => date('Y-m-d'),
-                        'status'            => 'A'
-                    ]);
-                }
+            $cekprosedur = ChecklistProsedur::where('id_karyawan', $id_karyawan)->where('id_kapal', $id_kapal)->first();
+            if(empty($cekprosedur)){
+                $karyawan = Karyawan::findOrFail($id_karyawan);
+                $save = ChecklistProsedur::insert([
+                    'id_karyawan'       => $id_karyawan,
+                    'id_jabatan'        => $karyawan->id_jabatan,
+                    'id_prosedur'       => $id_prosedur,
+                    'last_seen'         => date('Y-m-d')
+                ]);
+            } else {
+                $update = ChecklistProsedur::where('id', $cekprosedur->id)->update([
+                    'id_prosedur'       => $id_prosedur,
+                    'last_seen'         => date('Y-m-d')
+                ]);
             }
         }
         $filename = $show->file;
@@ -329,6 +310,22 @@ class ProsedurController extends Controller
                     'id_prosedur' => $id_prosedur,
                     'jml_download' => 1,
                     'update_download' => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            $cekprosedur = ChecklistProsedur::where('id_karyawan', $id_karyawan)->where('id_kapal', $id_kapal)->first();
+            if(empty($cekprosedur)){
+                $karyawan = Karyawan::findOrFail($id_karyawan);
+                $save = ChecklistProsedur::insert([
+                    'id_karyawan'       => $id_karyawan,
+                    'id_jabatan'        => $karyawan->id_jabatan,
+                    'id_prosedur'       => $id_prosedur,
+                    'last_seen'         => date('Y-m-d')
+                ]);
+            } else {
+                $update = ChecklistProsedur::where('id', $cekprosedur->id)->update([
+                    'id_prosedur'       => $id_prosedur,
+                    'last_seen'         => date('Y-m-d')
                 ]);
             }
         }
@@ -404,5 +401,59 @@ class ProsedurController extends Controller
             ];
         });
         return response()->json(['data' => $data]);
+    }
+
+    public function kapallist($uid)
+    {
+        $data['active'] = "form_ism";
+        $get = FormISM::where('uid', $uid)->first();
+        $roleJenis = Session::get('previllage');
+        $activeCompany = $get->id_perusahaan;
+        $activeShip = Session::get('id_kapal');
+        $data['kapal'] = Kapal::where('status', 'A')
+            ->when($roleJenis == 1 || $roleJenis == 2, function ($q) use ($activeCompany) {
+                return $q->where('pemilik', $activeCompany);
+            })
+            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
+                return $q->where('id', $activeShip);
+            })->get();    
+
+            
+        $data['form'] = KodeForm::find($get->id_form);
+        $data['id_perusahaan'] = $get->id_perusahaan;
+        return view('prosedur.elemen', $data);
+    }
+
+    public function pdfchecklist($uid){
+        $show =  Kapal::where('uid', $uid)->first();
+        $nama = $show->nama;
+        $id_perusahaan = $show->pemilik;
+        $form = DB::table('kode_form as a')
+                ->leftJoin('t_ism as b', function($join) use ($id_perusahaan) {
+                    $join->on('a.id', '=', 'b.id_form')
+                        ->where('b.id_perusahaan', $id_perusahaan)
+                        ->where('b.is_delete', 0);
+                })
+                ->select('a.*', 'b.judul')
+                ->where('a.id', 93)->first();
+        $get = "SELECT a.nama, a.id_jabatan, a.tanda_tangan, b.last_seen FROM karyawan a left join t_checklist_prosedur b on (a.id=b.id_karyawan and a.id_kapal = b.id_jabatan) where a.id_kapal=2";
+        $doc = DB::table(' as a')
+                ->leftJoin('master_file as b', 'a.id_file', '=', 'b.id')
+                ->select(
+                    'b.*',
+                    'a.no',
+                    'a.tgl_terbit',
+                    'a.tgl_expired',
+                    'a.penerbit'
+                )
+                ->where('a.id_kapal', $show->id)->where('b.status', 'A')->where('a.status', 'A')->where('b.type', 'K')
+                ->whereNotNull('a.tgl_expired')
+                ->orderBy('b.no_urut', 'ASC')->get();
+        $data['show'] = $show;
+        $data['form'] = $form;
+        $data['doc'] = $doc;   
+        $pdf = Pdf::loadView('kapal.pdfdoclist', $data)
+                ->setPaper('a3', 'portrait');
+        return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Menu;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Session;
+use DB;
 
 class KodeFormController extends Controller
 {
@@ -132,19 +133,18 @@ class KodeFormController extends Controller
         $id_perusahaan = Session::get('id_perusahaan');
         $roleJenis = Session::get('previllage');
 
-        $query = FormISM::where('is_delete', 0)
+        $query = DB::table('t_ism')
+                ->leftjoin('kode_form', 't_ism.id_form', '=', 'kode_form.id')
+                ->select('t_ism.*', 'kode_form.nama')
+                ->where('t_ism.is_delete', 0)
                 ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
                 ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
-                    return $q->where('id_perusahaan', $id_perusahaan);
+                    return $q->where('t_ism.id_perusahaan', $id_perusahaan);
                 })
-                ->orderBy('id_perusahaan', 'asc')->orderBy('judul', 'asc');
+                ->orderBy('t_ism.id_perusahaan', 'asc')->orderBy('t_ism.judul', 'asc');
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('nama', function ($row) {
-                $form = KodeForm::find($row->id_form);
-                return $form ? $form->nama : '-';
-            })
             ->addColumn('perusahaan', function ($row) {
                 $perusahaan = Perusahaan::find($row->id_perusahaan);
                 return $perusahaan ? $perusahaan->nama : '-';
@@ -153,10 +153,6 @@ class KodeFormController extends Controller
                 $form = KodeForm::find($row->id_form);
                 return $form ? $form->link : '-';
             })
-            ->addColumn('aksi', function ($row) {
-                return view('data_master.kode_form.partials.actions', compact('row'))->render();
-            })
-            ->rawColumns(['aksi'])
             ->make(true);
     }
 }

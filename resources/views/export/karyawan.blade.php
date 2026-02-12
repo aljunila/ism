@@ -22,6 +22,9 @@
         <th style="{{ $styleTh }}">No Telp</th>
         <th style="{{ $styleTh }}">Email</th>
         <th style="{{ $styleTh }}">Alamat</th>
+        <th style="{{ $styleTh }}">Kontak Darurat</th>
+        <th style="{{ $styleTh }}">Nama Kontak</th>
+        <th style="{{ $styleTh }}">No Telp Darurat</th>
         <th style="{{ $styleTh }}">Nama Bank</th>
         <th style="{{ $styleTh }}">Nama Pemegang Rekening</th>
         <th style="{{ $styleTh }}">No Rekening</th>
@@ -55,6 +58,9 @@
                 <td style="{{ $styleTd }}">{{$show->telp}}</td>
                 <td style="{{ $styleTd }}">{{$show->email}}</td>
                 <td style="{{ $styleTd }}">{{$show->alamat}}</td>
+                <td style="{{ $styleTd }}">{{$show->kontak_darurat}}</td>
+                <td style="{{ $styleTd }}">{{$show->nama_kontak}}</td>
+                <td style="{{ $styleTd }}">{{$show->telp_kontak}}</td>
                 <td style="{{ $styleTd }}">{{$show->nama_bank}}</td>
                 <td style="{{ $styleTd }}">{{$show->nama_rekening}}</td>
                 <td style="{{ $styleTd }}">{{$show->no_rekening}}</td>

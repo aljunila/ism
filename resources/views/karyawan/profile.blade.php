@@ -436,6 +436,21 @@
                                             <td>{!! ($show->alamat) ? $show->alamat : '-' !!}</td>
                                         </tr>
                                         <tr>
+                                            <td> Kontak Darurat</td>
+                                            <td>:</td>
+                                            <td>{!! ($show->kontak_darurat) ? $show->kontak_darurat : '-' !!}</td>
+                                        </tr>
+                                        <tr>
+                                            <td> Nama</td>
+                                            <td>:</td>
+                                            <td>{!! ($show->nama_kontak) ? $show->nama_kontak : '-' !!}</td>
+                                        </tr>
+                                        <tr>
+                                            <td> No Telp Darurat</td>
+                                            <td>:</td>
+                                            <td>{!! ($show->telp_kontak) ? $show->telp_kontak : '-' !!}</td>
+                                        </tr>
+                                        <tr>
                                             <td> Nama Bank</td>
                                             <td>:</td>
                                             <td>{!! ($show->nama_bank) ? $show->nama_bank : '-' !!}</td>

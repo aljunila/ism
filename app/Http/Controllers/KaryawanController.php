@@ -499,4 +499,46 @@ class KaryawanController extends Controller
                 ->setPaper('a3', 'portrait');
         return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }
+
+    public function dataresign(Request $request)
+    {
+        $roleJenis = Session::get('previllage');
+         $perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : null;
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : null;
+        $kel = $request->input('kel');
+
+        $karyawan = DB::table('karyawan')
+                ->leftJoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')
+                ->leftJoin('perusahaan', 'perusahaan.id', '=', 'karyawan.id_perusahaan')
+                ->leftJoin('kapal', 'kapal.id', '=', 'karyawan.id_kapal')
+                ->select(
+                    'karyawan.id',
+                    'karyawan.uid',
+                    'karyawan.nama',
+                    'karyawan.nik',
+                    'karyawan.nip',
+                    'kapal.nama as kapal',
+                    'jabatan.nama as jabatan'
+                )
+                ->where('karyawan.resign', 'Y')
+                ->where('karyawan.status','A')
+                ->when($kel, function($query, $kel) {
+                    return $query->where('jabatan.kel', $kel);
+                })
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where('perusahaan.id', $perusahaan);
+                })
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('karyawan.id_kapal', $kapal);
+                });
+        // print_r($kapal);die();
+        return DataTables::of($karyawan)
+        ->filterColumn('kapal', function($query, $keyword) {
+            $query->where('kapal.nama', 'like', "%{$keyword}%");
+        })
+        ->filterColumn('jabatan', function($query, $keyword) {
+            $query->where('jabatan.nama', 'like', "%{$keyword}%");
+        })
+        ->make(true);
+    }
 }

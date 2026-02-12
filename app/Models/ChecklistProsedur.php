@@ -9,10 +9,15 @@ class ChecklistProsedur extends Model
 {
     // use HasFactory;
     public $timestamps = false;
-    protected $table = 't_cuti';
-    protected $fillable = ['id', 'id_karyawan', 'id_jabatan', 'id__prosedur', 'last_seen'];
+    protected $table = 't_checklist_prosedur';
+    protected $fillable = ['id', 'id_kapal', 'id_karyawan', 'id_jabatan', 'id__prosedur', 'last_seen'];
 
-    public function get_karyawan()
+    public function get_kapal()
+    {
+        return  $this->hasOne(Kapal::class, 'id', 'id_kapal')->first();
+    }
+
+     public function get_karyawan()
     {
         return  $this->hasOne(Karyawan::class, 'id', 'id_karyawan')->first();
     }

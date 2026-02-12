@@ -93,7 +93,7 @@
         }
     });
 
-    table = $('#table2').DataTable({  
+    table2 = $('#table2').DataTable({  
         processing: true,
         searchable: true,
         serverSide: true,

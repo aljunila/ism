@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('t_checklist_prosedur', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('id_kapal')->nullable();
             $table->unsignedInteger('id_karyawan')->nullable();
             $table->unsignedInteger('id_jabatan')->nullable();
             $table->unsignedInteger('id_prosedur')->nullable();

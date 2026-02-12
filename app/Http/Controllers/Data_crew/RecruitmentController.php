@@ -28,7 +28,16 @@ class RecruitmentController extends Controller
 
     public function data()
     {
-        $query = Recruitment::where('is_delete', 0)->orderBy('id', 'DESC');
+        $id_perusahaan = Session::get('id_perusahaan');
+        $id_kapal = Session::get('id_kapal');
+        $roleJenis = Session::get('previllage');
+
+        $query = Recruitment::where('is_delete', 0)
+                 ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
+                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                    return $q->where('id_perusahaan', $id_perusahaan);
+                })
+                ->orderBy('id', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()

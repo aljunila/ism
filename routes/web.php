@@ -123,6 +123,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::prefix('karyawan')->group(function () {
         Route::get('/', [KaryawanController::class, 'show'])->name('karyawan');
         Route::post('data', [KaryawanController::class, 'getData']);
+        Route::get('dataresign', [KaryawanController::class, 'dataresign'])->name('karyawan.resign');
         Route::get('add', [KaryawanController::class, 'add']);
         Route::post('store', [KaryawanController::class, 'store']);
         Route::get('profil/{id}', [KaryawanController::class, 'profil']);
@@ -600,6 +601,6 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file');
         Route::get('download_file/{uid}', [ProsedurController::class, 'download_file'])->name('download_file');
         Route::get('kapallist/{uid}', [ProsedurController::class, 'kapallist'])->name('prosedur.kapallist');
-        Route::get('pdfchecklist/{id}', [KapalController::class, 'pdfchecklist'])->name('prosedur.pdfchecklist');
+        Route::get('pdfchecklist/{id}', [ProsedurController::class, 'pdfchecklist'])->name('prosedur.pdfchecklist');
     });
 });

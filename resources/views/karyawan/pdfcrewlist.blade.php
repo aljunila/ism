@@ -101,11 +101,11 @@
                         $expired_endors = $tglEndorse->format('d-m-Y');
                         $style = '';
 
-                        if ($Sisa <= 30) {
+                        if ($Sisa <= 7) {
                             $style = 'danger';
-                        } elseif ($Sisa <= 60) {
+                        } elseif ($Sisa <= 14) {
                             $style = 'warning';
-                        } elseif ($Sisa <= 90) {
+                        } elseif ($Sisa <= 30) {
                             $style = 'success';
                         }
                     } else {

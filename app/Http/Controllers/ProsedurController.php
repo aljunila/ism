@@ -269,6 +269,7 @@ class ProsedurController extends Controller
             if(empty($cekprosedur)){
                 $karyawan = Karyawan::findOrFail($id_karyawan);
                 $save = ChecklistProsedur::insert([
+                    'id_kapal'          => $id_kapal,
                     'id_karyawan'       => $id_karyawan,
                     'id_jabatan'        => $karyawan->id_jabatan,
                     'id_prosedur'       => $id_prosedur,
@@ -435,24 +436,20 @@ class ProsedurController extends Controller
                         ->where('b.is_delete', 0);
                 })
                 ->select('a.*', 'b.judul')
-                ->where('a.id', 93)->first();
-        $get = "SELECT a.nama, a.id_jabatan, a.tanda_tangan, b.last_seen FROM karyawan a left join t_checklist_prosedur b on (a.id=b.id_karyawan and a.id_kapal = b.id_jabatan) where a.id_kapal=2";
-        $doc = DB::table(' as a')
-                ->leftJoin('master_file as b', 'a.id_file', '=', 'b.id')
-                ->select(
-                    'b.*',
-                    'a.no',
-                    'a.tgl_terbit',
-                    'a.tgl_expired',
-                    'a.penerbit'
-                )
-                ->where('a.id_kapal', $show->id)->where('b.status', 'A')->where('a.status', 'A')->where('b.type', 'K')
-                ->whereNotNull('a.tgl_expired')
-                ->orderBy('b.no_urut', 'ASC')->get();
-        $data['show'] = $show;
-        $data['form'] = $form;
-        $data['doc'] = $doc;   
-        $pdf = Pdf::loadView('kapal.pdfdoclist', $data)
+                ->where('a.id', 12)->first();
+        $get = DB::table('karyawan as a')
+                ->leftJoin('t_checklist_prosedur as b', function ($join) {
+                    $join->on('a.id', '=', 'b.id_karyawan')
+                        ->on('a.id_kapal', '=', 'b.id_kapal');
+                })
+                ->leftJoin('jabatan as c', 'a.id_jabatan', '=', 'c.id')
+                ->where('a.id_kapal', $show->id)
+                ->select('a.nama', 'c.nama as jabatan', 'a.tanda_tangan', 'b.last_seen')->get();
+        $data['show'] = $get;
+        $data['form'] = $form; 
+        $data['kapal'] = $show->nama; 
+        $data['perusahaan'] = Perusahaan::find($id_perusahaan);
+        $pdf = Pdf::loadView('prosedur.pdfchecklist', $data)
                 ->setPaper('a3', 'portrait');
         return $pdf->stream($data['form']->ket.' '.$nama.'.pdf');
     }

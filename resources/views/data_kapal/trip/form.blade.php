@@ -35,24 +35,21 @@
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function(response){
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message ?? 'Data berhasil disimpan',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
+            })
+            .done(res => {
+                Swal.fire(res.status, res.message, res.status)
+                    .then(() => {
+                        if (res.status === 'success') {
                             window.location.href = "{{ url('/data_kapal/trip') }}";
-                        });
-                },
-                error: function(xhr){
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Gagal menyimpan data'
+                        }
                     });
-                }
+            })
+            .fail(xhr => {
+                Swal.fire(
+                    'Gagal',
+                    xhr.responseJSON?.message || 'Error',
+                    'error'
+                );
             });
         });
 
@@ -121,7 +118,7 @@
                                     <label class="col-form-label" for="first-name">Tanggal</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <input type="date" class="form-control" id="tanggal" name="tanggal" required value="{{ old('tanggal', $trip->tanggal ?? '') }}"  {{ isset($trip) ? 'disabled' : '' }}>
+                                    <input type="date" class="form-control" id="tanggal" name="tanggal" required value="{{ old('tanggal', $trip->tanggal ?? '') }}">
                                 </div>
                             </div>
                             <div class="mb-1 row">
@@ -142,7 +139,7 @@
                                     <label class="col-form-label" for="first-name">Trip ke</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="trip" id="trip"  class="form-control"  {{ isset($trip) ? 'disabled' : '' }}>
+                                    <select name="trip" id="trip"  class="form-control">
                                         <option value="">Pilih</option>
                                         @for($a=1; $a<=10; $a++)
                                         <option value="{{$a}}" @selected (isset($trip) && $a==$trip->trip)>{{$a}}</option>

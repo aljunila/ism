@@ -100,19 +100,23 @@ class TripController extends Controller
                 'total'        => $value * $nominal
             ];
         }
-
-        $save = Trip::create([
-          'uid' => Str::uuid()->toString(),
-          'id_kapal' => $request->input('id_kapal'),
-          'id_pelabuhan' => $request->input('id_pelabuhan'),
-          'tanggal' => $request->input('tanggal'),
-          'trip' => $request->input('trip'),
-          'jam' => $request->input('jam'),
-          'data' => $data,
-          'created_by' => Session::get('userid'),
-          'created_date' => date('Y-m-d H:i:s'),
-       ]);
-        return response()->json(['message' => 'Trip ditambahkan']);
+        $cek = Trip::where('id_kapal',$request->input('id_kapal'))->where('tanggal',$request->input('tanggal'))->where('trip', $request->input('trip'))->exists();
+        if($cek) {
+            return response()->json(['status' => 'error', 'message' => 'Maaf, data trip sudah ada'],422);
+        } else {
+            $save = Trip::create([
+              'uid' => Str::uuid()->toString(),
+              'id_kapal' => $request->input('id_kapal'),
+              'id_pelabuhan' => $request->input('id_pelabuhan'),
+              'tanggal' => $request->input('tanggal'),
+              'trip' => $request->input('trip'),
+              'jam' => $request->input('jam'),
+              'data' => $data,
+              'created_by' => Session::get('userid'),
+              'created_date' => date('Y-m-d H:i:s'),
+           ]);
+            return response()->json(['status' => 'success', 'message' => 'Trip berhasil ditambahkan'],200);
+        }
     }
 
     public function update(Request $request, $id)
@@ -135,11 +139,18 @@ class TripController extends Controller
                 'total'        => $value * $nominal
             ];
         }
-        $up->update([
-          'data' => $data,
-          'changed_by' => Session::get('userid'),
-        ]);
-        return response()->json(['message' => 'Trip diperbarui']);
+         $cek = Trip::where('id_kapal',$up->id_kapal)->where('tanggal',$request->input('tanggal'))->where('trip', $request->input('trip'))->exists();
+        if($cek) {
+            return response()->json(['status' => 'error', 'message' => 'Maaf, data trip sudah ada'],422);
+        } else {
+            $up->update([
+                'data' => $data,
+                'tanggal' => $request->post('tanggal'),
+                'trip' => $request->post('trip'),
+                'changed_by' => Session::get('userid'),
+            ]);
+            return response()->json(['status' => 'success', 'message' => 'Data trip berhasil diubah'],200);
+        }
     }
 
     public function destroy($id)

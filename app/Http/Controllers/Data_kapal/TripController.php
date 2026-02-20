@@ -100,7 +100,7 @@ class TripController extends Controller
                 'total'        => $value * $nominal
             ];
         }
-        $cek = Trip::where('id_kapal',$request->input('id_kapal'))->where('tanggal',$request->input('tanggal'))->where('trip', $request->input('trip'))->where('id_pelabuhan', $request->input('id_pelabuhan'))->exists();
+        $cek = Trip::where('id_kapal',$request->input('id_kapal'))->where('tanggal',$request->input('tanggal'))->where('jam', $request->input('jam'))->where('is_delete', 0)->exists();
         if($cek) {
             return response()->json(['status' => 'error', 'message' => 'Maaf, data trip sudah ada'],422);
         } else {
@@ -139,7 +139,7 @@ class TripController extends Controller
                 'total'        => $value * $nominal
             ];
         }
-         $cek = Trip::where('id_kapal',$up->id_kapal)->where('tanggal',$request->input('tanggal'))->where('trip', $request->input('trip'))->where('id_pelabuhan', $up->id_pelabuhan)->exists();
+         $cek = Trip::where('id_kapal',$up->id_kapal)->where('tanggal',$request->input('tanggal'))->where('is_delete', 0)->where('jam', $up->jam)->exists();
         if($cek) {
             return response()->json(['status' => 'error', 'message' => 'Maaf, data trip sudah ada'],422);
         } else {

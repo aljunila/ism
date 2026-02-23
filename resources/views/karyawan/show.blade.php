@@ -32,6 +32,7 @@
 <script>
     let table;
     $('#id_kapal').hide();
+    $('#id_cabang').hide();
  
   $(function () {
 	table = $('#table').DataTable({  
@@ -45,6 +46,7 @@
                 d.id_perusahaan= $('#id_perusahaan').val(),
                 d.kel= $('#kel').val(),
                 d.id_kapal= $('#id_kapal').val(),
+                d.id_cabang= $('#id_cabang').val(),
                 d._token= "{{ csrf_token() }}"
             },
             dataSrc: "data"
@@ -65,9 +67,11 @@
             },
             { data: 'nik' },
             { 
-                data: 'kapal',
+                data: null,
                 render: function(data, type, row) {
-                    return data ? data : 'Office';
+                    if(row.kapal) { return `${row.kapal}`; }
+                    else if(row.cabang) { return `Office ${row.cabang}`; }
+                    else { return `Office`; }
                 }
             },
             { data: 'jabatan' },
@@ -81,7 +85,7 @@
                             <button class="btn btn-flat-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i data-feather='edit-3'></i></button>
                             <div class="dropdown-menu">
                                 <a href="/karyawan/profil/${row.uid}" class="dropdown-item">Profil</a>
-                                <a type="button" data-id="${row.id}" class="dropdown-item resign-btn">Resign</a>
+                                <a type="button" data-id="${row.id}" class="dropdown-item resign-btn">Nonaktif</a>
                             </div>
                         </div>
                     `;
@@ -113,13 +117,14 @@
                 }
             },
             { data: 'nik' },
-            { 
-                data: 'kapal',
-                render: function(data, type, row) {
-                    return data ? data : 'Office';
-                }
-            },
-            { data: 'jabatan' },
+            { data: 'tgl_resign',
+                    render: function(data) {
+                        if (!data) return '';
+                        let parts = data.split(' ')[0].split('-'); 
+                        return parts[2] + '-' + parts[1] + '-' + parts[0]; 
+                    }
+                },
+            { data: 'alasan' },
             { 
                 data: null, 
                 orderable: false, 
@@ -181,53 +186,19 @@
 
   $(document).on("click", ".resign-btn", function(){
     let id = $(this).data("id");
-
-    Swal.fire({
-        title: "Apa benar resign?",
-        text: "Karyawan yang sudah resign tidak dapat login kembali",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "rgba(202, 221, 32, 1)",
-        cancelButtonColor: "#e76006ff",
-        confirmButtonText: "Benar!",
-        cancelButtonText: "Tidak"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: "/karyawan/resign/" + id,
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(res){
-                    Swal.fire({
-                        icon: "success",
-                        title: "Diarsipkan!",
-                        text: "Data telah diarsipkan",
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    table.ajax.reload();
-                },
-                error: function(err){
-                    Swal.fire({
-                        icon: "error",
-                        title: "Gagal!",
-                        text: "Data memproses"
-                    });
-                }
-            });
-        }
-    });
+    $('#id').val(id);
+    $('#FormResign').modal('show');
   });
 
     $(document).on('change', '#kel', function() {
         let kel = $(this).val();
         if(kel==1){
             $('#id_kapal').show();
+            $('#id_cabang').hide();
             table.ajax.reload();
         } else {
             $('#id_kapal').hide();
+            $('#id_cabang').show();
             table.ajax.reload();
         }
     })
@@ -257,6 +228,10 @@
          table.ajax.reload();
     });
 
+    $('#id_cabang').on('change', function () {
+         table.ajax.reload();
+    });
+
     $(document).on('click', '#download', function() {
         $.ajax({
             url: "/karyawan/export",
@@ -276,6 +251,38 @@
         })
     });
 
+    $('#form_resign').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let formData = new FormData(this);
+
+            $.ajax({
+                 url: "{{ url('/karyawan/resign') }}",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'Data berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#FormResign').modal('hide');
+                            table.ajax.reload();
+                            table2.ajax.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan data'
+                    });
+                }
+            });
+        });
 </script>
 @endsection
 @section('content')
@@ -304,7 +311,21 @@
                                     <option value="2">Darat</option>
                                 </select>
                                 </div>
-                                @include('filter')
+                                @include('perusahaan')
+                                <div class="col-sm-2">
+                                    <select name="id_kapal" id="id_kapal" class="form-control kapal">
+                                        <option value="">Pilih Kapal</option>
+                                        @foreach($kapal as $k)
+                                            <option value="{{$k->id}}">{{$k->nama}}</option>
+                                        @endforeach
+                                    </select>
+                                    <select name="id_cabang" id="id_cabang" class="form-control">
+                                        <option value="">Pilih Cabang</option>
+                                        @foreach($cabang as $c)
+                                        <option value="{{$c->id}}">{{$c->cabang}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="col-sm-3">
                                 <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
                                 <a href="/karyawan/add" class="btn btn-primary btn-sm"><i data-feather='file-plus'></i> Tambah Data</a>
@@ -336,8 +357,8 @@
                                         <th>No.</th>
                                         <th>Nama</th>
                                         <th>NIK</th>
-                                        <th>Penempatan</th>
-                                        <th>Jabatan</th>
+                                        <th>Tgl Nonaktif</th>
+                                        <th>Alasan</th>
                                         <th>Aksi</th>
                                     </tr>
                                     </thead>
@@ -351,4 +372,44 @@
             </div>
         </div>
 </section>
+<div class="modal fade text-start" id="FormResign" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel33">Nonaktif Crew</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form_resign" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Tgl Nonaktif</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" name="tgl_resign" id="tgl_resign">
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Keterangan</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="alasan" id="alasan" placeholder="Contoh: resing, PHK, dll">
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-12">
+                                <label class="col-form-label" style="color: red;">Karyawan nonaktif tidak akan dapat LogIn ke dalam sistem.</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" class="form-control" name="id" id="id">
+                        <button type="submit" class="btn btn-danger" id="simpan_resign">Nonaktifkan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection

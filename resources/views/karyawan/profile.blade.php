@@ -383,7 +383,7 @@
                                         <tr>
                                             <td> Tempat, Tanggal Lahir</td>
                                             <td>:</td>
-                                            <td>{!! ($show->tmp_lahir) ? $show->tmp_lahir : '-' !!}, {!! ($show->tgl_lahir) ? $show->tgl_lahir : '-' !!}</td>
+                                            <td>{!! ($show->tmp_lahir) ? $show->tmp_lahir : '-' !!}, {{ $show->tgl_lahir ? \Carbon\Carbon::parse($show->tgl_lahir)->format('d-m-Y') : '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td> Status Perkawinan</td>
@@ -546,7 +546,18 @@
                                         <tr>
                                             <td> Tanggal Mulai Gabung</td>
                                             <td>:</td>
-                                            <td>{!! ($show->tgl_mulai) ? $show->tgl_mulai : '-' !!}</td>
+                                            <td>{{ $show->tgl_mulai ? \Carbon\Carbon::parse($show->tgl_mulai)->format('d-m-Y') : '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Lama Bekerja</td>
+                                            <td>:</td>
+                                            <td>@if($show->tgl_mulai)
+                                                    @php
+                                                        $umur = \Carbon\Carbon::parse($show->tgl_mulai)->diff(now());
+                                                    @endphp
+                                                    {{ $umur->y }} Tahun {{ $umur->m }} Bulan {{ $umur->d }} Hari
+                                                @endif
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>

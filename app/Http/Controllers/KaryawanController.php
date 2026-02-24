@@ -21,6 +21,7 @@ use App\Models\JenisCuti;
 use App\Models\Cuti;
 use App\Models\KodeForm;
 use App\Models\FormISM;
+use App\Models\Cabang;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -37,6 +38,7 @@ class KaryawanController extends Controller
         $data['active'] = "karyawan";
         $data['perusahaan'] = Perusahaan::get();
         $data['kapal'] = Kapal::where('status', 'A')->get();
+        $data['cabang'] = Cabang::where('is_delete', 0)->get();
         return view('karyawan.show', $data);
     }
 
@@ -46,11 +48,13 @@ class KaryawanController extends Controller
         $perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
         $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $kel = $request->input('kel');
+        $cabang = $request->input('id_cabang');
 
         $karyawan = DB::table('karyawan')
                 ->leftJoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')
                 ->leftJoin('perusahaan', 'perusahaan.id', '=', 'karyawan.id_perusahaan')
                 ->leftJoin('kapal', 'kapal.id', '=', 'karyawan.id_kapal')
+                ->leftJoin('m_cabang', 'm_cabang.id', '=', 'karyawan.id_cabang')
                 ->select(
                     'karyawan.id',
                     'karyawan.uid',
@@ -58,7 +62,8 @@ class KaryawanController extends Controller
                     'karyawan.nik',
                     'karyawan.nip',
                     'kapal.nama as kapal',
-                    'jabatan.nama as jabatan'
+                    'jabatan.nama as jabatan',
+                    'm_cabang.cabang'
                 )
                 ->where('karyawan.resign', 'N')
                 ->where('karyawan.status','A')
@@ -70,11 +75,17 @@ class KaryawanController extends Controller
                 })
                 ->when($kapal, function($query, $kapal) {
                     return $query->where('karyawan.id_kapal', $kapal);
+                })
+                ->when($cabang, function($query, $cabang) {
+                    return $query->where('karyawan.id_cabang', $cabang);
                 });
         // print_r($kapal);die();
         return DataTables::of($karyawan)
         ->filterColumn('kapal', function($query, $keyword) {
             $query->where('kapal.nama', 'like', "%{$keyword}%");
+        })
+        ->filterColumn('cabang', function($query, $keyword) {
+            $query->where('cabang.cabang', 'like', "%{$keyword}%");
         })
         ->filterColumn('jabatan', function($query, $keyword) {
             $query->where('jabatan.nama', 'like', "%{$keyword}%");
@@ -294,10 +305,16 @@ class KaryawanController extends Controller
         return view('karyawan.profile',$data);
     }
 
-     public function resign($id)
+     public function resign(Request $request)
     {
-       $post = Karyawan::where('id',$id)->update(['resign' => 'Y', 'changed_by' => Session::get('userid')]);
-       return response()->json(['success' => true]);
+        $id = $request->post('id');
+        $post = Karyawan::where('id',$id)->update([
+            'resign' => 'Y', 
+            'tgl_resign' => $request->post('tgl_resign'),
+            'alasan' => $request->post('alasan'),
+            'changed_by' => Session::get('userid')
+        ]);
+        return response()->json(['success' => true]);
     }
 
     public function updatettd(Request $request, $id)
@@ -517,8 +534,8 @@ class KaryawanController extends Controller
                     'karyawan.nama',
                     'karyawan.nik',
                     'karyawan.nip',
-                    'kapal.nama as kapal',
-                    'jabatan.nama as jabatan'
+                    'karyawan.tgl_resign',
+                    'karyawan.alasan'
                 )
                 ->where('karyawan.resign', 'Y')
                 ->where('karyawan.status','A')

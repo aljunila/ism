@@ -41,7 +41,7 @@ class JenisCutiController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:50',
-            'jumlah' => 'required|integer|max:100',
+            'jumlah' => 'required|integer|max:200',
         ]);
         JenisCuti::create($validated);
         return response()->json(['message' => 'Jenis Cuti ditambahkan']);
@@ -51,7 +51,7 @@ class JenisCutiController extends Controller
     {
         $validated = $request->validate([
            'nama' => 'required|string|max:50',
-            'jumlah' => 'required|integer|max:100',
+            'jumlah' => 'required|integer|max:200',
         ]);
         $up = JenisCuti::findOrFail($id);
         $up->update($validated);

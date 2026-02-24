@@ -130,7 +130,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('edit/{uid}', [KaryawanController::class, 'edit']);
         Route::post('update/{id}', [KaryawanController::class, 'update']);
         Route::post('delete/{id}', [KaryawanController::class, 'delete']);
-        Route::post('resign/{id}', [KaryawanController::class, 'resign']);
+        Route::post('resign', [KaryawanController::class, 'resign']);
         Route::post('updatettd/{id}', [KaryawanController::class, 'updatettd']);
         Route::post('password/{id}', [KaryawanController::class, 'password']);
         Route::post('export', [KaryawanController::class, 'export']);
@@ -320,7 +320,9 @@ Route::middleware(['auth', 'active.role'])->group(function () {
 
         Route::get('cuti', [CutiController::class, 'index']);
         Route::get('cuti/data', [CutiController::class, 'data'])->name('cuti.data');
+        Route::get('cuti/form', [CutiController::class, 'form'])->name('cuti.form');
         Route::post('cuti', [CutiController::class, 'store'])->name('cuti.store');
+        Route::get('cuti/get/{id}', [CutiController::class, 'get'])->name('cuti.get');
         Route::put('cuti/{id}', [CutiController::class, 'update'])->name('cuti.update');
         Route::delete('cuti/{id}', [CutiController::class, 'destroy'])->name('cuti.destroy');
         Route::delete('cuti/reject/{id}', [CutiController::class, 'reject'])->name('cuti.reject');

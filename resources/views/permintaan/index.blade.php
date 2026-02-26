@@ -104,24 +104,13 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 <script>
+    let logTable;
+
     $(function () {
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-        });
-        let logTable;
-        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-            tab.addEventListener('shown.bs.tab', function (event) {
-                let activePane = document.querySelector('.tab-pane.active');
-                let status = null;
-                if (activePane) {
-                    status = activePane.getAttribute('data-status');
-                }
-                console.log("STATUS:", status);
-                console.log("aaaa");
-                initLogTable(status);
-            });
         });
         
         const table = $('#table-permintaan').DataTable({
@@ -155,6 +144,11 @@
         });
 
         function initLogTable() {
+            if ($.fn.DataTable.isDataTable('#table-logistik')) {
+                logTable = $('#table-logistik').DataTable();
+                return logTable;
+            }
+
             logTable = $('#table-logistik').DataTable({
                 processing: true,
                 serverSide: true,
@@ -201,27 +195,38 @@
                     }
                 ]
             });
+
+            return logTable;
         }
 
         document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
             tab.addEventListener('shown.bs.tab', function () {
+                let activePane = document.querySelector('.tab-pane.active');
+                let status = activePane?.getAttribute('data-status');
 
-                if (!$.fn.DataTable.isDataTable('#table-logistik')) {
+                if (!status) {
+                    return;
+                }
+
+                if (!logTable) {
                     initLogTable();
                 } else {
                     logTable.ajax.reload();
                 }
-
             });
         });
 
         $('#id_kapal').on('change', function () {
             table.ajax.reload();
-            logTable.ajax.reload();
+            if (logTable) {
+                logTable.ajax.reload();
+            }
         });
 
         $('#tanggal').on('change', function () {
-            logTable.ajax.reload();
+            if (logTable) {
+                logTable.ajax.reload();
+            }
             table.ajax.reload();
         });
 
@@ -337,7 +342,9 @@
                     title: 'Berhasil',
                     text: res.message
                 });
-                logTable.ajax.reload(); // reload table logistik
+                if (logTable) {
+                    logTable.ajax.reload(); // reload table logistik
+                }
             },
             error: function(xhr){
                 Swal.fire({

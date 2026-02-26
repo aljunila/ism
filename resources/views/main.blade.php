@@ -390,7 +390,7 @@
             right: 0;
             top: 0;
             margin: 0;
-            z-index: 1100;
+            z-index: 250;
         }
 
         body.layout-zahir .header-navbar.container-xxl,
@@ -1073,8 +1073,47 @@
     
     @yield('scriptfooter')
     <script>
+        (function () {
+            if (!window.feather || typeof window.feather.replace !== 'function') {
+                return;
+            }
+
+            if (window.feather.__safeReplacePatched) {
+                return;
+            }
+
+            var originalReplace = window.feather.replace.bind(window.feather);
+            var fallbackIcon = 'circle';
+
+            function sanitizeFeatherTargets() {
+                var iconMap = window.feather.icons || {};
+                var iconNodes = document.querySelectorAll('i[data-feather]');
+
+                for (var i = 0; i < iconNodes.length; i++) {
+                    var node = iconNodes[i];
+                    var iconName = (node.getAttribute('data-feather') || '').trim();
+
+                    if (!iconName || !iconMap[iconName]) {
+                        node.setAttribute('data-feather', fallbackIcon);
+                    }
+                }
+            }
+
+            window.feather.replace = function (options) {
+                sanitizeFeatherTargets();
+                try {
+                    return originalReplace(options);
+                } catch (error) {
+                    console.error('feather.replace error:', error);
+                    return null;
+                }
+            };
+
+            window.feather.__safeReplacePatched = true;
+        })();
+
         $(window).on('load', function() {
-            if (feather) {
+            if (window.feather) {
                 feather.replace({
                     width: 14,
                     height: 14

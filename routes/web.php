@@ -30,6 +30,8 @@ use App\Http\Controllers\Data_master\KendaraanController;
 use App\Http\Controllers\Data_master\PelabuhanController;
 use App\Http\Controllers\Data_master\BiayaController;
 use App\Http\Controllers\Data_master\JenisCutiController;
+use App\Http\Controllers\Data_master\KelBarangController;
+use App\Http\Controllers\Data_master\BarangController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
@@ -46,6 +48,8 @@ use App\Http\Controllers\Data_crew\PelatihanController;
 use App\Http\Controllers\Data_crew\EvaluasiController;
 use App\Http\Controllers\Data_crew\KonditeController;
 use App\Http\Controllers\Data_crew\KriteriaController;
+use App\Http\Controllers\PermintaanController;
+use App\Http\Controllers\Laporan\LapPermintaanController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -227,6 +231,18 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('mcuti', [JenisCutiController::class, 'store'])->name('mcuti.store');
         Route::put('mcuti/{id}', [JenisCutiController::class, 'update'])->name('mcuti.update');
         Route::delete('mcuti/{id}', [JenisCutiController::class, 'destroy'])->name('mcuti.destroy');
+
+        Route::get('kelbarang', [KelBarangController::class, 'index']);
+        Route::get('kelbarang/data', [KelBarangController::class, 'data'])->name('kelbarang.data');
+        Route::post('kelbarang', [KelBarangController::class, 'store'])->name('kelbarang.store');
+        Route::put('kelbarang/{id}', [KelBarangController::class, 'update'])->name('kelbarang.update');
+        Route::delete('kelbarang/{id}', [KelBarangController::class, 'destroy'])->name('kelbarang.destroy');
+
+        Route::get('barang', [BarangController::class, 'index']);
+        Route::get('barang/data', [BarangController::class, 'data'])->name('barang.data');
+        Route::post('barang', [BarangController::class, 'store'])->name('barang.store');
+        Route::put('barang/{id}', [BarangController::class, 'update'])->name('barang.update');
+        Route::delete('barang/{id}', [BarangController::class, 'destroy'])->name('kelbarang.destroy');
     });
     
     Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');
@@ -380,6 +396,30 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('kriteria', [KriteriaController::class, 'store'])->name('kriteria.store');
         Route::put('kriteria/{id}', [KriteriaController::class, 'update'])->name('kriteria.update');
         Route::delete('kriteria/{id}', [KriteriaController::class, 'destroy'])->name('kriteria.destroy');
+    });
+
+    Route::prefix('permintaan')->group(function () {
+        Route::get('/', [PermintaanController::class, 'index'])->name('permintaan');
+        Route::post('data', [PermintaanController::class, 'data'])->name('permintaan.data');
+        Route::get('form', [PermintaanController::class, 'form'])->name('permintaan.form');
+        Route::get('form/{uid}', [PermintaanController::class, 'form'])->name('permintaan.edit');
+        Route::post('store', [PermintaanController::class, 'store'])->name('permintaan.store');
+        Route::get('get/{id}', [PermintaanController::class, 'get'])->name('permintaan.get');
+        Route::post('datadetail', [PermintaanController::class, 'datadetail'])->name('permintaan.datadetail');
+        Route::post('update/{id}', [PermintaanController::class, 'update'])->name('permintaan.update');
+        Route::delete('destroy/{id}', [PermintaanController::class, 'destroy'])->name('permintaan.destroy');
+        Route::delete('deldetail/{id}', [PermintaanController::class, 'deldetail'])->name('permintaan.deldetail');
+        Route::post('databyId', [PermintaanController::class, 'databyId'])->name('permintaan.databyId');
+        Route::post('datalog', [PermintaanController::class, 'datalog'])->name('permintaan.datalog');
+        Route::get('statusbarang/{status}', [PermintaanController::class, 'getStatusBarang']);
+        Route::post('proses', [PermintaanController::class, 'proses'])->name('permintaan.proses');
+    });
+
+    Route::prefix('laporan')->group(function () {
+        Route::get('permintaan', [PermintaanController::class, 'laporan']);
+        Route::get('permintaan/data', [PermintaanController::class, 'datalaporan'])->name('lappermintaan.data');
+        Route::post('permintaan', [PermintaanController::class, 'store'])->name('lappermintaan.store');
+        Route::get('permintaan/getlog/{id}', [PermintaanController::class, 'getlog'])->name('lappermintaan.getlog');
     });
 
     Route::prefix('refrensi')->group(function () {

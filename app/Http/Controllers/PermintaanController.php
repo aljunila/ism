@@ -274,7 +274,8 @@ class PermintaanController extends Controller
         $status = $request->input('status');
         $query = DB::table('t_detail_permintaan as a')
                 ->leftjoin('t_permintaan_barang as b', 'b.id', '=', 'a.id_permintaan')
-                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal')
+                ->leftjoin('user as u', 'u.id', '=', 'b.created_by')
+                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'b.bagian', 'u.nama as peminta')
                 ->where('a.is_delete', 0)
                 ->orderBy('b.tanggal', 'DESC');
 

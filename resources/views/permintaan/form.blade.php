@@ -22,6 +22,19 @@
     <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
     <script>
+    function initSearchSelect(selector) {
+        $(selector).each(function () {
+            if (this.tomselect) return;
+            new TomSelect(this, {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+        });
+    }
+
     $(document).on("click", ".delete-btn", function(){
         let id = $(this).data("id");
 
@@ -70,7 +83,7 @@
             <div class="col-sm-3">
             </div>
             <div class="col-sm-4">
-                <select name="item[]" class="form-control">
+                <select name="item[]" class="js-search-select w-100">
                     <option value="">Pilih Barang</option>
                     @foreach($barang as $b)
                         <option value="{{$b->id}}">{{$b->nama}}</option>
@@ -78,13 +91,14 @@
                 </select>
             </div>
                 <div class="col-sm-3">
-                <input type="text" class="form-control" name="jumlah[]">
+                <input type="text" class="form-control" placeholder="Masukan jumlah" name="jumlah[]">
             </div>
             <div class="col-sm-2">
                 <button type="button" class="btn btn-danger btn-sm hapus">Hapus</button>
             </div>
         </div>`;
         $("#field-container").append(field);
+        initSearchSelect("#field-container .js-search-select:last");
     });
 
     $(document).on("click", ".hapus", function () {
@@ -125,6 +139,8 @@
         });
     });
 
+    initSearchSelect('.js-search-select');
+
     </script>
 @endsection
 
@@ -156,7 +172,7 @@
                                     <label class="col-form-label" for="first-name">Pilih Kapal</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="id_kapal" id="id_kapal" class="form-control" {{ isset($data) ? 'disabled' : '' }}>
+                                    <select name="id_kapal" id="id_kapal" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="">Pilih Kapal</option>
                                         @foreach($kapal as $kp)
                                             <option value="{{$kp->id}}" @selected (isset($data) && $kp->id==$data->id_kapal)>{{$kp->nama}}</option>
@@ -177,7 +193,7 @@
                                     <label class="col-form-label" for="first-name">Bagian</label>
                                 </div>
                                 <div class="col-sm-9">
-                                    <select name="bagian" id="bagian" class="form-control" {{ isset($data) ? 'disabled' : '' }}>
+                                    <select name="bagian" id="bagian" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="DECK" @selected (isset($data) && $data->bagian=="DECK")>DECK</option>
                                         <option value="MESIN" @selected (isset($data) && $data->bagian=="MESIN")>MESIN</option>
                                     </select>

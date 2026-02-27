@@ -8,10 +8,12 @@ use App\Models\Barang;
 use App\Models\DetailPermintaan;
 use App\Models\LogBarang;
 use App\Models\Kapal;
+use App\Models\Perusahaan;
 use App\Models\ChecklistData;
 use App\Models\KodeForm;
 use App\Models\User;
 use App\Models\StatusBarang;
+use App\Models\Cabang;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Str;
@@ -217,31 +219,47 @@ class PermintaanController extends Controller
                 $barang = Barang::find($row->id_barang);
                 return $barang ? $barang->deskripsi : '-';
             })
+            ->addColumn('cabang', function ($row) {
+                $cabang = Cabang::find($row->id_cabang);
+                return $cabang ? $cabang->cabang : '-';
+            })
             ->make(true);
     }
 
-    public function getStatusBarang($status)
+    public function getcabang($idkapal)
     {
-        $data = StatusBarang::where('id', '>', $status)->get();
+        $kapal = Kapal::find($idkapal);
+        $data = Cabang::where('id', $kapal->id_cabang)->orWhere('id', 5)->get();
         return response()->json($data);
     }
 
      public function proses(Request $request)
     {   
         $id  = $request->input('id');
-        $status  = $request->input('status');
+        if($request->input('sedia')==0){
+            $get = explode("|", $request->input('status'));
+            $status = $get[0];
+            $id_cabang = $get[1];
+        } else {
+            $status =$request->input('sedia');
+            $id_cabang = null;
+        }
         $up = DetailPermintaan::findOrFail($id);
-        $up->update(['status' => $status, 'changed_by' => Session::get('userid')]);
+        $up->update(['status' => $status, 
+                'id_cabang' => $id_cabang, 
+                'kode_po' => $request->input('kode_po'),
+                'changed_by' => Session::get('userid')
+        ]);
 
-            $savelog = LogBarang::create([
-                'uid' => Str::uuid()->toString(),
-                'id_detail_permintaan' => $id,
-                'tanggal' => $request->input('tanggal'),
-                'status' => $status,
-                'is_delete' => 0,
-                'created_by' => Session::get('userid'),
-                'created_date' => date('Y-m-d H:i:s')
-            ]);
+        $savelog = LogBarang::create([
+            'uid' => Str::uuid()->toString(),
+            'id_detail_permintaan' => $id,
+            'tanggal' => $request->input('tanggal'),
+            'status' => $status,
+            'is_delete' => 0,
+            'created_by' => Session::get('userid'),
+            'created_date' => date('Y-m-d H:i:s')
+        ]);
         return response()->json(['success' => true]);
     }
 
@@ -291,5 +309,27 @@ class PermintaanController extends Controller
                 ->orderBy('c.id', 'DESC')
                 ->get();
         return response()->json($result);
+    }
+
+     public function pdf($uid) {
+        $show =  Permintaan::where('uid', $uid)->first();
+        $nama = $show->get_kapal()->call_sign;
+        $id_perusahaan = $show->get_kapal()->pemilik;
+        $form = DB::table('kode_form as a')
+                ->leftJoin('t_ism as b', function($join) use ($id_perusahaan) {
+                    $join->on('a.id', '=', 'b.id_form')
+                        ->where('b.id_perusahaan', $id_perusahaan)
+                        ->where('b.is_delete', 0);
+                })
+                ->select('a.*', 'b.judul')
+                ->where('a.id', 47)->first();
+        $data['show'] = $show;
+        $data['form'] = $form;
+        $data['perusahaan'] = Perusahaan::find($id_perusahaan);
+        $data['item'] = DetailPermintaan::where('id_permintaan', $show->id)->where('is_delete', 0)->get(); 
+        $data['created'] = User::find($show->created_by);
+        $pdf = Pdf::loadView('permintaan.pdf', $data)
+                ->setPaper('a3', 'landscap');
+        return $pdf->stream($form->ket.' '.$nama.'.pdf');
     }
 }

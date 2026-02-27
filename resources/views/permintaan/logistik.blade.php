@@ -1,11 +1,11 @@
-<table class="table table-bordered table-striped" id="table-logistik" width="100%">
+<table class="table table-bordered table-striped" id="{{ $tableId }}" width="100%">
     <thead>
         <tr align="center">
             <th>No</th>
             <th>Barang</th>
             <th>Jumlah</th>
             <th>Tanggal Permintaan</th>
-            <th>Dari</th>
+            <th>Keterangan</th>
             <th>Aksi</th>
         </tr>
     </thead>
@@ -25,14 +25,30 @@
                 <div class="modal-body">                    
                     <div class="mb-1 row">
                         <div class="col-sm-3">
-                            <label class="col-form-label" for="first-name">Ubah Status</label>
+                            <label class="col-form-label" for="first-name">Ketersediaan</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <select name="sedia" id="sedia" class="form-control">
+                                <option value="4">Ada (Workshop)</option>
+                                <option value="0">Tidak ada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-1 row" id="pembelian">
+                        <div class="col-sm-3">
+                            <label class="col-form-label" for="first-name">Pembelian</label>
                         </div>
                         <div class="col-sm-9">
                             <select name="status" id="status" class="form-control">
-                                @foreach($statusbarang as $sb)
-                                <option value="{{$sb->id}}">{{$sb->nama}}</option>
-                                @endforeach
                             </select>
+                        </div>
+                    </div>
+                    <div class="mb-1 row" id="zahir">
+                        <div class="col-sm-3">
+                            <label class="col-form-label" for="first-name">Masukkan kode P.O.</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="kode_po" id="kode_po">
                         </div>
                     </div>
                     <div class="mb-1 row">

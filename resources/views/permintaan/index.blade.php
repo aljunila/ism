@@ -15,14 +15,14 @@
                         <a class="nav-link active" id="permintaan-tab" data-bs-toggle="tab" href="#permintaan" aria-controls="permintaan" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Permintaan</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="1"><i data-feather="user"></i>Logistik</a>
-                    <!-- </li>
+                        <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="1"><i data-feather="permintaan"></i>Logistik</a>
+                   </li>
                         <li class="nav-item">
-                        <a class="nav-link" id="cabang-tab" data-bs-toggle="tab" href="#cabang" aria-controls="cabang" role="tab" aria-selected="true" data-status="2"><i data-feather="file"></i>Cabang</a>
+                        <a class="nav-link" id="purchas-tab" data-bs-toggle="tab" href="#purchas" aria-controls="purchas" role="tab" aria-selected="true" data-status="2"><i data-feather="file"></i>Puchashing</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="workshop-tab" data-bs-toggle="tab" href="#workshop" aria-controls="workshop" role="tab" aria-selected="true"><i data-feather="log-out"></i>Workshop</a>
-                    </li> -->
+                        <a class="nav-link" id="po-tab" data-bs-toggle="tab" href="#po" aria-controls="po" role="tab" aria-selected="true" data-status="2"><i data-feather="log-out"></i>P.O.</a>
+                    </li>
                 </ul>
                 <div class="card-header border-bottom">
                     <div class="col-sm-3">
@@ -58,10 +58,13 @@
                         </div>
                     </div>
                     <div class="tab-pane" id="logistik" aria-labelledby="logistik-tab" role="tabpanel" data-status="1">
-                           @include('permintaan/logistik')
+                           @include('permintaan/logistik', ['tableId' => 'table-logistik'])
                     </div>
-                    <div class="tab-pane" id="cabang" aria-labelledby="cabang-tab" role="tabpanel" data-status="2">
-                            @include('permintaan/logistik')
+                    <div class="tab-pane" id="purchas" aria-labelledby="purchas-tab" role="tabpanel" data-status="2">
+                            @include('permintaan/logistik', ['tableId' => 'table-purchas'])
+                    </div>
+                    <div class="tab-pane" id="po" aria-labelledby="po-tab" role="tabpanel" data-status="3">
+                            @include('permintaan/logistik', ['tableId' => 'table-po'])
                     </div>
                 </div>
             </div>
@@ -143,13 +146,37 @@
             ]
         });
 
+        $('#pembelian').hide();
+        $('#zahir').hide();
+        $(document).on('change', '#sedia', function() {
+            let kel = $(this).val();
+            if(kel==0){
+                $('#pembelian').show();
+            } else {
+                $('#pembelian').hide();
+            }
+        });
+
+        $(document).on('change', '#status', function() {
+            let kel = $(this).val();
+            console.log(kel);
+            
+            if(kel=="3|0"){
+                $('#zahir').show();
+            } else {
+                $('#zahir').hide();
+            }
+        })
+
         function initLogTable() {
-            if ($.fn.DataTable.isDataTable('#table-logistik')) {
-                logTable = $('#table-logistik').DataTable();
-                return logTable;
+            let activePane = document.querySelector('.tab-pane.active');
+            let tableId = activePane.querySelector('table').id;
+
+            if ($.fn.DataTable.isDataTable('#' + tableId)) {
+                return $('#' + tableId).DataTable();
             }
 
-            logTable = $('#table-logistik').DataTable({
+            return $('#' + tableId).DataTable({
                 processing: true,
                 serverSide: true,
                 ajax:{
@@ -177,8 +204,15 @@
                         data: null,
                         name: null,
                         render: function (data, type, row) {
-                            return `${row.kapal} <br>
-                            No : ${row.nomor}`;
+                            let html = `${row.kapal} <br>
+                                        No : ${row.nomor}`;
+                            if (row.cabang!="-") {
+                                html += `<br>Pembelian di ${row.cabang}`;
+                            }
+                            if (row.kode_po) {
+                                html += `<br>Kode PO : ${row.kode_po}`;
+                            }
+                            return html;
                         }
                     }, 
                     { 
@@ -187,7 +221,7 @@
                         searchable: false,
                         render: function (data, type, row) {
                             return `
-                                <button type="button" class="btn btn-sm btn-outline-primary proses-btn" data-id="${row.id}">
+                                <button type="button" class="btn btn-sm btn-outline-primary proses-btn" data-id="${row.id}" data-id_kapal="${row.id_kapal}">
                                     Proses
                                 </button>
                             `;
@@ -207,7 +241,8 @@
                 if (!status) {
                     return;
                 }
-
+                console.log(status);
+                
                 if (!logTable) {
                     initLogTable();
                 } else {
@@ -301,26 +336,29 @@
     }
 
     $(document).on('click', '.proses-btn', function () {
-
         let id = $(this).data('id');
-        let activePane = document.querySelector('.tab-pane.active');
-        let sbarang = activePane?.getAttribute('data-status');
+        let idkapal = $(this).data('id_kapal');
+        let pane = $(this).closest('.tab-pane');
+        let sbarang = pane.data('status');
 
         $('#proses_id').val(id);
-        $('#current_status').val(sbarang); // hidden input baru
+        $('#current_status').val(sbarang);
 
-        loadStatusBarang(sbarang); // load dropdown sesuai status
+        console.log("ID:", id);
+        console.log("Status:", sbarang);
 
+        loadStatusBarang(idkapal);
         $('#prosesModal').modal('show');
     });
 
-    function loadStatusBarang(sbarang)
+    function loadStatusBarang(idkapal)
     {
-        $.get(`/permintaan/statusbarang/${sbarang}`, function(res){
+        $.get(`/permintaan/getcabang/${idkapal}`, function(res){
             let html = '';
             res.forEach(function(item){
-                html += `<option value="${item.id}">${item.nama}</option>`;
+                html += `<option value="2|${item.id}">Cabang ${item.cabang}</option>`;
             });
+                html += `<option value="3|0">Purchasing Order</option>`;
             $('#status').html(html);
         });
     }

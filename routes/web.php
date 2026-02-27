@@ -411,8 +411,9 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::delete('deldetail/{id}', [PermintaanController::class, 'deldetail'])->name('permintaan.deldetail');
         Route::post('databyId', [PermintaanController::class, 'databyId'])->name('permintaan.databyId');
         Route::post('datalog', [PermintaanController::class, 'datalog'])->name('permintaan.datalog');
-        Route::get('statusbarang/{status}', [PermintaanController::class, 'getStatusBarang']);
+        Route::get('getcabang/{idkapal}', [PermintaanController::class, 'getcabang']);
         Route::post('proses', [PermintaanController::class, 'proses'])->name('permintaan.proses');
+        Route::get('/pdf/{uid}', [PermintaanController::class, 'pdf'])->name('permintaan.pdf');
     });
 
     Route::prefix('laporan')->group(function () {

@@ -223,7 +223,7 @@
                                                 <td>{{$d->get_barang()->deskripsi}}</td>
                                                 <td>{{$d->jumlah}}</td>
                                                 <td>
-                                                    @if($d->status==1) 
+                                                    @if((int) $d->status === (int) ($permintaanStatusId ?? 0)) 
                                                         <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{$d->id}}">Hapus</button>
                                                     @endif
                                                 </td>

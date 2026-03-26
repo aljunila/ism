@@ -359,6 +359,7 @@
         let html = '';
         rows.forEach(function (row) {
             const tanggal = escapeHtml(row.tanggal || '-');
+            const title = escapeHtml(row.keterangan || row.status || '-');
             const status = escapeHtml(row.status || '-');
             const created = escapeHtml(row.created || '-');
             const activeClass = html === '' ? 'is-active' : '';
@@ -368,7 +369,8 @@
                     <div class="timeline-time">${tanggal}</div>
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
-                        <div><strong>${status}</strong></div>
+                        <div><strong>${title}</strong></div>
+                        <div class="small">Status: ${status}</div>
                         <div class="small">Diproses oleh: ${created}</div>
                     </div>
                 </div>

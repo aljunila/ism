@@ -78,6 +78,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'active.role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('show');
+    Route::get('dashboard/permintaan/{id}/detail', [DashboardController::class, 'permintaanDetail'])->name('dashboard.permintaan.detail');
+    Route::get('dashboard/permintaan/log/{id_detail}', [DashboardController::class, 'permintaanLog'])->name('dashboard.permintaan.log');
     Route::get('form_ism', [KodeFormController::class, 'form']);
     Route::post('upload-image', [UploadController::class, 'upload'])->name('upload.image');
 
@@ -405,11 +407,9 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('form/{uid}', [PermintaanController::class, 'form'])->name('permintaan.edit');
         Route::post('store', [PermintaanController::class, 'store'])->name('permintaan.store');
         Route::get('get/{id}', [PermintaanController::class, 'get'])->name('permintaan.get');
-        Route::post('datadetail', [PermintaanController::class, 'datadetail'])->name('permintaan.datadetail');
         Route::post('update/{id}', [PermintaanController::class, 'update'])->name('permintaan.update');
         Route::delete('destroy/{id}', [PermintaanController::class, 'destroy'])->name('permintaan.destroy');
         Route::delete('deldetail/{id}', [PermintaanController::class, 'deldetail'])->name('permintaan.deldetail');
-        Route::post('databyId', [PermintaanController::class, 'databyId'])->name('permintaan.databyId');
         Route::post('datalog', [PermintaanController::class, 'datalog'])->name('permintaan.datalog');
         Route::get('getcabang/{idkapal}', [PermintaanController::class, 'getcabang']);
         Route::post('proses', [PermintaanController::class, 'proses'])->name('permintaan.proses');

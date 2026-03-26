@@ -17,4 +17,9 @@ class Permintaan extends Model
     {
         return  $this->hasOne(Kapal::class, 'id', 'id_kapal')->first();
     }
+
+    public function details()
+    {
+        return $this->hasMany(DetailPermintaan::class, 'id_permintaan', 'id');
+    }
 }

@@ -242,6 +242,81 @@
         return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
+    function updateProcessFormUi() {
+        const stage = $('#current_status').val();
+        const flowStage = $('#current_flow_stage').val();
+        const target = $('#sedia').val();
+        const routeValue = $('#status').val();
+        const shippingMode = $('#shipping_mode').val();
+        let hint = '';
+
+        $('#process_hint').hide().text('');
+
+        if (stage === 'logistik') {
+            const showPembelian = flowStage !== 'gudang' && target === '0';
+            $('#pembelian').toggle(showPembelian);
+            $('#zahir').toggle(showPembelian && (routeValue || '').startsWith('3|'));
+            $('#finance_block').hide();
+            $('#shipping_mode_row').hide();
+            $('#shipping_point_row').hide();
+
+            if (flowStage === 'gudang') {
+                hint = 'Barang sudah di gudang. Langkah berikutnya hanya naik kapal.';
+            } else if (target === '4') {
+                hint = 'Log akan disimpan sebagai "Barang tersedia di workshop".';
+            } else if (target === '5') {
+                hint = 'Barang akan dipindahkan ke antrean gudang logistik.';
+            } else if (target === '6') {
+                hint = 'Barang akan diselesaikan dan dinyatakan naik kapal.';
+            } else if (target === '0') {
+                if ((routeValue || '').startsWith('2|')) {
+                    hint = 'Barang akan dipindahkan ke antrean purchasing.';
+                } else if ((routeValue || '').startsWith('3|')) {
+                    hint = 'Barang akan dipindahkan ke antrean PO.';
+                }
+            }
+        }
+
+        if (stage === 'purchasing') {
+            const isDone = target === '4';
+            $('#pembelian').hide();
+            $('#zahir').hide();
+            $('#finance_block').show();
+            $('#shipping_mode_row').toggle(isDone);
+            $('#shipping_point_row').toggle(isDone && shippingMode === 'transit');
+
+            if (!isDone) {
+                $('#shipping_mode').val('');
+                $('#shipping_point').val('');
+                $('#shipping_point_row').hide();
+                hint = 'Log akan disimpan sebagai "Barang sedang dibeli".';
+            } else if (shippingMode === 'transit') {
+                hint = 'Log akan disimpan sebagai "Transit pada ...".';
+            } else if (shippingMode === 'direct_workshop') {
+                hint = 'Log akan disimpan sebagai "Direct langsung ke workshop".';
+            } else {
+                hint = 'Saat selesai, pilih mode kirim untuk melanjutkan ke logistik.';
+            }
+        }
+
+        if (stage === 'po') {
+            $('#pembelian').hide();
+            $('#zahir').show();
+            $('#finance_block').show();
+            $('#shipping_mode_row').hide();
+            $('#shipping_point_row').hide();
+            $('#shipping_mode').val('');
+            $('#shipping_point').val('');
+            hint = target === '4'
+                ? 'Log akan disimpan sebagai "PO sudah selesai, dikembalikan ke logistik".'
+                : 'Log akan disimpan sebagai "Barang sedang di PO".';
+        }
+
+        if (hint) {
+            $('#process_hint').text(hint).show();
+        }
+    }
+
     $(document).on('input', '#amount', function () {
         this.value = maskRupiah(this.value);
     });
@@ -285,81 +360,6 @@
 
         $('#pembelian').hide();
         $('#zahir').hide();
-
-        function updateProcessFormUi() {
-            const stage = $('#current_status').val();
-            const flowStage = $('#current_flow_stage').val();
-            const target = $('#sedia').val();
-            const routeValue = $('#status').val();
-            const shippingMode = $('#shipping_mode').val();
-            let hint = '';
-
-            $('#process_hint').hide().text('');
-
-            if (stage === 'logistik') {
-                const showPembelian = flowStage !== 'gudang' && target === '0';
-                $('#pembelian').toggle(showPembelian);
-                $('#zahir').toggle(showPembelian && (routeValue || '').startsWith('3|'));
-                $('#finance_block').hide();
-                $('#shipping_mode_row').hide();
-                $('#shipping_point_row').hide();
-
-                if (flowStage === 'gudang') {
-                    hint = 'Barang sudah di gudang. Langkah berikutnya hanya naik kapal.';
-                } else if (target === '4') {
-                    hint = 'Log akan disimpan sebagai "Barang tersedia di workshop".';
-                } else if (target === '5') {
-                    hint = 'Barang akan dipindahkan ke antrean gudang logistik.';
-                } else if (target === '6') {
-                    hint = 'Barang akan diselesaikan dan dinyatakan naik kapal.';
-                } else if (target === '0') {
-                    if ((routeValue || '').startsWith('2|')) {
-                        hint = 'Barang akan dipindahkan ke antrean purchasing.';
-                    } else if ((routeValue || '').startsWith('3|')) {
-                        hint = 'Barang akan dipindahkan ke antrean PO.';
-                    }
-                }
-            }
-
-            if (stage === 'purchasing') {
-                const isDone = target === '4';
-                $('#pembelian').hide();
-                $('#zahir').hide();
-                $('#finance_block').show();
-                $('#shipping_mode_row').toggle(isDone);
-                $('#shipping_point_row').toggle(isDone && shippingMode === 'transit');
-
-                if (!isDone) {
-                    $('#shipping_mode').val('');
-                    $('#shipping_point').val('');
-                    $('#shipping_point_row').hide();
-                    hint = 'Log akan disimpan sebagai "Barang sedang dibeli".';
-                } else if (shippingMode === 'transit') {
-                    hint = 'Log akan disimpan sebagai "Transit pada ...".';
-                } else if (shippingMode === 'direct_workshop') {
-                    hint = 'Log akan disimpan sebagai "Direct langsung ke workshop".';
-                } else {
-                    hint = 'Saat selesai, pilih mode kirim untuk melanjutkan ke logistik.';
-                }
-            }
-
-            if (stage === 'po') {
-                $('#pembelian').hide();
-                $('#zahir').show();
-                $('#finance_block').show();
-                $('#shipping_mode_row').hide();
-                $('#shipping_point_row').hide();
-                $('#shipping_mode').val('');
-                $('#shipping_point').val('');
-                hint = target === '4'
-                    ? 'Log akan disimpan sebagai "PO sudah selesai, dikembalikan ke logistik".'
-                    : 'Log akan disimpan sebagai "Barang sedang di PO".';
-            }
-
-            if (hint) {
-                $('#process_hint').text(hint).show();
-            }
-        }
 
         $(document).on('change', '#sedia', updateProcessFormUi);
         $(document).on('change', '#status', updateProcessFormUi);

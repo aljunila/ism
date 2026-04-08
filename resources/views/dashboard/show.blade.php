@@ -369,6 +369,28 @@
     </div>
 
     @if(Session::get('previllage')!=4)
+        <div class="col-lg-12" style="display:flex;justify-content:space-between;margin-bottom:1rem;padding-left:1rem;padding-right:1rem;">
+            <div class="row">
+                @if($count_doc)
+                <div class="alert alert-primary col-lg-5" role="alert">
+                    <h4 class="alert-heading">Dokumen Kapal</h4>
+                    <div class="alert-body">
+                        <a type="button" data-bs-toggle="modal" data-bs-target="#large">Anda memiliki {{ $count_doc }} dokumen yang akan segera expired.</a>
+                    </div>
+                </div>
+                <div class="col-lg-1"></div>
+                @endif
+                @if($count_dockru)
+                <div class="alert alert-success col-lg-5" role="alert">
+                    <h4 class="alert-heading">Dokumen Kru</h4>
+                    <div class="alert-body">
+                        <a type="button" data-bs-toggle="modal" data-bs-target="#krumodal">Anda memiliki {{ $count_dockru }} dokumen yang akan segera expired.</a>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+       
         <div class="row g-2">
             @if(!empty($perusahaan))
             <div class="col-lg-3 col-sm-6 col-12">
@@ -587,6 +609,88 @@
                             <div class="timeline-empty">Memuat riwayat rute...</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-size-lg d-inline-block">
+    <div class="modal fade text-start" id="large" tabindex="-1" aria-labelledby="myModalLabel17" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel17">List Dokumen Kapal</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                            <table class="table table-bordered table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="35%">Kapal</th>
+                                        <th width="45%">Nama Document</th>
+                                        <th width="20%">Tgl Expired</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($document as $d)
+                                        <tr>
+                                            <td>{{$d->get_kapal()->get_pemilik()->nama}}<br>
+                                                {{$d->get_kapal()->nama}}</td>
+                                            <td><a type="button" href="{{ asset('file_upload/'.$d->file) }}" target="_blank" 
+                                                    title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">{{$d->get_file()->nama}}</a></td>
+                                            <td>{{ \Carbon\Carbon::parse($d->tgl_expired)->format('d-m-Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-size-lg d-inline-block">
+    <div class="modal fade text-start" id="krumodal" tabindex="-1" aria-labelledby="myModalLabel17" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel17">List Dokumen Kru</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                            <table class="table table-bordered table-striped" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="35%">Kapal</th>
+                                        <th width="45%">Nama Document</th>
+                                        <th width="20%">Tgl Expired</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($doc_kru as $kru)
+                                        <tr>
+                                            <td>{{$kru->get_karyawan()->get_kapal()->nama}}<br>
+                                                {{$kru->get_karyawan()->nama}}</td>
+                                            <td><a type="button" href="{{ asset('file_upload/'.$kru->file) }}" target="_blank" 
+                                                    title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->nama}}">{{$kru->get_file()->nama}}</a></td>
+                                            <td>{{ \Carbon\Carbon::parse($kru->tgl_expired)->format('d-m-Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept</button>
                 </div>
             </div>
         </div>

@@ -7,6 +7,7 @@ use App\Models\Perusahaan;
 use App\Models\Karyawan;
 use App\Models\User;
 use App\Models\Kapal;
+use App\Models\FileUpload;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -46,6 +47,7 @@ class DashboardController extends Controller
         $data['pre'] = $roleJenis;
         $id_perusahaan = Session::get('id_perusahaan');
         $data['com'] = Perusahaan::where('id', $id_perusahaan)->first();
+        $tanggal = Carbon::today()->addDays(45)->format('Y-m-d');
         if($roleJenis==1) { // superadmin
             $data['perusahaan'] = Perusahaan::count();
             $data['kapal'] = Kapal::where('status','A')->count();
@@ -54,6 +56,10 @@ class DashboardController extends Controller
                             ->leftjoin('karyawan', 'karyawan.id', 'user.id_karyawan')
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->count();
+            $data['document'] = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal)->whereNotNull('id_kapal')->get();
+            $data['count_doc'] = count($data['document']);
+            $data['doc_kru'] = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal)->whereNotNull('id_karyawan')->get();
+            $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==2) { // admin perusahaan
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->count();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->where('id_perusahaan', $id_perusahaan)->count();
@@ -62,6 +68,16 @@ class DashboardController extends Controller
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->where('karyawan.id_perusahaan', $id_perusahaan)
                             ->count();
+            $data['document'] = DB::table('file_upload as a')
+                                ->leftJoin('kapal as b', 'a.id_kapal', '=', 'b.id')
+                                ->select('a.*')
+                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.pemilik', $id_perusahaan)->get();
+            $data['count_doc'] = count($data['document']);
+            $data['doc_kru'] = DB::table('file_upload as a')
+                                ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                                ->select('a.*')
+                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_perusahaan', $id_perusahaan)->get();
+            $data['count_dockru'] = count($data['document']);
         } elseif($roleJenis==3) { // user kapal
             $id_kapal = Session::get('id_kapal');
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->where('id_kapal', $id_kapal)->count();
@@ -70,6 +86,11 @@ class DashboardController extends Controller
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->where('karyawan.id_kapal', $id_kapal)
                             ->count();
+            $data['doc_kru'] = DB::table('file_upload as a')
+                                ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                                ->select('a.*')
+                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_perusahaan', $id_perusahaan)->get();
+            $data['count_dockru'] = count($data['document']);
         } else {
             $id_user = Session::get('userid');
 

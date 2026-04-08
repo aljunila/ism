@@ -7,6 +7,50 @@
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/plugins/forms/pickers/form-flat-pickr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/css/plugins/forms/pickers/form-pickadate.css')}}">
     <!-- END: Page CSS-->
+    <style>
+        .trip-form-wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        .trip-main-fields .form-group-row {
+            align-items: center;
+            margin-bottom: .85rem;
+        }
+
+        .trip-main-fields .field-label {
+            font-weight: 600;
+            color: #5e5873;
+        }
+
+        .trip-divider {
+            margin: 1rem 0 .9rem;
+        }
+
+        .trip-kendaraan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: .7rem .9rem;
+        }
+
+        .trip-kendaraan-item {
+            padding: .7rem .8rem;
+            border: 1px solid #ebe9f1;
+            border-radius: .5rem;
+            background: #fbfbfd;
+        }
+
+        .trip-kendaraan-item label {
+            font-weight: 600;
+            margin-bottom: .5rem;
+            color: #5e5873;
+        }
+
+        .trip-number-group .btn {
+            min-width: 36px;
+            padding: .38rem .5rem;
+        }
+    </style>
 @endsection
 
 @section('scriptfooter')
@@ -73,12 +117,24 @@
                 $('#id_pelabuhan').empty().append('<option value="">Tidak ada data</option>');
             }
         });
+
+        $(document).on('click', '.btn-number-step', function() {
+            const targetId = $(this).data('target');
+            const step = Number($(this).data('step')) || 1;
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const current = Number(input.value) || 0;
+            const nextValue = Math.max(0, current + step);
+            input.value = nextValue;
+            $(input).trigger('change');
+        });
     </script>
 @endsection
 
 @section('content')
 <section id="basic-horizontal-layouts">
-    <div class="row">
+    <div class="row trip-form-wrap">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
@@ -98,13 +154,12 @@
                     data-store-url="{{ route('trip.store') }}"
                     data-update-url="{{ isset($trip) ? route('trip.update', $trip->id) : '' }}">
                     @csrf
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Kapal</label>
+                    <div class="trip-main-fields">
+                            <div class="form-group-row row">
+                                <div class="col-sm-3 col-md-2">
+                                    <label class="col-form-label field-label">Kapal</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-9 col-md-10">
                                     <select name="id_kapal" id="id_kapal" required class="form-control"  {{ isset($trip) ? 'disabled' : '' }}>
                                         <option value="">Pilih Kapal</option>
                                     @foreach($kapal as $kp)
@@ -113,19 +168,19 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Tanggal</label>
+                            <div class="form-group-row row">
+                                <div class="col-sm-3 col-md-2">
+                                    <label class="col-form-label field-label">Tanggal</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-9 col-md-10">
                                     <input type="date" class="form-control" id="tanggal" name="tanggal" required value="{{ old('tanggal', $trip->tanggal ?? '') }}">
                                 </div>
                             </div>
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Pelabuhan</label>
+                            <div class="form-group-row row">
+                                <div class="col-sm-3 col-md-2">
+                                    <label class="col-form-label field-label">Pelabuhan</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-9 col-md-10">
                                     <select name="id_pelabuhan" id="id_pelabuhan" required class="form-control"  {{ isset($trip) ? 'disabled' : '' }}>
                                         <option value="">Pilih Pelabuhan</option>
                                             @foreach($pelabuhan as $p)
@@ -134,11 +189,11 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Trip ke</label>
+                            <div class="form-group-row row">
+                                <div class="col-sm-3 col-md-2">
+                                    <label class="col-form-label field-label">Trip ke</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-9 col-md-10">
                                     <select name="trip" id="trip"  class="form-control">
                                         <option value="">Pilih</option>
                                         @for($a=1; $a<=10; $a++)
@@ -147,31 +202,33 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Jam</label>
+                            <div class="form-group-row row">
+                                <div class="col-sm-3 col-md-2">
+                                    <label class="col-form-label field-label">Jam</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-9 col-md-10">
                                     <input type="time" class="form-control" id="jam" name="jam" value="{{ old('jam', $trip->jam ?? '') }}" {{ isset($trip) ? 'disabled' : '' }}>
                                 </div>
-                            </div>  
-                            <hr>
+                            </div>
+                            <hr class="trip-divider">
+
+                            <div class="trip-kendaraan-grid">
                             @foreach($kendaraan as $kr)
-                            <div class="mb-1 row">
-                                <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">{{$kr->kode}}</label>
+                            <div class="trip-kendaraan-item">
+                                <label class="col-form-label">{{$kr->kode}}</label>
+                                <div class="input-group trip-number-group">
+                                    <button type="button" class="btn btn-outline-secondary btn-number-step" data-target="{{$kr->id}}" data-step="-1">-</button>
+                                    <input type="number" min="0" class="form-control text-center" id="{{$kr->id}}" name="gol[{{$kr->id}}]" value="{{ $gol[$kr->id]['jumlah'] ?? '' }}">
+                                    <button type="button" class="btn btn-outline-primary btn-number-step" data-target="{{$kr->id}}" data-step="1">+</button>
                                 </div>
-                                <div class="col-sm-3">
-                                    <input type="number" class="form-control" id="{{$kr->id}}" name="gol[{{$kr->id}}]" value="{{ $gol[$kr->id]['jumlah'] ?? '' }}">
-                                </div>
-                            </div>  
+                            </div>
                             @endforeach
+                            </div>
                         </div>
-                        <div class="col-sm-9 offset-sm-3">
+                        <div class="mt-2">
                             <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>
                             <button type="reset" class="btn btn-outline-secondary">Reset</button>
                         </div>
-                    </div>
                     </form>
                 </div>
             </div>

@@ -357,7 +357,7 @@
     <div style="display:flex;justify-content:space-between;margin-bottom:1rem;padding-left:1rem;padding-right:1rem;">
         <div>
             <h2>Selamat Datang Kembali, {{ Session::get('name') }}</h2>
-            <p class="mb-0 text-white-75">{{$com->nama}}</p>
+            <p class="mb-0 text-white-75">{{ $com->nama ?? '-' }}</p>
         </div>
 
         <div class="d-flex align-items-center mt-3 mt-md-0">

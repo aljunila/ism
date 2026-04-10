@@ -47,6 +47,10 @@ class DashboardController extends Controller
         $data['pre'] = $roleJenis;
         $id_perusahaan = Session::get('id_perusahaan');
         $data['com'] = Perusahaan::where('id', $id_perusahaan)->first();
+        $data['document'] = collect();
+        $data['doc_kru'] = collect();
+        $data['count_doc'] = 0;
+        $data['count_dockru'] = 0;
         $tanggal = Carbon::today()->addDays(45)->format('Y-m-d');
         if($roleJenis==1) { // superadmin
             $data['perusahaan'] = Perusahaan::count();
@@ -77,20 +81,29 @@ class DashboardController extends Controller
                                 ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
                                 ->select('a.*')
                                 ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_perusahaan', $id_perusahaan)->get();
-            $data['count_dockru'] = count($data['document']);
+            $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==3) { // user kapal
             $id_kapal = Session::get('id_kapal');
+            $kapal = Kapal::where('id', $id_kapal)->first();
+            if (!$data['com'] && $kapal) {
+                $data['com'] = Perusahaan::where('id', $kapal->pemilik)->first();
+            }
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->where('id_kapal', $id_kapal)->count();
             $data['user'] = DB::table('user')
                             ->leftjoin('karyawan', 'karyawan.id', 'user.id_karyawan')
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->where('karyawan.id_kapal', $id_kapal)
                             ->count();
+            $data['document'] = FileUpload::where('status', 'A')
+                                ->where('tgl_expired', '<=', $tanggal)
+                                ->where('id_kapal', $id_kapal)
+                                ->get();
+            $data['count_doc'] = count($data['document']);
             $data['doc_kru'] = DB::table('file_upload as a')
                                 ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
                                 ->select('a.*')
-                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_perusahaan', $id_perusahaan)->get();
-            $data['count_dockru'] = count($data['document']);
+                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_kapal', $id_kapal)->get();
+            $data['count_dockru'] = count($data['doc_kru']);
         } else {
             $id_user = Session::get('userid');
 

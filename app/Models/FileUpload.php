@@ -27,4 +27,9 @@ class FileUpload extends Model
     {
         return  $this->hasOne(Karyawan::class, 'id', 'id_karyawan')->first();
     }
+
+    public function get_file()
+    {
+        return $this->hasOne(MasterFile::class, 'id', 'id_file')->first();
+    }
 }

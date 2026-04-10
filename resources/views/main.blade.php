@@ -696,6 +696,7 @@
                     use App\Models\Perusahaan;
                     use App\Models\Role;
                     use Illuminate\Support\Facades\DB;
+                    use Illuminate\Support\Facades\Schema;
                     $previllage = Session::get('previllage');
                     $id_perusahaan = Session::get('id_perusahaan');
                     $id_kapal = Session::get('id_kapal');
@@ -703,27 +704,30 @@
                     $cek = Perusahaan::where('id', $id_perusahaan)->first();
                     $activeRoleId = Session::get('active_role_id', Session::get('role_id'));
                     $pre = Role::find($activeRoleId);
-                    if ($previllage == 1) {
-                        $get = DB::table('reset_password')
-                                ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
-                                ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
-                                ->where('reset_password.status', 'N')
-                                ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
-                                ->get();
-                    } elseif ($previllage == 2) {
-                        $get = DB::table('reset_password')
-                                ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
-                                ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
-                                ->where('karyawan.id_perusahaan', $id_perusahaan)->where('reset_password.status', 'N')
-                                ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
-                                ->get();
-                    } else{
-                        $get = DB::table('reset_password')
-                                ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
-                                ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
-                                ->where('karyawan.id_kapal', $id_kapal)->where('reset_password.status', 'N')
-                                ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
-                                ->get();
+                    $get = collect();
+                    if (Schema::hasTable('reset_password')) {
+                        if ($previllage == 1) {
+                            $get = DB::table('reset_password')
+                                    ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
+                                    ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
+                                    ->where('reset_password.status', 'N')
+                                    ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
+                                    ->get();
+                        } elseif ($previllage == 2) {
+                            $get = DB::table('reset_password')
+                                    ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
+                                    ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
+                                    ->where('karyawan.id_perusahaan', $id_perusahaan)->where('reset_password.status', 'N')
+                                    ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
+                                    ->get();
+                        } else{
+                            $get = DB::table('reset_password')
+                                    ->leftJoin('user', 'user.id', '=', 'reset_password.id_user')
+                                    ->leftJoin('karyawan', 'karyawan.id', '=', 'user.id_karyawan')
+                                    ->where('karyawan.id_kapal', $id_kapal)->where('reset_password.status', 'N')
+                                    ->select('reset_password.id', 'user.nama', 'karyawan.uid', 'karyawan.nip')
+                                    ->get();
+                        }
                     }
                     $count = count($get);
                 @endphp
@@ -1053,7 +1057,7 @@
     </div>
     <!-- BEGIN: Footer-->
     <footer class="footer footer-static footer-light">
-        <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="https://trimas-ferry.co.id" target="_blank">{{$cek->nama}}</a></p>
+        <p class="clearfix mb-0"><span class="float-md-start d-block d-md-inline-block mt-25">2025<a class="ms-25" href="https://trimas-ferry.co.id" target="_blank">{{ $cek->nama ?? 'TFM' }}</a></p>
     </footer>
     <button class="btn btn-primary btn-icon scroll-top" type="button"><i data-feather="arrow-up"></i></button>
     <!-- END: Footer-->

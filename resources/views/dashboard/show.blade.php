@@ -635,11 +635,16 @@
                                 </thead>
                                 <tbody>
                                     @foreach($document as $d)
+                                        @php
+                                            $kapal = $d->get_kapal();
+                                            $pemilik = $kapal ? $kapal->get_pemilik() : null;
+                                            $file = $d->get_file();
+                                        @endphp
                                         <tr>
-                                            <td>{{$d->get_kapal()->get_pemilik()->nama}}<br>
-                                                {{$d->get_kapal()->nama}}</td>
+                                            <td>{{ $pemilik->nama ?? '-' }}<br>
+                                                {{ $kapal->nama ?? '-' }}</td>
                                             <td><a type="button" href="{{ asset('file_upload/'.$d->file) }}" target="_blank" 
-                                                    title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">{{$d->get_file()->nama}}</a></td>
+                                                    title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">{{ $file->nama ?? ($d->nama ?? 'File') }}</a></td>
                                             <td>{{ \Carbon\Carbon::parse($d->tgl_expired)->format('d-m-Y') }}</td>
                                         </tr>
                                     @endforeach
@@ -676,11 +681,16 @@
                                 </thead>
                                 <tbody>
                                     @foreach($doc_kru as $kru)
+                                        @php
+                                            $karyawan = $kru->get_karyawan();
+                                            $kapalKru = $karyawan ? $karyawan->get_kapal() : null;
+                                            $file = $kru->get_file();
+                                        @endphp
                                         <tr>
-                                            <td>{{$kru->get_karyawan()->get_kapal()->nama}}<br>
-                                                {{$kru->get_karyawan()->nama}}</td>
+                                            <td>{{ $kapalKru->nama ?? '-' }}<br>
+                                                {{ $karyawan->nama ?? '-' }}</td>
                                             <td><a type="button" href="{{ asset('file_upload/'.$kru->file) }}" target="_blank" 
-                                                    title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->nama}}">{{$kru->get_file()->nama}}</a></td>
+                                                    title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->nama}}">{{ $file->nama ?? ($kru->nama ?? 'File') }}</a></td>
                                             <td>{{ \Carbon\Carbon::parse($kru->tgl_expired)->format('d-m-Y') }}</td>
                                         </tr>
                                     @endforeach

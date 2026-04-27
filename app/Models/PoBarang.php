@@ -17,6 +17,7 @@ class PoBarang extends Model
         'id_detail_permintaan',
         'nomor_po',
         'status_po',
+        'jumlah',
         'amount',
         'id_currency',
         'rate_to_idr',

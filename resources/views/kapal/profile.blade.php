@@ -240,7 +240,7 @@
                         <ul class="list-unstyled">
                             <li class="mb-75">
                                 <span class="fw-bolder me-25">Lokasi Cabang:</span>
-                                <span>{{$show->get_cabang()->cabang}}</span>
+                                <span>{!! ($show->id_cabang) ? $show->get_cabang()->cabang : '-' !!}</span>
                             </li>
                             <li class="mb-75">
                                 <span class="fw-bolder me-25">Kelas:</span>

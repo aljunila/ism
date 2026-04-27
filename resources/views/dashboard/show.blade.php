@@ -367,7 +367,7 @@
             <div class="text-white-75 small">Akses aktif • {{ date('d M Y') }}</div>
         </div>
     </div>
-
+        {{Session::get('previllage')}}
     @if(Session::get('previllage')!=4)
         <div class="col-lg-12" style="display:flex;justify-content:space-between;margin-bottom:1rem;padding-left:1rem;padding-right:1rem;">
             <div class="row">

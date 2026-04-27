@@ -39,7 +39,10 @@ class KelBarangController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'kategori' => 'required|integer|max:2',
             'nama' => 'required|string|max:50',
+            'kode' => 'nullable|string|max:50',
+            'ket' => 'nullable|string|max:100',
         ]);
         KelBarang::create($validated);
         return response()->json(['message' => 'Data ditambahkan']);
@@ -48,7 +51,10 @@ class KelBarangController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
+            'kategori' => 'required|integer|max:2',
             'nama' => 'required|string|max:50',
+            'kode' => 'nullable|string|max:50',
+            'ket' => 'nullable|string|max:100',
         ]);
         $up = KelBarang::findOrFail($id);
         $up->update($validated);

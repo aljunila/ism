@@ -22,6 +22,7 @@ use App\Models\Cuti;
 use App\Models\KodeForm;
 use App\Models\FormISM;
 use App\Models\Cabang;
+use App\Models\Divisi;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -115,12 +116,13 @@ class KaryawanController extends Controller
   
     public function store(Request $request)
     {
-        $get = Karyawan::where('resign', 'N')->where('status', 'A')->where('id_perusahaan', $request->input('id_perusahaan'))   
-                ->orderBy('id', 'DESC')->limit(1)->first();
+        $tglmulai = $request->input('tgl_mulai');
+        $get = Karyawan::where('status', 'A')->where('id_perusahaan', $request->input('id_perusahaan'))  
+                ->orderBy('tgl_mulai', 'DESC')->limit(1)->first();
         $getnip = explode('-',$get->nip);
         $kode = $getnip[0];
-        $num = str_pad(($getnip[1]+1), 3, '0', STR_PAD_LEFT);
-        $nip = $kode.'-'.$num;
+        $num = str_pad(($getnip[1]+1), 5, '0', STR_PAD_LEFT);
+        $nip = $kode.'-'.$tglmulai.'-'.$num;
         
         $save = Karyawan::create([
             'uid' => Str::uuid()->toString(),
@@ -249,12 +251,14 @@ class KaryawanController extends Controller
     {
         $show = DB::table('karyawan')
                     ->select('karyawan.*', 'user.id as user', 'karyawan.id_perusahaan', 'perusahaan.nama as perusahaan', 
-                        'karyawan.id_kapal', 'kapal.nama as kapal', 'jabatan.nama as jabatan', 'jabatan.kel', 'user.username', 'user.role_id', 'roles.nama as role_nama')
+                        'karyawan.id_kapal', 'kapal.nama as kapal', 'jabatan.nama as jabatan', 'jabatan.kel', 'm_divisi.nama as divisi',
+                        'user.username', 'user.role_id', 'roles.nama as role_nama')
                     ->leftjoin('user', 'user.id_karyawan', '=', 'karyawan.id')
                     ->leftjoin('roles', 'roles.id', '=', 'user.role_id')
                     ->leftjoin('perusahaan', 'karyawan.id_perusahaan', '=', 'perusahaan.id')
                     ->leftjoin('kapal', 'karyawan.id_kapal', '=', 'kapal.id')
                     ->leftjoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')
+                    ->leftjoin('m_divisi', 'karyawan.id_divisi', '=', 'm_divisi.id')
                     ->where('karyawan.uid', $uid)->first();
         if ($show) {
             $show->tanda_tangan_url = $show->tanda_tangan && 
@@ -284,6 +288,7 @@ class KaryawanController extends Controller
                 ->get();
         $data['show'] = $show;
         $data['jabatan'] = Jabatan::where('status', 'A')->get();
+        $data['divisi'] = DIvisi::where('is_delete', 0)->get();
         $data['perusahaan'] = Perusahaan::get();
         $roleJenis = Session::get('previllage');
          if($roleJenis==1) {
@@ -305,7 +310,7 @@ class KaryawanController extends Controller
         return view('karyawan.profile',$data);
     }
 
-     public function resign(Request $request)
+    public function resign(Request $request)
     {
         $id = $request->post('id');
         $post = Karyawan::where('id',$id)->update([

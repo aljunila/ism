@@ -106,9 +106,7 @@
             $('#btn-save-barang').data('mode', 'create').data('id', '');
         };
 
-        $('#btn-add-barang').on('click', function () {
-            console.log('aaaa');
-            
+        $('#btn-add-barang').on('click', function () {     
             resetForm();
             $('#modal-barang').modal('show');
         });

@@ -76,4 +76,18 @@ class BarangController extends Controller
         $up->update(['is_delete' => 1]);
         return response()->json(['message' => 'Data dihapus']);
     }
+   
+    public function databyKat(Request $request)
+    {
+        $id_bagian = $request->input('bagian');
+        $get = KelBarang::where('kategori', $id_bagian)->where('is_delete', 0)->get();
+        return response()->json($get);
+    }
+
+    public function barangbyKel(Request $request)
+    {
+        $id_kel = $request->input('id_kel_barang');
+        $get = Barang::where('id_kel_barang', $id_kel)->where('is_delete', 0)->get();
+        return response()->json($get);
+    }
 }

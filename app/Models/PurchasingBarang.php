@@ -17,6 +17,7 @@ class PurchasingBarang extends Model
         'id_detail_permintaan',
         'vendor',
         'status_purchasing',
+        'jumlah',
         'amount',
         'id_currency',
         'rate_to_idr',

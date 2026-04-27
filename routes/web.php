@@ -32,10 +32,12 @@ use App\Http\Controllers\Data_master\BiayaController;
 use App\Http\Controllers\Data_master\JenisCutiController;
 use App\Http\Controllers\Data_master\KelBarangController;
 use App\Http\Controllers\Data_master\BarangController;
+use App\Http\Controllers\Data_master\DivisiController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
 use App\Http\Controllers\Acl\CabangController;
+use App\Http\Controllers\GudangController;
 use App\Models\Perusahaan;
 use App\Models\Karyawan;
 use App\Http\Controllers\Data_kapal\TripController;
@@ -50,6 +52,8 @@ use App\Http\Controllers\Data_crew\KonditeController;
 use App\Http\Controllers\Data_crew\KriteriaController;
 use App\Http\Controllers\PermintaanController;
 use App\Http\Controllers\Laporan\LapPermintaanController;
+use App\Http\Controllers\Ck_kapal\BerlayarController;
+use App\Http\Controllers\Ck_kapal\LatihanController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -245,6 +249,14 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('barang', [BarangController::class, 'store'])->name('barang.store');
         Route::put('barang/{id}', [BarangController::class, 'update'])->name('barang.update');
         Route::delete('barang/{id}', [BarangController::class, 'destroy'])->name('kelbarang.destroy');
+        Route::post('barang/databyKat', [BarangController::class, 'databyKat'])->name('barang.databyKat');
+        Route::get('barang/barangbyKel', [BarangController::class, 'barangbyKel'])->name('barang.barangbyKel');
+
+        Route::get('divisi', [DivisiController::class, 'index']);
+        Route::get('divisi/data', [DivisiController::class, 'data'])->name('divisi.data');
+        Route::post('divisi', [DivisiController::class, 'store'])->name('divisi.store');
+        Route::put('divisi/{id}', [DivisiController::class, 'update'])->name('divisi.update');
+        Route::delete('divisi/{id}', [DivisiController::class, 'destroy'])->name('divisi.destroy');
     });
     
     Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');
@@ -414,6 +426,39 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('getcabang/{idkapal}', [PermintaanController::class, 'getcabang']);
         Route::post('proses', [PermintaanController::class, 'proses'])->name('permintaan.proses');
         Route::get('/pdf/{uid}', [PermintaanController::class, 'pdf'])->name('permintaan.pdf');
+        Route::get('kirim', [PermintaanController::class, 'kirim'])->name('permintaan.kirim');
+        Route::post('storekirim', [PermintaanController::class, 'storekirim'])->name('permintaan.storekirim');
+        Route::post('datakirim', [PermintaanController::class, 'datakirim'])->name('permintaan.datakirim');
+        Route::get('getkirim/{id}', [PermintaanController::class, 'getkirim'])->name('permintaan.getkirim');
+        Route::get('/pdfkirim/{uid}', [PermintaanController::class, 'pdfkirim'])->name('permintaan.pdfkirim');
+        Route::post('baranggudang', [PermintaanController::class, 'baranggudang'])->name('permintaan.baranggudang');
+        Route::get('pengiriman', [PermintaanController::class, 'pengiriman'])->name('permintaan.pengiriman');
+        Route::get('/{id}', [PermintaanController::class, 'elemen'])->name('permintaan.elemen');
+        Route::post('dataByIdp', [PermintaanController::class, 'dataByIdp'])->name('permintaan.dataByIdp');
+        Route::get('pengiriman/{id}', [PermintaanController::class, 'elemenkirim'])->name('permintaan.elemenkirim');
+        Route::post('kirimByIdp', [PermintaanController::class, 'kirimByIdp'])->name('permintaan.kirimByIdp');
+        Route::post('dataPurchas/{id}', [PermintaanController::class, 'dataPurchas'])->name('permintaan.dataPurchas');
+    });
+
+    Route::prefix('ck_kapal')->group(function(){
+        Route::get('berlayar', [BerlayarController::class, 'index']);
+        Route::get('berlayar/data', [BerlayarController::class, 'data'])->name('berlayar.data');
+        Route::post('berlayar', [BerlayarController::class, 'store'])->name('berlayar.store');
+        Route::put('berlayar/{id}', [BerlayarController::class, 'update'])->name('berlayar.update');
+        Route::delete('berlayar/{id}', [BerlayarController::class, 'destroy'])->name('berlayar.destroy');
+        Route::get('/berlayar/pdf/{id}', [BerlayarController::class, 'pdf'])->name('berlayar.pdf');
+        Route::get('berlayar/{id}', [BerlayarController::class, 'elemen'])->name('berlayar.elemen');
+        Route::post('berlayar/databyIdp', [BerlayarController::class, 'databyIdp'])->name('berlayar.databyIdp');
+
+        Route::get('latihan', [LatihanController::class, 'index']);
+        Route::get('latihan/data', [LatihanController::class, 'data'])->name('latihan.data');
+        Route::post('latihan', [LatihanController::class, 'store'])->name('latihan.store');
+        Route::put('latihan/{id}', [LatihanController::class, 'update'])->name('latihan.update');
+        Route::delete('latihan/{id}', [LatihanController::class, 'destroy'])->name('latihan.destroy');
+        Route::get('latihan/get/{id}', [LatihanController::class, 'get'])->name('latihan.get');
+        Route::get('/latihan/pdf/{id}', [LatihanController::class, 'pdf'])->name('latihan.pdf');
+        Route::get('latihan/{id}', [LatihanController::class, 'elemen'])->name('latihan.elemen');
+        Route::post('/latihan/databyIdp', [LatihanController::class, 'databyIdp'])->name('latihan.databyIdp');
     });
 
     Route::prefix('laporan')->group(function () {
@@ -421,6 +466,12 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('permintaan/data', [PermintaanController::class, 'datalaporan'])->name('lappermintaan.data');
         Route::post('permintaan', [PermintaanController::class, 'store'])->name('lappermintaan.store');
         Route::get('permintaan/getlog/{id}', [PermintaanController::class, 'getlog'])->name('lappermintaan.getlog');
+    });
+
+    Route::prefix('gudang')->group(function () {
+        Route::get('/', [GudangController::class, 'show'])->name('gudang');
+        Route::post('data', [GudangController::class, 'getData'])->name('gudang.data');
+        Route::put('{id}', [GudangController::class, 'update'])->name('gudang.update');
     });
 
     Route::prefix('refrensi')->group(function () {

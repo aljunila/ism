@@ -9,18 +9,15 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Master - Kelompok Barang</h4>
-        <button class="btn btn-primary btn-sm" id="btn-add-kel">Tambah Data</button>
+        <h4 class="card-title">Master - DIvisi</h4>
+        <button class="btn btn-primary btn-sm" id="btn-add-divisi">Tambah Data</button>
     </div>
     <div class="card-body">
-        <table id="table-kel" class="table table-striped w-100">
+        <table id="table-divisi" class="table table-striped w-100">
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Kelompok</th>
                     <th>Nama</th>
-                    <th>Kode/Seri</th>
-                    <th>Keterangan/Merk</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -29,42 +26,21 @@
     </div>
 </div>
 
-<div class="modal fade" id="modal-kel" tabindex="-1" aria-labelledby="modal-kel-label" aria-hidden="true">
+<div class="modal fade" id="modal-divisi" tabindex="-1" aria-labelledby="modal-divisi-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-kel-label">Tambah Data</h5>
+                <h5 class="modal-title" id="modal-divisi-label">Tambah Data</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-1">
-                    <label class="form-label">Kategori</label>
-                    <select id="kel-kategori" class="form-control">
-                        <option value="1">Deck</option>
-                        <option value="2">Mesin</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="mb-1">
-                    <label class="form-label">Nama</label>
-                    <input type="text" id="kel-nama" class="form-control">
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="mb-1">
-                    <label class="form-label">Kode/Seri</label>
-                    <input type="text" id="kel-kode" class="form-control">
-                </div>
-            </div>
-            <div class="modal-body">
-                <div class="mb-1">
-                    <label class="form-label">Keterangan/Merk</label>
-                    <input type="text" id="kel-ket" class="form-control">
+                    <label class="form-label">Nama Divisi</label>
+                    <input type="text" id="divisi-nama" class="form-control">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="btn-save-kel">Simpan</button>
+                <button class="btn btn-primary" id="btn-save-divisi">Simpan</button>
             </div>
         </div>
     </div>
@@ -87,82 +63,62 @@
             }
         });
 
-        const table = $('#table-kel').DataTable({
+        const table = $('#table-divisi').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('kelbarang.data') }}',
+            ajax: '{{ route('divisi.data') }}',
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { 
-                    data: 'kategori',
-                    render: function(data, type, row) {
-                        if(data==1){
-                            return `Deck`;
-                        } else {
-                            return `Mesin`;
-                        }
-                    }
-                },
                 { data: 'nama', name: 'nama' },
-                { data: 'kode', name: 'kode' },
-                { data: 'ket', name: 'ket' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
 
         const resetForm = () => {
-            $('#modal-kel-label').text('Tambah Data');
-            $('#kel-nama').val('');
-            $('#kel-kode').val('');
-            $('#kel-ket').val('');
-            $('#kel-kategori').val('');
-            $('#btn-save-kel').data('mode', 'create').data('id', '');
+            $('#modal-divisi-label').text('Tambah Data');
+            $('#divisi-nama').val('');
+            $('#btn-save-divisi').data('mode', 'create').data('id', '');
         };
 
-        $('#btn-add-kel').on('click', function () {
+        $('#btn-add-divisi').on('click', function () {
             resetForm();
-            $('#modal-kel').modal('show');
+            $('#modal-divisi').modal('show');
         });
 
-        $('#btn-save-kel').on('click', function () {
+        $('#btn-save-divisi').on('click', function () {
             const mode = $(this).data('mode') || 'create';
             const id = $(this).data('id');
             const payload = {
-                nama: $('#kel-nama').val(),
-                kode: $('#kel-kode').val(),
-                ket: $('#kel-ket').val(),
-                kategori: $('#kel-kategori').val(),
+                nama: $('#divisi-nama').val(),
+                id_cabang: $('#divisi-id_cabang').val(),
             };
             const ajaxOpts = {
-                url: mode === 'edit' ? '{{ url('data_master/kelbarang') }}/' + id : '{{ route('kelbarang.store') }}',
+                url: mode === 'edit' ? '{{ url('data_master/divisi') }}/' + id : '{{ route('divisi.store') }}',
                 type: mode === 'edit' ? 'PUT' : 'POST',
                 data: payload
             };
             $.ajax(ajaxOpts)
             .done(() => {
-                Swal.fire('Sukses', mode === 'edit' ? 'data diperbarui' : 'data ditambahkan', 'success');
-                $('#modal-kel').modal('hide');
+                Swal.fire('Sukses', mode === 'edit' ? 'divisi diperbarui' : 'divisi ditambahkan', 'success');
+                $('#modal-divisi').modal('hide');
                 table.ajax.reload(null, false);
                 loadCabang();
             })
             .fail(xhr => Swal.fire('Gagal', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error'));
         });
 
-        $(document).on('click', '.btn-edit-kel', function () {
+        $(document).on('click', '.btn-edit-divisi', function () {
             const btn = $(this);
-            $('#modal-kel-label').text('Edit Data');
-            $('#kel-nama').val(btn.data('nama'));
-            $('#kel-kode').val(btn.data('kode'));
-            $('#kel-ket').val(btn.data('ket'));
-            $('#kel-kategori').val(btn.data('kategori'));
-            $('#btn-save-kel').data('mode', 'edit').data('id', btn.data('id'));
-            $('#modal-kel').modal('show');
+            $('#modal-divisi-label').text('Edit Data');
+            $('#divisi-nama').val(btn.data('nama'));
+            $('#btn-save-divisi').data('mode', 'edit').data('id', btn.data('id'));
+            $('#modal-divisi').modal('show');
         });
 
-        $(document).on('click', '.btn-delete-kel', function () {
+        $(document).on('click', '.btn-delete-divisi', function () {
             const id = $(this).data('id');
             Swal.fire({
-                title: 'Hapus data ini?',
+                title: 'Hapus divisi ini?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya',
@@ -170,10 +126,10 @@
             }).then((result) => {
                 if (!result.isConfirmed) return;
                 $.ajax({
-                    url: '{{ url('data_master/kelbarang') }}/' + id,
+                    url: '{{ url('data_master/divisi') }}/' + id,
                     type: 'DELETE',
                     success: function () {
-                        Swal.fire('Terhapus', 'data berhasil dihapus', 'success');
+                        Swal.fire('Terhapus', 'divisi berhasil dihapus', 'success');
                         table.ajax.reload(null, false);
                         loadCabang                    
                     },

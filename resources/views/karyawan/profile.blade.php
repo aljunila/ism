@@ -510,6 +510,11 @@
                                             <td>{!! ($show->kapal) ? $show->kapal : 'Office' !!}</td>
                                         </tr>
                                         <tr>
+                                            <td> Divisi</td>
+                                            <td>:</td>
+                                            <td>{!! ($show->id_divisi) ? $show->divisi : '-' !!}</td>
+                                        </tr>
+                                        <tr>
                                             <td> Jabatan</td>
                                             <td>:</td>
                                             <td>{!! ($show->id_jabatan) ? $show->jabatan : '-' !!}</td>
@@ -693,6 +698,23 @@
                                     </select>
                             </div>
                         </div> -->
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Divisi</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <select name="id_divisi" id="id_divisi"  class="form-control" required>
+                                    <option value="">-</option>
+                                @foreach($divisi as $d)
+                                    @if($show->id_divisi==$d->id)
+                                        <option value="{{$d->id}}" selected>{{$d->nama}}</option>
+                                    @else
+                                        <option value="{{$d->id}}">{{$d->nama}}</option>
+                                    @endif
+                                @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="mb-1 row">
                             <div class="col-sm-3">
                                 <label class="col-form-label" for="first-name">Jabatan</label>

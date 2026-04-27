@@ -9,7 +9,7 @@ class ChecklistData extends Model
 {
     public $timestamps = false;
     protected $table = 'checklist_data';
-    protected $fillable = ['id', 'uid', 'id_form', 'kode', 'id_perusahaan', 'id_karyawan', 'id_jabatan', 'id_kapal', 'date', 'time', 'data', 'keterangan', 'id_karyawan2', 'id_jabatan2', 'note', 'pj', 'id_mengetahui', 'id_mentor', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'id_form', 'kode', 'id_perusahaan', 'id_karyawan', 'id_jabatan', 'id_kapal', 'date', 'time', 'data', 'keterangan', 'id_karyawan2', 'id_jabatan2', 'note', 'pj', 'file', 'id_mengetahui', 'id_mentor', 'status', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     protected $casts = [
         'data' => 'array',

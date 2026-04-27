@@ -52,7 +52,7 @@ class DashboardController extends Controller
         $data['count_doc'] = 0;
         $data['count_dockru'] = 0;
         $tanggal = Carbon::today()->addDays(45)->format('Y-m-d');
-        if($roleJenis==1) { // superadmin
+        if(($roleJenis==1) || ($roleJenis==5)) { // superadmin
             $data['perusahaan'] = Perusahaan::count();
             $data['kapal'] = Kapal::where('status','A')->count();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign','N')->count();

@@ -1055,10 +1055,6 @@ class PermintaanController extends Controller
                     ]);
 
                     if($jumlah<=$tot) {
-                        $statusId=2;
-                        $eventCode = "flow_workshop";
-                        $keterangan = "Barang dikirim sebagian";
-                    } else {
                         DetailPermintaan::where('id', $id)->update([
                             'flow_stage' => "selesai",
                             'status'    => 3,
@@ -1069,6 +1065,11 @@ class PermintaanController extends Controller
                         $statusId=3;
                         $eventCode = "permintaan_done";
                         $keterangan = "Barang sudah dikirim ke kapal";
+                        
+                    } else {
+                        $statusId=2;
+                        $eventCode = "flow_workshop";
+                        $keterangan = "Barang dikirim sebagian";
                     }
 
                     $cek = Gudang::where('id_kapal', $save->id_kapal)

@@ -92,12 +92,7 @@
         <table class="table-bordered" width="100%">
             <tr>
                 <td>Pembuat  Permintaan<br>
-                    @if($created->get_karyawan()->tanda_tangan)
-                    <img src="file://{{ public_path('ttd_karyawan/' . $created->get_karyawan()->tanda_tangan) }}" width="100px" height="75px"><br>
-                    @else
-                    <br><br><br>
-                    @endif
-                    {{$created->get_karyawan()->nama}}
+                   
                 </td>
                 <td>Disetujui Oleh<br>
                     

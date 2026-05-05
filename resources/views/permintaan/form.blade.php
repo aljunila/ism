@@ -149,14 +149,21 @@
                         </select>
                     </div>
 
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                         <select name="item[]" id="item" class="form-control select-item">
                             <option value="">Pilih Barang</option>
                         </select>
                     </div>
 
+                    <div class="col-sm-1">
+                        <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]">
+                    </div>
+
                     <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="Masukan jumlah" name="jumlah[]">
+                        <select name="ket[]" class="form-control">
+                            <option value="Umum">Umum</option>
+                            <option value="Segera">Segera</option>
+                        </select>
                     </div>
 
                     <div class="col-sm-1">
@@ -266,12 +273,12 @@
                     data-store-url="{{ route('permintaan.store') }}" data-update-url="{{ isset($data) ? route('permintaan.update', $data->id) : '' }}">
                     @csrf
                     <div class="row">
-                        <div class="col-8">
+                        <div class="col-10">
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Pilih Kapal</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-3">
                                     <select name="id_kapal" id="id_kapal" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="">Pilih Kapal</option>
                                         @foreach($kapal as $kp)
@@ -284,7 +291,7 @@
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Tanggal</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-3">
                                     <input type="date" class="form-control" name="tanggal" id="tanggal" value="{{ old('tanggal', $data->tanggal ?? '') }}" {{ isset($data) ? 'disabled' : '' }}>
                                 </div>
                             </div>
@@ -292,7 +299,7 @@
                                  <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Bagian</label>
                                 </div>
-                                <div class="col-sm-9">
+                                <div class="col-sm-3">
                                     <select name="bagian" id="bagian" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>

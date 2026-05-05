@@ -75,6 +75,17 @@
                                 <input type="hidden" name="barang[${row.id}]" class="form-control" value="${row.id_barang}">
                                 <input type="hidden" name="gudang[${row.id}]" class="form-control" value="${row.idgudang}">`;
                     }
+                },
+                { 
+                    data: null, 
+                    orderable: false, 
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return `<select name="ket[${row.id}]" class="form-control">
+                                    <option value="Baru">Baru</option>
+                                    <option value="Rekondisi">Rekondisi</option>
+                                </select>`;
+                    }
                 }
             ],
             drawCallback: function(settings) {
@@ -187,7 +198,7 @@
                                 <div class="col-sm-2">
                                     <label class="col-form-label" for="first-name">Daftar Barang Workshop</label>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-7">
                                     <table id="table" class="table table-bordered table-striped" width="100%">
                                         <thead>
                                             <tr>
@@ -198,6 +209,7 @@
                                                 <th>Jml Permintaan</th>
                                                 <th>Jml Stok</th>
                                                 <th>Jml Kirim</th>
+                                                <th>Keterangan</th>
                                             </tr>
                                         </thead>
                                         <tbody>

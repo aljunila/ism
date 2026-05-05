@@ -291,13 +291,16 @@ class PermintaanController extends Controller
 
         $barangs = (array) $request->input('item', []);
         $jumlah = (array) $request->input('jumlah', []);
+        $ket = (array) $request->input('ket', []);
         $validItems = [];
         foreach ($barangs as $item => $value) {
             $jum = $jumlah[$item] ?? null;
+            $ket = $ket[$item] ?? null;
             if ($value && $jum !== null && $jum !== '') {
                 $validItems[] = [
                     'barang' => $value,
                     'jumlah' => $jum,
+                    'ket' => $ket,
                 ];
             }
         }
@@ -329,6 +332,7 @@ class PermintaanController extends Controller
                     'id_permintaan' => $save->id,
                     'id_barang' => $payload['barang'],
                     'jumlah' => $payload['jumlah'],
+                    'ket' => $payload['ket'],
                     'status' => $statusId,
                     'id_cabang' => $id_cabang,
                     'flow_stage' => 'logistik',
@@ -567,7 +571,8 @@ class PermintaanController extends Controller
                 })
                 ->when($tanggal, function($query, $tanggal) {
                     return $query->where('b.tanggal', $tanggal);
-                });
+                })
+                ->orderBy('b.id', 'DESC');
 
         $this->applyPermintaanVisibility($query, 'b');
 
@@ -1036,6 +1041,7 @@ class PermintaanController extends Controller
             $tot_barang = $request->total ?? [];
             $barang = $request->barang ?? [];
             $gudang = $request->gudang ?? [];
+            $keterangan = $request->ket ?? [];
             
             DB::beginTransaction();
             try {
@@ -1044,11 +1050,13 @@ class PermintaanController extends Controller
                     $tot = $tot_barang[$id] ?? 0;
                     $id_barang = $barang[$id] ?? 0;
                     $id_gudang = $gudang[$id] ?? 0;
+                    $ket = $keterangan[$id] ?? 0;
                     $savedetail = DetailKirim::create([
                         'uid' => Str::uuid()->toString(),
                         'id_kirim' => $save->id,
                         'id_detail_permintaan' => $id,
                         'jumlah' => $jumlah,
+                        'ket' => $ket,
                         'is_delete' => 0,
                         'created_by' => Session::get('userid'),
                         'created_date' => date('Y-m-d H:i:s')

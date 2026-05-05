@@ -11,7 +11,7 @@ class Barang extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 'm_barang';
-    protected $fillable = ['id', 'id_kel_barang', 'kode', 'nama', 'deskripsi', 'is_delete'];
+    protected $fillable = ['id', 'id_kel_barang', 'kode', 'nama', 'deskripsi', 'min', 'max', 'img', 'is_delete'];
 
     public function get_kel_barang()
     {

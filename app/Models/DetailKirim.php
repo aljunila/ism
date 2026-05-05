@@ -11,7 +11,7 @@ class DetailKirim extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 't_detail_kirim';
-    protected $fillable = ['id', 'uid', 'id_kirim', 'id_detail_permintaan', 'jumlah', 'is_delete', 'created_by', 'created_date'];
+    protected $fillable = ['id', 'uid', 'id_kirim', 'id_detail_permintaan', 'jumlah', 'ket', 'is_delete', 'created_by', 'created_date'];
 
     public function get_detail()
     {

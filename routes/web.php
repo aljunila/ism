@@ -33,6 +33,7 @@ use App\Http\Controllers\Data_master\JenisCutiController;
 use App\Http\Controllers\Data_master\KelBarangController;
 use App\Http\Controllers\Data_master\BarangController;
 use App\Http\Controllers\Data_master\DivisiController;
+use App\Http\Controllers\Data_master\VendorController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
@@ -257,6 +258,12 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('divisi', [DivisiController::class, 'store'])->name('divisi.store');
         Route::put('divisi/{id}', [DivisiController::class, 'update'])->name('divisi.update');
         Route::delete('divisi/{id}', [DivisiController::class, 'destroy'])->name('divisi.destroy');
+
+        Route::get('vendor', [VendorController::class, 'index']);
+        Route::get('vendor/data', [VendorController::class, 'data'])->name('vendor.data');
+        Route::post('vendor', [VendorController::class, 'store'])->name('vendor.store');
+        Route::put('vendor/{id}', [VendorController::class, 'update'])->name('vendor.update');
+        Route::delete('vendor/{id}', [VendorController::class, 'destroy'])->name('vendor.destroy');
     });
     
     Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');

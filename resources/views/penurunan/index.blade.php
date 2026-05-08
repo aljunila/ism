@@ -36,6 +36,7 @@
                     <th>Tanggal</th>
                     <th>Kapal</th>
                     <th>Bagian</th>
+                    <th>Penerima</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -113,6 +114,7 @@
                     }
                 },    
                 { data: 'bagian', name: 'bagian' },
+                { data: 'penerima', name: 'penerima' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
             

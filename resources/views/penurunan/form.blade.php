@@ -22,7 +22,13 @@
     <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
     <script>
+    let otpGenerated = false;
+
     function initSearchSelect(selector) {
+        if (typeof TomSelect === 'undefined') {
+            return;
+        }
+
         $(selector).each(function () {
             if (this.tomselect) return;
             new TomSelect(this, {
@@ -33,6 +39,28 @@
                 }
             });
         });
+    }
+
+    function getAjaxErrorMessage(xhr, fallback) {
+        if (xhr.responseJSON?.message) {
+            return xhr.responseJSON.message;
+        }
+
+        if (xhr.responseJSON?.errors) {
+            const firstKey = Object.keys(xhr.responseJSON.errors)[0];
+            if (firstKey && xhr.responseJSON.errors[firstKey]?.length) {
+                return xhr.responseJSON.errors[firstKey][0];
+            }
+        }
+
+        return fallback;
+    }
+
+    function resetOtpState() {
+        otpGenerated = false;
+        $('#otp_code').val('').prop('disabled', true);
+        $('#otp-status').removeClass('text-success text-danger').addClass('text-muted')
+            .text('Generate OTP setelah memilih penerima.');
     }
 
     const resetForm = () => {
@@ -245,9 +273,85 @@
         $(this).closest(".field-item").remove();
     });
 
+    $('#id_penerima').on('change', function () {
+        resetOtpState();
+        $('#btn-generate-otp').prop('disabled', !$(this).val());
+    });
+
+    $('#btn-generate-otp').on('click', function () {
+        const receiverId = $('#id_penerima').val();
+        if (!receiverId) {
+            Swal.fire('Penerima belum dipilih', 'Pilih user penerima terlebih dahulu.', 'warning');
+            return;
+        }
+
+        const btn = $(this);
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('Mengirim...');
+        $('#otp-status').removeClass('text-success text-danger').addClass('text-muted').text('Mengirim OTP ke penerima...');
+
+        $.ajax({
+            url: "{{ route('penurunan.generateOtpTurun') }}",
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                id_penerima: receiverId
+            },
+            success: function(response){
+                otpGenerated = true;
+                $('#otp_code').prop('disabled', false).focus();
+                $('#otp-status').removeClass('text-muted text-danger').addClass('text-success')
+                    .text(response.message ?? 'OTP berhasil dikirim ke penerima.');
+
+                if (typeof window.refreshNotifications === 'function') {
+                    window.refreshNotifications();
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'OTP Terkirim',
+                    text: response.message ?? 'OTP berhasil dikirim ke penerima',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            },
+            error: function(xhr){
+                otpGenerated = false;
+                $('#otp_code').val('').prop('disabled', true);
+                $('#otp-status').removeClass('text-muted text-success').addClass('text-danger')
+                    .text(getAjaxErrorMessage(xhr, 'Gagal mengirim OTP'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: getAjaxErrorMessage(xhr, 'Gagal mengirim OTP')
+                });
+            },
+            complete: function(){
+                btn.prop('disabled', !$('#id_penerima').val()).html(originalText);
+            }
+        });
+    });
+
     $('#form_permintaan').on('submit', function(e){
         e.preventDefault(); // cegah submit biasa
         let form = $(this);
+
+        if (!$('#id_penerima').val()) {
+            Swal.fire('Penerima wajib dipilih', 'Pilih user penerima sebelum menyimpan.', 'warning');
+            return;
+        }
+
+        const otpCode = ($('#otp_code').val() || '').trim();
+        if (!otpGenerated || !otpCode) {
+            Swal.fire('OTP wajib diisi', 'Generate OTP lalu masukkan kode OTP dari penerima.', 'warning');
+            return;
+        }
+
+        if (!/^[0-9]{6}$/.test(otpCode)) {
+            Swal.fire('OTP tidak valid', 'Kode OTP harus 6 digit angka.', 'warning');
+            return;
+        }
+
         let formData = new FormData(this);
         let url = form.data('update-url')
             ? form.data('update-url')   // EDIT
@@ -273,13 +377,14 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Gagal menyimpan data'
+                    text: getAjaxErrorMessage(xhr, 'Gagal menyimpan data')
                 });
             }
         });
     });
 
     initSearchSelect('.js-search-select');
+    resetOtpState();
 
     </script>
 @endsection
@@ -337,6 +442,33 @@
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="id_penerima">User Penerima</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select name="id_penerima" id="id_penerima" class="js-search-select w-100" required>
+                                        <option value="">Pilih User Penerima</option>
+                                        @foreach($penerima as $user)
+                                            <option value="{{ $user->id }}">
+                                                {{ $user->nama ?? $user->username }} ({{ $user->username }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="otp_code">Kode OTP</label>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="otp_code" id="otp_code" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="Masukkan OTP dari penerima" disabled required>
+                                        <button type="button" class="btn btn-outline-primary" id="btn-generate-otp" disabled>Generate OTP</button>
+                                    </div>
+                                    <small id="otp-status" class="text-muted">Generate OTP setelah memilih penerima.</small>
                                 </div>
                             </div>
                              <div class="mb-1 row" id="form-wrapper">

@@ -29,6 +29,9 @@
                     <li class="nav-item">
                         <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Kapal</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" aria-controls="history" role="tab" aria-selected="true"><i data-feather="clock"></i>History</a>
+                    </li>
                 </ul>
                 <div class="card-header border-bottom">
                     <div class="col-sm-3">
@@ -86,6 +89,25 @@
                                         <th>Kapal</th>
                                         <th>Bagian</th>
                                         <th>Pengirim</th>
+                                        <th>Penerima</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="history" aria-labelledby="history-tab" role="tabpanel">
+                        <div class="card-body">
+                            <table id="table-history" class="table table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal</th>
+                                        <th>Kapal</th>
+                                        <th>Bagian</th>
+                                        <th>Jumlah Item</th>
+                                        <th>Pembuat Permintaan</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -303,6 +325,10 @@
         return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
+    function escapeHtml(value) {
+        return $('<div>').text(value ?? '').html();
+    }
+
     function updateProcessFormUi() {
         const stage = $('#current_status').val();
         const flowStage = $('#current_flow_stage').val();
@@ -417,6 +443,7 @@
                 },    
                 { data: 'bagian', name: 'bagian' },
                 { data: 'created', name: 'created' },
+                { data: 'penerima', name: 'penerima' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -448,6 +475,52 @@
                 { data: 'bagian', name: 'bagian' },
                 { data: 'created', name: 'created' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
+            ]
+        });
+
+        const tableHistory = $('#table-history').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax:{
+                url: "/permintaan/history",
+                type: "POST",
+                data: function(d){
+                    d.id_kapal= $('#id_kapal').val(),
+                    d.tanggal= $('#tanggal').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+            },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'tanggal', name: 'tanggal' },
+                {
+                    data: null,
+                    name: null,
+                    render: function (data, type, row) {
+                        const kapal = escapeHtml(row.kapal || '-');
+                        const nomor = escapeHtml(row.nomor || '-');
+                        return `${kapal} <button type="button" onclick="openDetail(${row.id})" class="btn btn-icon btn-xs btn-flat-primary" title="Detail Barang">
+                        Detail Permintaan</button><br>
+                        No : ${nomor}`;
+                    }
+                },
+                { data: 'bagian', name: 'bagian' },
+                { data: 'item_count', name: 'item_count', searchable: false },
+                { data: 'created', name: 'created' },
+                {
+                    data: null,
+                    name: null,
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const nomor = escapeHtml(row.nomor || '-');
+                        return `
+                            <button type="button" class="btn btn-sm btn-outline-warning btn-repeat-order" data-id="${row.id}" data-nomor="${nomor}">
+                                Repeat Order
+                            </button>
+                        `;
+                    }
+                }
             ]
         });
 
@@ -535,6 +608,11 @@
                 let activePane = document.querySelector('.tab-pane.active');
                 let status = activePane?.getAttribute('data-status');
 
+                if (activePane?.id === 'history') {
+                    tableHistory.columns.adjust().ajax.reload();
+                    return;
+                }
+
                 if (!status) {
                     return;
                 }
@@ -545,6 +623,8 @@
 
         $('#id_kapal').on('change', function () {
             table.ajax.reload();
+            table2.ajax.reload();
+            tableHistory.ajax.reload();
             Object.keys(logTables).forEach(function (key) {
                 logTables[key].ajax.reload();
             });
@@ -555,6 +635,8 @@
                 logTables[key].ajax.reload();
             });
             table.ajax.reload();
+            table2.ajax.reload();
+            tableHistory.ajax.reload();
         });
 
         $(document).on('click', '.btn-delete-permintaan', function () {
@@ -587,6 +669,52 @@
                     Swal.fire(
                         'Gagal',
                         xhr.responseJSON?.message || 'Error',
+                        'error'
+                    );
+                });
+            });
+        });
+
+        $(document).on('click', '.btn-repeat-order', function () {
+            const id = $(this).data('id');
+            const nomor = $(this).data('nomor') || '-';
+
+            Swal.fire({
+                title: 'Repeat order?',
+                text: `Buat permintaan baru dari ${nomor}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                $.ajax({
+                    url: `/permintaan/repeat/${id}`,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    }
+                })
+                .done(res => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: res.message
+                    }).then(() => {
+                        if (res.redirect_url) {
+                            window.location.href = res.redirect_url;
+                            return;
+                        }
+
+                        table.ajax.reload(null, false);
+                        tableHistory.ajax.reload(null, false);
+                    });
+                })
+                .fail(xhr => {
+                    Swal.fire(
+                        'Gagal',
+                        xhr.responseJSON?.message || 'Repeat order gagal dibuat',
                         'error'
                     );
                 });

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PerusahaanController;
 use App\Http\Controllers\KapalController;
 use App\Http\Controllers\JabatanController;
@@ -86,6 +87,10 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('show');
     Route::get('dashboard/permintaan/{id}/detail', [DashboardController::class, 'permintaanDetail'])->name('dashboard.permintaan.detail');
     Route::get('dashboard/permintaan/log/{id_detail}', [DashboardController::class, 'permintaanLog'])->name('dashboard.permintaan.log');
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('notifications/send', [NotificationController::class, 'send'])->name('notifications.send');
+    Route::post('notifications/test', [NotificationController::class, 'test'])->name('notifications.test');
     Route::get('form_ism', [KodeFormController::class, 'form']);
     Route::post('upload-image', [UploadController::class, 'upload'])->name('upload.image');
 
@@ -423,6 +428,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::prefix('permintaan')->group(function () {
         Route::get('/', [PermintaanController::class, 'index'])->name('permintaan');
         Route::post('data', [PermintaanController::class, 'data'])->name('permintaan.data');
+        Route::post('history', [PermintaanController::class, 'history'])->name('permintaan.history');
+        Route::post('repeat/{id}', [PermintaanController::class, 'repeat'])->name('permintaan.repeat');
         Route::get('form', [PermintaanController::class, 'form'])->name('permintaan.form');
         Route::get('form/{uid}', [PermintaanController::class, 'form'])->name('permintaan.edit');
         Route::post('store', [PermintaanController::class, 'store'])->name('permintaan.store');
@@ -435,6 +442,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('proses', [PermintaanController::class, 'proses'])->name('permintaan.proses');
         Route::get('/pdf/{uid}', [PermintaanController::class, 'pdf'])->name('permintaan.pdf');
         Route::get('kirim', [PermintaanController::class, 'kirim'])->name('permintaan.kirim');
+        Route::post('generate-otp-kirim', [PermintaanController::class, 'generateKirimOtp'])->name('permintaan.generateOtpKirim');
         Route::post('storekirim', [PermintaanController::class, 'storekirim'])->name('permintaan.storekirim');
         Route::post('datakirim', [PermintaanController::class, 'datakirim'])->name('permintaan.datakirim');
         Route::get('getkirim/{id}', [PermintaanController::class, 'getkirim'])->name('permintaan.getkirim');
@@ -451,6 +459,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::prefix('penurunan')->group(function () {
         Route::get('/', [PenurunanController::class, 'index'])->name('penurunan');
         Route::get('form', [PenurunanController::class, 'form'])->name('penurunan.form');
+        Route::post('generate-otp-turun', [PenurunanController::class, 'generateTurunOtp'])->name('penurunan.generateOtpTurun');
         Route::post('store', [PenurunanController::class, 'store'])->name('penurunan.store');
         Route::post('data', [PenurunanController::class, 'data'])->name('penurunan.data');
         Route::post('datagudang', [PenurunanController::class, 'datagudang'])->name('permintaan.datagudang');

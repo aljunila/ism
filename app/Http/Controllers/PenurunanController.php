@@ -13,9 +13,12 @@ use App\Models\User;
 use App\Models\Cabang;
 use App\Models\TurunBarang;
 use App\Models\DetailTurun;
+use App\Models\TurunOtp;
 use App\Models\FormISM;
 use App\Models\Gudang;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\Facades\DataTables;
 use Str;
 use Session;
@@ -52,6 +55,10 @@ class PenurunanController extends Controller
         } else {
             $data['kapal'] = Kapal::where('status','A')->get();
         }
+        $data['penerima'] = $this->turunReceiverQuery()
+            ->orderBy('user.nama')
+            ->limit(200)
+            ->get();
         if ($uid) {
             $get = $this->visiblePermintaanByUid($uid);
             abort_unless($get, 404);
@@ -66,14 +73,109 @@ class PenurunanController extends Controller
         return (int) Session::get('previllage');
     }
 
+    private function turunReceiverQuery()
+    {
+        $query = User::query()->select('user.id', 'user.nama', 'user.username', 'user.id_perusahaan', 'user.id_kapal');
+
+        if (Schema::hasColumn('user', 'is_delete')) {
+            $query->where('user.is_delete', 0);
+        }
+
+        if (Schema::hasColumn('user', 'status')) {
+            $query->where(function ($q) {
+                $q->where('user.status', 1)->orWhere('user.status', 'A');
+            });
+        }
+
+        $roleJenis = $this->currentRoleJenis();
+        if ($roleJenis === 2) {
+            $query->where('user.id_perusahaan', Session::get('id_perusahaan'));
+        } elseif ($roleJenis === 3) {
+            $query->where('user.id_kapal', Session::get('id_kapal'));
+        } elseif ($roleJenis === 4) {
+            $query->where('user.id', Session::get('userid'));
+        }
+
+        return $query;
+    }
+
+    private function validTurunReceiver(int $receiverId): bool
+    {
+        return Schema::hasTable('user')
+            && $this->turunReceiverQuery()->where('user.id', $receiverId)->exists();
+    }
+
+    public function generateTurunOtp(Request $request)
+    {
+        $request->validate([
+            'id_penerima' => ['required', 'integer'],
+        ]);
+
+        if (!Schema::hasTable('t_turun_otp')) {
+            return response()->json(['message' => 'Tabel OTP penurunan belum tersedia. Jalankan migration terlebih dahulu.'], 500);
+        }
+
+        $receiverId = (int) $request->input('id_penerima');
+        $receiver = $this->turunReceiverQuery()
+            ->where('user.id', $receiverId)
+            ->first();
+
+        if (!$receiver) {
+            return response()->json(['message' => 'User penerima tidak valid untuk akses aktif'], 422);
+        }
+
+        $senderId = (int) Session::get('userid');
+        TurunOtp::where('id_penerima', $receiverId)
+            ->where('created_by', $senderId)
+            ->whereNull('used_at')
+            ->where('is_delete', 0)
+            ->update([
+                'is_delete' => 1,
+                'changed_by' => $senderId,
+            ]);
+
+        $otpCode = sprintf('%06d', random_int(0, 999999));
+        $expiresAt = Carbon::now()->addMinutes(10);
+        TurunOtp::create([
+            'uid' => Str::uuid()->toString(),
+            'id_penerima' => $receiverId,
+            'otp_code' => $otpCode,
+            'expires_at' => $expiresAt,
+            'is_delete' => 0,
+            'created_by' => $senderId,
+            'created_date' => date('Y-m-d H:i:s'),
+        ]);
+
+        app(NotificationService::class)->sendToTargets([
+            'id_user' => $receiverId,
+            'tipe' => 'otp_turun',
+            'judul' => 'OTP Penurunan Barang',
+            'pesan' => 'Kode OTP penurunan Anda: ' . $otpCode . '. Berlaku sampai ' . $expiresAt->format('d-m-Y H:i') . '.',
+            'url' => route('show'),
+            'created_by' => $senderId,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sudah dikirim ke dashboard dan notifikasi penerima',
+            'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
+        ]);
+    }
+
     public function store(Request $request)
     {   
         $request->validate([
             'id_kapal' => ['required', 'integer'],
+            'id_penerima' => ['required', 'integer'],
+            'otp_code' => ['required', 'regex:/^[0-9]{6}$/'],
             'bagian' => ['required', 'string'],
             'tanggal' => ['required', 'date'],
             'jumlah.*' => 'nullable|numeric|min:0'
         ]);
+
+        if (!Schema::hasTable('t_turun_otp')) {
+            return response()->json(['message' => 'Tabel OTP penurunan belum tersedia. Jalankan migration terlebih dahulu.'], 500);
+        }
 
         $kapal = Kapal::where('status', 'A')->findOrFail($request->input('id_kapal'));
         $id_cabang = $kapal->id_cabang;
@@ -84,73 +186,115 @@ class PenurunanController extends Controller
             return response()->json(['message' => 'Kapal tidak valid untuk role aktif'], 403);
         }
 
+        $receiverId = (int) $request->input('id_penerima');
+        if (!$this->validTurunReceiver($receiverId)) {
+            return response()->json(['message' => 'User penerima tidak valid untuk akses aktif'], 422);
+        }
+
+        $senderId = (int) Session::get('userid');
+        $otp = TurunOtp::where('id_penerima', $receiverId)
+            ->where('created_by', $senderId)
+            ->where('otp_code', $request->input('otp_code'))
+            ->whereNull('used_at')
+            ->where('is_delete', 0)
+            ->where('expires_at', '>=', Carbon::now())
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$otp) {
+            return response()->json(['message' => 'Kode OTP tidak valid atau sudah expired'], 422);
+        }
+
+        $barangs = (array) $request->input('item', []);
+        $jumlah = (array) $request->input('jumlah', []);
+        $keterangan = (array) $request->input('ket', []);
+        $validItems = [];
+        foreach ($barangs as $item => $value) {
+            $jum = $jumlah[$item] ?? null;
+            $ket = $keterangan[$item] ?? null;
+            if ($value && $jum !== null && $jum !== '') {
+                $validItems[] = [
+                    'barang' => $value,
+                    'jumlah' => (int) $jum,
+                    'ket' => $ket,
+                ];
+            }
+        }
+
+        if (empty($validItems)) {
+            return response()->json(['message' => 'Minimal satu barang dan jumlah harus diisi'], 422);
+        }
+
+        foreach ($validItems as $payload) {
+            $cek = Gudang::where('id_kapal', $kapal->id)
+                ->where('id_barang', $payload['barang'])
+                ->orderByDesc('id')
+                ->first();
+
+            if (!$cek || $payload['jumlah'] > (int) $cek->jumlah) {
+                return response()->json(['message' => 'Jumlah melebihi stok barang yang tersedia'], 422);
+            }
+        }
+
         $bagian = $request->input('bagian');
-        if($bagian==1) { $kat= 'Deck'; } else { $kat= 'Mesin'; }
+        $kat = ((int) $bagian === 1) ? 'Deck' : 'Mesin';
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
+        DB::beginTransaction();
+        try {
             $save = TurunBarang::create([
-              'uid' => Str::uuid()->toString(),
-              'id_kapal' => $request->input('id_kapal'),
-              'id_cabang' => $id_cabang,
-              'nomor' => $nomor,
-              'bagian' => $kat,
-              'tanggal' => $request->input('tanggal'),
-              'is_delete' => 0,
-              'created_by' => Session::get('userid'),
-              'created_date' => date('Y-m-d H:i:s')
+                'uid' => Str::uuid()->toString(),
+                'id_kapal' => $request->input('id_kapal'),
+                'id_penerima' => $receiverId,
+                'otp_code' => $request->input('otp_code'),
+                'otp_verified_at' => Carbon::now(),
+                'id_cabang' => $id_cabang,
+                'nomor' => $nomor,
+                'bagian' => $kat,
+                'tanggal' => $request->input('tanggal'),
+                'is_delete' => 0,
+                'created_by' => $senderId,
+                'created_date' => date('Y-m-d H:i:s')
             ]);
 
-            $barangs = (array) $request->input('item', []);
-            $jumlah = (array) $request->input('jumlah', []);
-            $keterangan = (array) $request->input('ket', []);
-            $validItems = [];
-            foreach ($barangs as $item => $value) {
-                $jum = $jumlah[$item] ?? null;
-                $ket = $keterangan[$item] ?? null;
-                if ($value && $jum !== null && $jum !== '') {
-                    $validItems[] = [
-                        'barang' => $value,
-                        'jumlah' => $jum,
-                        'ket' => $ket,
-                    ];
-                }
-            }
-
-            if (empty($validItems)) {
-                return response()->json(['message' => 'Minimal satu barang dan jumlah harus diisi'], 422);
-            }
-            
             foreach ($validItems as $payload) {
-                $cek = Gudang::where('id_kapal', $save->id_kapal)
-                        ->where('id_barang',  $payload['barang'])
-                        ->orderByDesc('id')
-                        ->first();
+                DetailTurun::create([
+                    'uid' => Str::uuid()->toString(),
+                    'id_turun' => $save->id,
+                    'id_barang' => $payload['barang'],
+                    'jumlah' => $payload['jumlah'],
+                    'kondisi' => $payload['ket'],
+                    'is_delete' => 0,
+                    'created_by' => $senderId,
+                    'created_date' => date('Y-m-d H:i:s')
+                ]);
 
-                if ($payload['jumlah'] > $cek->jumlah) {
-                    return back()->with('error', 'Jumlah melebihi stok');
-                } else {
-                    $savedetail = DetailTurun::create([
-                        'uid' => Str::uuid()->toString(),
-                        'id_turun' => $save->id,
-                        'id_barang' => $payload['barang'],
-                        'jumlah' => $payload['jumlah'],
-                        'kondisi' => $payload['ket'],
-                        'is_delete' => 0,
-                        'created_by' => Session::get('userid'),
-                        'created_date' => date('Y-m-d H:i:s')
-                    ]);
-                    
-                    $idgudang = $cek->id;
-                    $total = max(0, $cek->jumlah - $payload['jumlah']);
-                    Gudang::where('id', $idgudang)->update([
-                            'jumlah' => $total,
-                            'changed_date' => date('Y-m-d H:i:s')
-                        ]);
-                }
+                $cek = Gudang::where('id_kapal', $save->id_kapal)
+                    ->where('id_barang', $payload['barang'])
+                    ->orderByDesc('id')
+                    ->first();
+
+                $total = max(0, ((int) $cek->jumlah) - $payload['jumlah']);
+                Gudang::where('id', $cek->id)->update([
+                    'jumlah' => $total,
+                    'changed_date' => date('Y-m-d H:i:s')
+                ]);
             }
 
-        return response()->json(['success' => true, 'message' => 'Permintaan berhasil disimpan']);
+            $otp->update([
+                'used_at' => Carbon::now(),
+                'id_turun' => $save->id,
+                'changed_by' => $senderId,
+            ]);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return response()->json(['success' => true, 'message' => 'Penurunan berhasil disimpan']);
     }
 
     public function data(Request $request)
@@ -181,6 +325,10 @@ class PenurunanController extends Controller
             ->addColumn('created', function ($row) {
                 $created = User::find($row->created_by);
                 return $created ? $created->nama : '-';
+            })
+            ->addColumn('penerima', function ($row) {
+                $penerima = User::find($row->id_penerima);
+                return $penerima ? $penerima->nama : '-';
             })
             ->addColumn('aksi', function ($row) {
                 return view('penurunan.partials.actions', compact('row'))->render();

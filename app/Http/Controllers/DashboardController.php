@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Perusahaan;
 use App\Models\Karyawan;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Kapal;
 use App\Models\FileUpload;
+use Illuminate\Support\Facades\Schema;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -51,6 +53,10 @@ class DashboardController extends Controller
         $data['doc_kru'] = collect();
         $data['count_doc'] = 0;
         $data['count_dockru'] = 0;
+        $data['notification_users'] = collect();
+        $data['notification_roles'] = collect();
+        $data['pending_kirim_otps'] = collect();
+        $data['pending_turun_otps'] = collect();
         $tanggal = Carbon::today()->addDays(45)->format('Y-m-d');
         if(($roleJenis==1) || ($roleJenis==5)) { // superadmin
             $data['perusahaan'] = Perusahaan::count();
@@ -146,6 +152,88 @@ class DashboardController extends Controller
             ->orderBy('a.tanggal', 'DESC')
             ->orderBy('a.id', 'DESC')
             ->paginate(10, ['*'], 'permintaan_page');
+
+        if (Schema::hasTable('user')) {
+            $notificationUsers = User::query()
+                ->select('id', 'nama', 'username', 'id_perusahaan', 'id_kapal')
+                ->when(Schema::hasColumn('user', 'is_delete'), function ($query) {
+                    $query->where('is_delete', 0);
+                })
+                ->when(Schema::hasColumn('user', 'status'), function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('status', 1)->orWhere('status', 'A');
+                    });
+                });
+
+            if ((int) $roleJenis === 2) {
+                $notificationUsers->where('id_perusahaan', $id_perusahaan);
+            } elseif ((int) $roleJenis === 3) {
+                $notificationUsers->where('id_kapal', Session::get('id_kapal'));
+            } elseif ((int) $roleJenis === 4) {
+                $notificationUsers->where('id', $userId);
+            }
+
+            $data['notification_users'] = $notificationUsers
+                ->orderBy('nama')
+                ->limit(200)
+                ->get();
+        }
+
+        if (Schema::hasTable('roles')) {
+            $notificationRoles = Role::query()
+                ->select('id', 'nama')
+                ->where('status', 'A');
+
+            if ((int) $roleJenis === 2 && Schema::hasColumn('roles', 'is_superadmin')) {
+                $notificationRoles->where('is_superadmin', 0);
+            } elseif ((int) $roleJenis === 4) {
+                $notificationRoles->whereRaw('1 = 0');
+            }
+
+            $data['notification_roles'] = $notificationRoles
+                ->orderBy('nama')
+                ->get();
+        }
+
+        if (Schema::hasTable('t_kirim_otp')) {
+            $data['pending_kirim_otps'] = DB::table('t_kirim_otp as o')
+                ->leftJoin('user as u', 'u.id', '=', 'o.created_by')
+                ->select(
+                    'o.id',
+                    'o.otp_code',
+                    'o.expires_at',
+                    'o.created_date',
+                    'u.nama as pengirim_nama',
+                    'u.username as pengirim_username'
+                )
+                ->where('o.id_penerima', $userId)
+                ->whereNull('o.used_at')
+                ->where('o.is_delete', 0)
+                ->where('o.expires_at', '>=', Carbon::now())
+                ->orderByDesc('o.created_date')
+                ->limit(5)
+                ->get();
+        }
+
+        if (Schema::hasTable('t_turun_otp')) {
+            $data['pending_turun_otps'] = DB::table('t_turun_otp as o')
+                ->leftJoin('user as u', 'u.id', '=', 'o.created_by')
+                ->select(
+                    'o.id',
+                    'o.otp_code',
+                    'o.expires_at',
+                    'o.created_date',
+                    'u.nama as pengirim_nama',
+                    'u.username as pengirim_username'
+                )
+                ->where('o.id_penerima', $userId)
+                ->whereNull('o.used_at')
+                ->where('o.is_delete', 0)
+                ->where('o.expires_at', '>=', Carbon::now())
+                ->orderByDesc('o.created_date')
+                ->limit(5)
+                ->get();
+        }
 
         return view('dashboard.show', $data);
     }

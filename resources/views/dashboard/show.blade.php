@@ -137,6 +137,111 @@
             $('#dashboardLogTimeline').html('<div class="timeline-empty">Gagal memuat data rute.</div>');
         });
     });
+
+    function showBrowserNotification(title, message) {
+        if (!('Notification' in window)) {
+            return;
+        }
+
+        const notify = function () {
+            new Notification(title, {
+                body: message,
+                icon: "{{ url('/img/trimas.png') }}"
+            });
+        };
+
+        if (Notification.permission === 'granted') {
+            notify();
+            return;
+        }
+
+        if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === 'granted') {
+                    notify();
+                }
+            });
+        }
+    }
+
+    $(document).on('click', '#btn-test-push-notification', function () {
+        const btn = $(this);
+        const originalText = btn.html();
+        const target = $('input[name="notification_target"]:checked').val() || 'self';
+        const payload = {
+            _token: "{{ csrf_token() }}"
+        };
+
+        if (target === 'user') {
+            const userId = $('#notification-target-user').val();
+            if (!userId) {
+                Swal.fire('Target belum dipilih', 'Pilih user tujuan notifikasi.', 'warning');
+                return;
+            }
+            payload.id_user = userId;
+        }
+
+        if (target === 'role') {
+            const roleId = $('#notification-target-role').val();
+            if (!roleId) {
+                Swal.fire('Target belum dipilih', 'Pilih role tujuan notifikasi.', 'warning');
+                return;
+            }
+            payload.role_id = roleId;
+            const idPerusahaan = "{{ Session::get('id_perusahaan') }}";
+            const idKapal = "{{ Session::get('id_kapal') }}";
+            if (idPerusahaan && idPerusahaan !== '0') {
+                payload.id_perusahaan = idPerusahaan;
+            }
+            if (idKapal && idKapal !== '0') {
+                payload.id_kapal = idKapal;
+            }
+        }
+
+        btn.prop('disabled', true).html('Mengirim...');
+
+        $.ajax({
+            url: "{{ route('notifications.test') }}",
+            type: 'POST',
+            data: payload
+        })
+        .done(function (res) {
+            const notification = res.notification || {};
+            const title = notification.judul || 'Test push notification';
+            const message = notification.pesan || res.message || 'Notifikasi test berhasil dikirim';
+
+            if (typeof window.refreshNotifications === 'function') {
+                window.refreshNotifications();
+            }
+
+            showBrowserNotification(title, message);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: `${res.message || 'Notifikasi test berhasil dikirim'} (${res.sent_count || 0} user)`,
+                timer: 1600,
+                showConfirmButton: false
+            });
+            $('#DashboardNotificationTestModal').modal('hide');
+        })
+        .fail(function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: xhr.responseJSON?.message || 'Gagal mengirim test notifikasi'
+            });
+        })
+        .always(function () {
+            btn.prop('disabled', false).html(originalText);
+        });
+    });
+
+    $(document).on('change', 'input[name="notification_target"]', function () {
+        const target = $('input[name="notification_target"]:checked').val();
+        $('#notification-target-user-wrapper').toggle(target === 'user');
+        $('#notification-target-role-wrapper').toggle(target === 'role');
+    });
 </script>
 @endsection
 @section('content')
@@ -361,13 +466,83 @@
         </div>
 
         <div class="d-flex align-items-center mt-3 mt-md-0">
+            {{-- <button type="button" class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#DashboardNotificationTestModal">
+                <i data-feather="bell" class="me-25"></i>
+                Test Push Notification
+            </button> --}}
             <div class="stat-icon me-2">
                 <i data-feather="award"></i>
             </div>
             <div class="text-white-75 small">Akses aktif • {{ date('d M Y') }}</div>
         </div>
     </div>
-        {{Session::get('previllage')}}
+
+    @if(!empty($pending_kirim_otps) && count($pending_kirim_otps))
+    <div class="row mb-2">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-blue">OTP Pengiriman Barang</h5>
+                    <span class="badge bg-primary">{{ count($pending_kirim_otps) }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-1">
+                        @foreach($pending_kirim_otps as $otp)
+                        <div class="col-md-6 col-xl-4">
+                            <div class="d-flex justify-content-between align-items-center border rounded p-1 h-100">
+                                <div>
+                                    <div class="fw-bolder fs-4 letter-spacing-0">{{ $otp->otp_code }}</div>
+                                    <div class="text-muted small">
+                                        Pengirim: {{ $otp->pengirim_nama ?? $otp->pengirim_username ?? '-' }}
+                                    </div>
+                                </div>
+                                <div class="text-end small text-muted">
+                                    Expired<br>
+                                    {{ \Carbon\Carbon::parse($otp->expires_at)->format('d-m-Y H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(!empty($pending_turun_otps) && count($pending_turun_otps))
+    <div class="row mb-2">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-blue">OTP Penurunan Barang</h5>
+                    <span class="badge bg-primary">{{ count($pending_turun_otps) }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-1">
+                        @foreach($pending_turun_otps as $otp)
+                        <div class="col-md-6 col-xl-4">
+                            <div class="d-flex justify-content-between align-items-center border rounded p-1 h-100">
+                                <div>
+                                    <div class="fw-bolder fs-4 letter-spacing-0">{{ $otp->otp_code }}</div>
+                                    <div class="text-muted small">
+                                        Pengirim: {{ $otp->pengirim_nama ?? $otp->pengirim_username ?? '-' }}
+                                    </div>
+                                </div>
+                                <div class="text-end small text-muted">
+                                    Expired<br>
+                                    {{ \Carbon\Carbon::parse($otp->expires_at)->format('d-m-Y H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+        
     @if(Session::get('previllage')!=4)
         <div class="col-lg-12" style="display:flex;justify-content:space-between;margin-bottom:1rem;padding-left:1rem;padding-right:1rem;">
             <div class="row">
@@ -610,6 +785,60 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DashboardNotificationTestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Test Push Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Target Notifikasi</label>
+                <div class="d-flex flex-column gap-50 mb-1">
+                    <label class="form-check">
+                        <input class="form-check-input" type="radio" name="notification_target" value="self" checked>
+                        <span class="form-check-label">Diri sendiri</span>
+                    </label>
+                    <label class="form-check">
+                        <input class="form-check-input" type="radio" name="notification_target" value="user">
+                        <span class="form-check-label">User tertentu</span>
+                    </label>
+                    <label class="form-check">
+                        <input class="form-check-input" type="radio" name="notification_target" value="role" {{ empty($notification_roles) || count($notification_roles) === 0 ? 'disabled' : '' }}>
+                        <span class="form-check-label">Role tertentu</span>
+                    </label>
+                </div>
+                <div id="notification-target-user-wrapper" style="display:none;">
+                    <label class="form-label">Pilih User</label>
+                    <select id="notification-target-user" class="form-control">
+                        <option value="">-Pilih User-</option>
+                        @foreach($notification_users as $user)
+                            <option value="{{ $user->id }}">{{ $user->nama ?? $user->username }} ({{ $user->username }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div id="notification-target-role-wrapper" style="display:none;">
+                    <label class="form-label">Pilih Role</label>
+                    <select id="notification-target-role" class="form-control">
+                        <option value="">-Pilih Role-</option>
+                        @foreach($notification_roles as $role)
+                            <option value="{{ $role->id }}">{{ $role->nama }}</option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Role akan dikirim ke semua user aktif pada role tersebut sesuai konteks perusahaan/kapal aktif.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btn-test-push-notification">
+                    <i data-feather="send" class="me-25"></i>
+                    Kirim Test
+                </button>
             </div>
         </div>
     </div>

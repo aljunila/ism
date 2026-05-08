@@ -11,7 +11,7 @@ class TurunBarang extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 't_turun_barang';
-    protected $fillable = ['id', 'uid', 'id_kapal', 'id_cabang', 'bagian', 'nomor', 'tanggal', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'id_kapal', 'id_penerima', 'otp_code', 'otp_verified_at', 'id_cabang', 'bagian', 'nomor', 'tanggal', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     public function get_kapal()
     {

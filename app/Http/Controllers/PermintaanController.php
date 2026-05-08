@@ -20,9 +20,13 @@ use App\Models\PoBarang;
 use App\Models\PurchasingBarang;
 use App\Models\KirimBarang;
 use App\Models\DetailKirim;
+use App\Models\KirimOtp;
 use App\Models\Gudang;
 use App\Models\FormISM;
+use App\Models\Notifikasi;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\Facades\DataTables;
 use Str;
 use Session;
@@ -99,6 +103,130 @@ class PermintaanController extends Controller
         ]);
     }
 
+    private function activeUserQuery()
+    {
+        $query = User::query()->select('user.id');
+
+        if (Schema::hasTable('roles')) {
+            $query->leftJoin('roles', 'roles.id', '=', 'user.role_id');
+        }
+
+        if (Schema::hasColumn('user', 'is_delete')) {
+            $query->where('user.is_delete', 0);
+        }
+
+        if (Schema::hasColumn('user', 'status')) {
+            $query->where(function ($q) {
+                $q->where('user.status', 1)->orWhere('user.status', 'A');
+            });
+        }
+
+        return $query;
+    }
+
+    private function kirimReceiverQuery()
+    {
+        $query = User::query()->select('user.id', 'user.nama', 'user.username', 'user.id_perusahaan', 'user.id_kapal');
+
+        if (Schema::hasColumn('user', 'is_delete')) {
+            $query->where('user.is_delete', 0);
+        }
+
+        if (Schema::hasColumn('user', 'status')) {
+            $query->where(function ($q) {
+                $q->where('user.status', 1)->orWhere('user.status', 'A');
+            });
+        }
+
+        $roleJenis = $this->currentRoleJenis();
+        if ($roleJenis === 2) {
+            $query->where('user.id_perusahaan', Session::get('id_perusahaan'));
+        } elseif ($roleJenis === 3) {
+            $query->where('user.id_kapal', Session::get('id_kapal'));
+        } elseif ($roleJenis === 4) {
+            $query->where('user.id', Session::get('userid'));
+        }
+
+        return $query;
+    }
+
+    private function validKirimReceiver(int $receiverId): bool
+    {
+        return Schema::hasTable('user')
+            && $this->kirimReceiverQuery()->where('user.id', $receiverId)->exists();
+    }
+
+    private function notificationRecipientsForPermintaan(Permintaan $permintaan, ?int $excludeUserId = null): array
+    {
+        if (!Schema::hasTable('user')) {
+            return [];
+        }
+
+        $kapal = Kapal::find($permintaan->id_kapal);
+        $query = $this->activeUserQuery();
+
+        $hasRolesTable = Schema::hasTable('roles');
+        $hasSuperField = $hasRolesTable && Schema::hasColumn('roles', 'is_superadmin');
+        $hasJenisField = $hasRolesTable && Schema::hasColumn('roles', 'jenis');
+
+        $query->where(function ($q) use ($permintaan, $kapal, $hasSuperField, $hasJenisField) {
+            if ($hasSuperField) {
+                $q->orWhere('roles.is_superadmin', 1);
+            }
+
+            if ($hasJenisField && $kapal) {
+                $q->orWhere(function ($subQuery) use ($kapal) {
+                    $subQuery->where('roles.jenis', 1)
+                        ->where('user.id_perusahaan', $kapal->pemilik);
+                });
+
+                $q->orWhere(function ($subQuery) use ($permintaan) {
+                    $subQuery->where('roles.jenis', 2)
+                        ->where('user.id_kapal', $permintaan->id_kapal);
+                });
+            }
+
+            if ($permintaan->created_by) {
+                $q->orWhere('user.id', $permintaan->created_by);
+            }
+        });
+
+        if ($excludeUserId) {
+            $query->where('user.id', '!=', $excludeUserId);
+        }
+
+        return $query->distinct()->pluck('user.id')->map(fn ($id) => (int) $id)->all();
+    }
+
+    private function createNotifications(array $userIds, string $judul, string $pesan, ?string $url = null, string $tipe = 'info'): void
+    {
+        if (!Schema::hasTable('t_notifikasi')) {
+            return;
+        }
+
+        $createdBy = Session::get('userid');
+        foreach (array_unique(array_filter($userIds)) as $userId) {
+            Notifikasi::create([
+                'uid' => Str::uuid()->toString(),
+                'id_user' => (int) $userId,
+                'tipe' => $tipe,
+                'judul' => $judul,
+                'pesan' => $pesan,
+                'url' => $url,
+                'is_delete' => 0,
+                'created_by' => $createdBy,
+                'created_date' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
+    private function notifyPermintaan(Permintaan $permintaan, string $judul, string $pesan, string $tipe = 'info', ?string $url = null): void
+    {
+        $url = $url ?: route('permintaan.edit', $permintaan->uid);
+        $recipients = $this->notificationRecipientsForPermintaan($permintaan, (int) Session::get('userid'));
+        $this->createNotifications($recipients, $judul, $pesan, $url, $tipe);
+    }
+
     private function flowStageLabel(?string $flowStage): string
     {
         return match ($flowStage) {
@@ -119,6 +247,19 @@ class PermintaanController extends Controller
         }
         $clean = preg_replace('/[^\d\-]/', '', (string) $value);
         return $clean === '' ? 0 : (float) $clean;
+    }
+
+    private function normalizeQuantity($value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (!is_numeric($value) || (int) $value != (float) $value) {
+            return null;
+        }
+
+        return (int) $value;
     }
 
     private function currentRoleJenis(): int
@@ -270,6 +411,146 @@ class PermintaanController extends Controller
             ->make(true);
     }
 
+    public function history(Request $request)
+    {
+        $roleJenis = Session::get('previllage');
+        $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
+        $tanggal = $request->input('tanggal');
+
+        $query = Permintaan::where('is_delete', 0)
+            ->whereHas('details', function ($query) {
+                $query->where('is_delete', 0);
+            })
+            ->whereDoesntHave('details', function ($query) {
+                $query->where('is_delete', 0)
+                    ->where(function ($subQuery) {
+                        $subQuery->whereNull('flow_stage')
+                            ->orWhere('flow_stage', '!=', 'selesai');
+                    });
+            })
+            ->withCount(['details as item_count' => function ($query) {
+                $query->where('is_delete', 0);
+            }])
+            ->when($id_kapal, function ($query, $id_kapal) {
+                return $query->where('id_kapal', $id_kapal);
+            })
+            ->when($tanggal, function ($query, $tanggal) {
+                return $query->where('tanggal', $tanggal);
+            });
+
+        if ((int) $roleJenis === 2) {
+            $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+        }
+
+        $query->orderByDesc('tanggal')->orderByDesc('id');
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('kapal', function ($row) {
+                $kapal = Kapal::find($row->id_kapal);
+                return $kapal ? $kapal->nama : '-';
+            })
+            ->addColumn('created', function ($row) {
+                $created = User::find($row->created_by);
+                return $created ? $created->nama : '-';
+            })
+            ->make(true);
+    }
+
+    public function repeat($id)
+    {
+        $source = $this->visiblePermintaanById((int) $id);
+        if (!$source) {
+            return response()->json(['message' => 'Data tidak ditemukan atau tidak dapat diakses'], 404);
+        }
+
+        $details = DetailPermintaan::where('id_permintaan', $source->id)
+            ->where('is_delete', 0)
+            ->get();
+
+        if ($details->isEmpty()) {
+            return response()->json(['message' => 'Permintaan tidak memiliki detail barang'], 422);
+        }
+
+        $unfinished = $details->contains(function ($detail) {
+            return $detail->flow_stage !== 'selesai';
+        });
+
+        if ($unfinished) {
+            return response()->json(['message' => 'Repeat order hanya dapat dibuat dari permintaan yang sudah selesai'], 422);
+        }
+
+        $kapal = Kapal::where('id', $source->id_kapal)->where('status', 'A')->first();
+        if (!$kapal) {
+            return response()->json(['message' => 'Kapal pada permintaan asal tidak aktif'], 422);
+        }
+
+        if ((int) $this->currentRoleJenis() === 2 && (int) $kapal->pemilik !== (int) Session::get('id_perusahaan')) {
+            return response()->json(['message' => 'Kapal tidak valid untuk role aktif'], 403);
+        }
+        if ((int) $this->currentRoleJenis() === 3 && (int) $kapal->id !== (int) Session::get('id_kapal')) {
+            return response()->json(['message' => 'Kapal tidak valid untuk role aktif'], 403);
+        }
+
+        $tanggal = date('Y-m-d');
+        $nomorTanggal = Carbon::parse($tanggal)->format('dmY');
+        $nomor = $kapal->call_sign . '/' . $source->bagian . '/' . $nomorTanggal;
+        $statusId = $this->statusPermintaanId();
+        $idCabang = (int) ($kapal->id_cabang ?? 0);
+        $newPermintaan = null;
+
+        DB::transaction(function () use ($source, $details, $tanggal, $nomor, $statusId, $idCabang, &$newPermintaan) {
+            $newPermintaan = Permintaan::create([
+                'uid' => Str::uuid()->toString(),
+                'id_kapal' => $source->id_kapal,
+                'nomor' => $nomor,
+                'bagian' => $source->bagian,
+                'tanggal' => $tanggal,
+                'is_delete' => 0,
+                'created_by' => Session::get('userid'),
+                'created_date' => date('Y-m-d H:i:s')
+            ]);
+
+            foreach ($details as $detail) {
+                $newDetail = DetailPermintaan::create([
+                    'uid' => Str::uuid()->toString(),
+                    'id_permintaan' => $newPermintaan->id,
+                    'id_barang' => $detail->id_barang,
+                    'jumlah' => $detail->jumlah,
+                    'ket' => $detail->ket,
+                    'status' => $statusId,
+                    'id_cabang' => $idCabang ?: null,
+                    'flow_stage' => 'logistik',
+                    'is_delete' => 0,
+                    'created_by' => Session::get('userid'),
+                    'created_date' => date('Y-m-d H:i:s')
+                ]);
+
+                $this->createFlowLog(
+                    $newDetail->id,
+                    $tanggal,
+                    $statusId,
+                    'repeat_order_created',
+                    'Repeat order dibuat dari permintaan ' . $source->nomor
+                );
+            }
+        });
+
+        $this->notifyPermintaan(
+            $newPermintaan,
+            'Repeat order baru',
+            'Repeat order dibuat dari permintaan ' . $source->nomor,
+            'repeat'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Repeat order berhasil dibuat',
+            'uid' => $newPermintaan->uid,
+            'redirect_url' => route('permintaan.edit', $newPermintaan->uid)
+        ]);
+    }
+
     public function store(Request $request)
     {   
         $request->validate([
@@ -291,16 +572,16 @@ class PermintaanController extends Controller
 
         $barangs = (array) $request->input('item', []);
         $jumlah = (array) $request->input('jumlah', []);
-        $keterangan = (array) $request->input('ket', []);
+        $kets = (array) $request->input('ket', []);
         $validItems = [];
         foreach ($barangs as $item => $value) {
             $jum = $jumlah[$item] ?? null;
-            $ket = $keterangan[$item] ?? null;
+            $itemKet = $kets[$item] ?? null;
             if ($value && $jum !== null && $jum !== '') {
                 $validItems[] = [
                     'barang' => $value,
                     'jumlah' => $jum,
-                    'ket' => $ket,
+                    'ket' => $itemKet,
                 ];
             }
         }
@@ -313,7 +594,8 @@ class PermintaanController extends Controller
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$bagian.'/'.$tanggal;
 
-        DB::transaction(function () use ($request, $bagian, $nomor, $validItems, $id_cabang) {
+        $save = null;
+        DB::transaction(function () use ($request, $bagian, $nomor, $validItems, $id_cabang, &$save) {
             $save = Permintaan::create([
               'uid' => Str::uuid()->toString(),
               'id_kapal' => $request->input('id_kapal'),
@@ -350,6 +632,13 @@ class PermintaanController extends Controller
                 );
             }
         });
+
+        $this->notifyPermintaan(
+            $save,
+            'Permintaan barang baru',
+            'Permintaan ' . $save->nomor . ' berhasil dibuat',
+            'permintaan'
+        );
 
         return response()->json(['success' => true, 'message' => 'Permintaan berhasil disimpan']);
     }
@@ -477,9 +766,69 @@ class PermintaanController extends Controller
 
         $barangs = (array) $request->input('item', []);
         $jumlah = (array) $request->input('jumlah', []);
+        $ket = (array) $request->input('ket', []);
+        $detailJumlah = (array) $request->input('detail_jumlah', []);
+        $detailKeterangan = (array) $request->input('detail_keterangan', []);
+        $permintaanStatusId = $this->statusPermintaanId();
+        $quantityUpdates = [];
         $createdCount = 0;
+        $updatedCount = 0;
 
-        DB::transaction(function () use ($permintaan, $barangs, $jumlah, &$createdCount) {
+        foreach ($detailJumlah as $detailId => $rawJumlah) {
+            $detail = DetailPermintaan::where('id', (int) $detailId)
+                ->where('id_permintaan', $permintaan->id)
+                ->where('is_delete', 0)
+                ->first();
+
+            if (!$detail) {
+                return response()->json(['message' => 'Detail permintaan tidak ditemukan'], 404);
+            }
+
+            $newJumlah = $this->normalizeQuantity($rawJumlah);
+            if ($newJumlah === null || $newJumlah < 1) {
+                return response()->json(['message' => 'Jumlah permintaan wajib berupa angka minimal 1'], 422);
+            }
+
+            if ((int) $detail->jumlah === $newJumlah) {
+                continue;
+            }
+
+            $reason = trim((string) ($detailKeterangan[$detailId] ?? ''));
+            if ($reason === '') {
+                return response()->json(['message' => 'Keterangan wajib diisi jika jumlah bertambah atau berkurang'], 422);
+            }
+
+            $quantityUpdates[] = [
+                'detail' => $detail,
+                'old_jumlah' => (int) $detail->jumlah,
+                'new_jumlah' => $newJumlah,
+                'reason' => $reason,
+            ];
+        }
+
+        $kapal = Kapal::find($permintaan->id_kapal);
+        $id_cabang = (int) ($kapal->id_cabang ?? 0);
+
+        DB::transaction(function () use ($permintaan, $barangs, $jumlah, $ket, $quantityUpdates, $permintaanStatusId, $id_cabang, &$createdCount, &$updatedCount) {
+            foreach ($quantityUpdates as $payload) {
+                $detail = $payload['detail'];
+                $detail->update([
+                    'jumlah' => $payload['new_jumlah'],
+                    'changed_by' => Session::get('userid'),
+                    'changed_date' => date('Y-m-d H:i:s')
+                ]);
+
+                $this->createFlowLog(
+                    $detail->id,
+                    date('Y-m-d'),
+                    (int) $detail->status,
+                    'permintaan_jumlah_updated',
+                    'Jumlah permintaan diubah dari ' . $payload['old_jumlah'] . ' menjadi ' . $payload['new_jumlah'] . '. Keterangan: ' . $payload['reason']
+                );
+
+                $updatedCount++;
+            }
+
             foreach ($barangs as $item => $value) {
                 if (!$value) {
                     continue;
@@ -490,13 +839,20 @@ class PermintaanController extends Controller
                     continue;
                 }
 
-                $statusId = $this->statusPermintaanId();
+                $normalizedJumlah = $this->normalizeQuantity($jum);
+                if ($normalizedJumlah === null || $normalizedJumlah < 1) {
+                    continue;
+                }
+
+                $itemKet = $ket[$item] ?? null;
                 $savedetail = DetailPermintaan::create([
                     'uid' => Str::uuid()->toString(),
                     'id_permintaan' => $permintaan->id,
                     'id_barang' => $value,
-                    'jumlah' => $jum,
-                    'status' => $statusId,
+                    'jumlah' => $normalizedJumlah,
+                    'ket' => $itemKet,
+                    'status' => $permintaanStatusId,
+                    'id_cabang' => $id_cabang ?: null,
                     'flow_stage' => 'logistik',
                     'is_delete' => 0,
                     'created_by' => Session::get('userid'),
@@ -507,16 +863,31 @@ class PermintaanController extends Controller
                 $this->createFlowLog(
                     $savedetail->id,
                     $permintaan->tanggal,
-                    $statusId,
+                    $permintaanStatusId,
                     'permintaan_created',
                     'Permintaan berhasil dibuat'
                 );
             }
         });
 
-        if ($createdCount === 0) {
-            return response()->json(['success' => true, 'message' => 'Tidak ada item baru yang ditambahkan']);
+        if ($createdCount === 0 && $updatedCount === 0) {
+            return response()->json(['success' => true, 'message' => 'Tidak ada perubahan yang disimpan']);
         }
+
+        $messageParts = [];
+        if ($updatedCount > 0) {
+            $messageParts[] = $updatedCount . ' jumlah barang diubah';
+        }
+        if ($createdCount > 0) {
+            $messageParts[] = $createdCount . ' barang ditambahkan';
+        }
+
+        $this->notifyPermintaan(
+            $permintaan,
+            'Permintaan barang diperbarui',
+            'Permintaan ' . $permintaan->nomor . ' diperbarui: ' . implode(', ', $messageParts),
+            'permintaan'
+        );
 
         return response()->json(['success' => true, 'message' => 'Permintaan berhasil diperbarui']);
     }
@@ -888,6 +1259,17 @@ class PermintaanController extends Controller
             $this->createFlowLog($id, $tanggalLog, $statusId, $eventCode, $keterangan, $imgName);
         });
 
+        $permintaan = $up->get_permintaan();
+        if ($permintaan) {
+            $this->notifyPermintaan(
+                $permintaan,
+                'Status permintaan diperbarui',
+                $permintaan->nomor . ': ' . $keterangan,
+                'proses',
+                url('/permintaan')
+            );
+        }
+
         return response()->json(['success' => true, 'message' => 'Proses permintaan berhasil diperbarui']);
     }
 
@@ -992,6 +1374,10 @@ class PermintaanController extends Controller
         $data['barang'] = DetailPermintaan::where('is_delete', 0)->where('flow_stage', 'workshop')->orderBy('changed_date', 'ASC')->get();
         $data['gudang'] = Gudang::where('is_delete', 0)->get();
         $data['permintaanStatusId'] = $this->statusPermintaanId();
+        $data['penerima'] = $this->kirimReceiverQuery()
+            ->orderBy('user.nama')
+            ->limit(200)
+            ->get();
         if ($uid) {
             $get = $this->visiblePermintaanByUid($uid);
             abort_unless($get, 404);
@@ -1001,18 +1387,80 @@ class PermintaanController extends Controller
         return view('permintaan.kirim', $data);
     }
 
+    public function generateKirimOtp(Request $request)
+    {
+        $request->validate([
+            'id_penerima' => ['required', 'integer'],
+        ]);
+
+        if (!Schema::hasTable('t_kirim_otp')) {
+            return response()->json(['message' => 'Tabel OTP pengiriman belum tersedia. Jalankan migration terlebih dahulu.'], 500);
+        }
+
+        $receiverId = (int) $request->input('id_penerima');
+        $receiver = $this->kirimReceiverQuery()
+            ->where('user.id', $receiverId)
+            ->first();
+
+        if (!$receiver) {
+            return response()->json(['message' => 'User penerima tidak valid untuk akses aktif'], 422);
+        }
+
+        $senderId = (int) Session::get('userid');
+        KirimOtp::where('id_penerima', $receiverId)
+            ->where('created_by', $senderId)
+            ->whereNull('used_at')
+            ->where('is_delete', 0)
+            ->update([
+                'is_delete' => 1,
+                'changed_by' => $senderId,
+            ]);
+
+        $otpCode = sprintf('%06d', random_int(0, 999999));
+        $expiresAt = Carbon::now()->addMinutes(10);
+        KirimOtp::create([
+            'uid' => Str::uuid()->toString(),
+            'id_penerima' => $receiverId,
+            'otp_code' => $otpCode,
+            'expires_at' => $expiresAt,
+            'is_delete' => 0,
+            'created_by' => $senderId,
+            'created_date' => date('Y-m-d H:i:s'),
+        ]);
+
+        app(NotificationService::class)->sendToTargets([
+            'id_user' => $receiverId,
+            'tipe' => 'otp_kirim',
+            'judul' => 'OTP Pengiriman Barang',
+            'pesan' => 'Kode OTP pengiriman Anda: ' . $otpCode . '. Berlaku sampai ' . $expiresAt->format('d-m-Y H:i') . '.',
+            'url' => route('show'),
+            'created_by' => $senderId,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sudah dikirim ke dashboard dan notifikasi penerima',
+            'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
+        ]);
+    }
+
     public function storekirim(Request $request)
     {   
         $request->validate([
             'id_kapal' => ['required', 'integer'],
+            'id_penerima' => ['required', 'integer'],
+            'otp_code' => ['required', 'regex:/^[0-9]{6}$/'],
             'bagian' => ['required', 'string'],
             'tanggal' => ['required', 'date'],
             'check' => 'required|array|min:1',
             'jumlah.*' => 'nullable|numeric|min:0'
         ]);
 
+        if (!Schema::hasTable('t_kirim_otp')) {
+            return response()->json(['message' => 'Tabel OTP pengiriman belum tersedia. Jalankan migration terlebih dahulu.'], 500);
+        }
+
         $kapal = Kapal::where('status', 'A')->findOrFail($request->input('id_kapal'));
-        $id_cabang = $kapal->id_cabang;
         if ((int) $this->currentRoleJenis() === 2 && (int) $kapal->pemilik !== (int) Session::get('id_perusahaan')) {
             return response()->json(['message' => 'Kapal tidak valid untuk role aktif'], 403);
         }
@@ -1020,31 +1468,52 @@ class PermintaanController extends Controller
             return response()->json(['message' => 'Kapal tidak valid untuk role aktif'], 403);
         }
 
+        $receiverId = (int) $request->input('id_penerima');
+        if (!$this->validKirimReceiver($receiverId)) {
+            return response()->json(['message' => 'User penerima tidak valid untuk akses aktif'], 422);
+        }
+
+        $senderId = (int) Session::get('userid');
+        $otp = KirimOtp::where('id_penerima', $receiverId)
+            ->where('created_by', $senderId)
+            ->where('otp_code', $request->input('otp_code'))
+            ->whereNull('used_at')
+            ->where('is_delete', 0)
+            ->where('expires_at', '>=', Carbon::now())
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$otp) {
+            return response()->json(['message' => 'Kode OTP tidak valid atau sudah expired'], 422);
+        }
+
         $bagian = $request->input('bagian');
         if($bagian==1) { $kat= 'Deck'; } else { $kat= 'Mesin'; }
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
+        $checked = $request->check ?? [];
+        $jml_kirim = $request->jumlah ?? [];
+        $tot_barang = $request->total ?? [];
+        $barang = $request->barang ?? [];
+        $gudang = $request->gudang ?? [];
+        $keterangan = $request->ket ?? [];
+        
+        DB::beginTransaction();
+        try {
             $save = KirimBarang::create([
-              'uid' => Str::uuid()->toString(),
-              'id_kapal' => $request->input('id_kapal'),
-              'nomor' => $nomor,
-              'bagian' => $kat,
-              'tanggal' => $request->input('tanggal'),
-              'is_delete' => 0,
-              'created_by' => Session::get('userid'),
-              'created_date' => date('Y-m-d H:i:s')
+                'uid' => Str::uuid()->toString(),
+                'id_kapal' => $request->input('id_kapal'),
+                'id_penerima' => $receiverId,
+                'otp_code' => $request->input('otp_code'),
+                'otp_verified_at' => Carbon::now(),
+                'nomor' => $nomor,
+                'bagian' => $kat,
+                'tanggal' => $request->input('tanggal'),
+                'is_delete' => 0,
+                'created_by' => $senderId,
+                'created_date' => date('Y-m-d H:i:s')
             ]);
-
-            $checked = $request->check ?? [];
-            $jml_kirim = $request->jumlah ?? [];
-            $tot_barang = $request->total ?? [];
-            $barang = $request->barang ?? [];
-            $gudang = $request->gudang ?? [];
-            $keterangan = $request->ket ?? [];
-            
-            DB::beginTransaction();
-            try {
                 foreach ($checked as $id) {
                     $jumlah = $jml_kirim[$id] ?? 0;
                     $tot = $tot_barang[$id] ?? 0;
@@ -1092,7 +1561,7 @@ class PermintaanController extends Controller
                             'changed_date' => date('Y-m-d H:i:s')
                         ]);
                     } else {
-                            Gudang::create([
+                        Gudang::create([
                             'uid' => Str::uuid()->toString(),
                             'id_barang' => $id_barang,
                             'id_kapal' => $save->id_kapal,
@@ -1117,6 +1586,13 @@ class PermintaanController extends Controller
                         $keterangan
                     );
                 }
+
+                $otp->update([
+                    'used_at' => Carbon::now(),
+                    'id_kirim' => $save->id,
+                    'changed_by' => $senderId,
+                ]);
+
                 DB::commit();
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -1154,6 +1630,10 @@ class PermintaanController extends Controller
             ->addColumn('created', function ($row) {
                 $created = User::find($row->created_by);
                 return $created ? $created->nama : '-';
+            })
+            ->addColumn('penerima', function ($row) {
+                $penerima = User::find($row->id_penerima);
+                return $penerima ? $penerima->nama : '-';
             })
             ->addColumn('aksi', function ($row) {
                 return view('permintaan.partials.actionkirim', compact('row'))->render();

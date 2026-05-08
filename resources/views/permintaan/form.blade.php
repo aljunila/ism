@@ -211,9 +211,51 @@
         $(this).closest(".field-item").remove();
     });
 
+    function toggleDetailKeterangan(input) {
+        const original = String($(input).data('original') ?? '');
+        const current = String($(input).val() ?? '');
+        const wrapper = $(input).closest('.jumlah-cell');
+        const reasonBlock = wrapper.find('.detail-keterangan-wrapper');
+        const reasonInput = wrapper.find('.detail-keterangan');
+        const isChanged = current !== '' && current !== original;
+
+        reasonBlock.toggleClass('d-none', !isChanged);
+        reasonInput.prop('required', isChanged);
+
+        if (!isChanged) {
+            reasonInput.val('');
+        }
+    }
+
+    $(document).on('input change', '.detail-jumlah', function () {
+        toggleDetailKeterangan(this);
+    });
+
     $('#form_permintaan').on('submit', function(e){
         e.preventDefault(); // cegah submit biasa
         let form = $(this);
+        let invalidChange = false;
+
+        $('.detail-jumlah').each(function () {
+            toggleDetailKeterangan(this);
+            const original = String($(this).data('original') ?? '');
+            const current = String($(this).val() ?? '');
+            const reason = $(this).closest('.jumlah-cell').find('.detail-keterangan').val();
+
+            if (current !== '' && current !== original && !String(reason || '').trim()) {
+                invalidChange = true;
+            }
+        });
+
+        if (invalidChange) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Keterangan wajib diisi',
+                text: 'Isi keterangan untuk setiap jumlah permintaan yang bertambah atau berkurang.'
+            });
+            return;
+        }
+
         let formData = new FormData(this);
         let url = form.data('update-url')
             ? form.data('update-url')   // EDIT
@@ -236,10 +278,12 @@
                     });
             },
             error: function(xhr){
+                const errors = xhr.responseJSON?.errors;
+                const firstError = errors ? Object.values(errors).flat()[0] : null;
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Gagal menyimpan data'
+                    text: firstError || xhr.responseJSON?.message || 'Gagal menyimpan data'
                 });
             }
         });
@@ -324,13 +368,34 @@
                                         </thead>
                                         <tbody>
                                             @foreach($detail as $d)
+                                            @php
+                                                $canEditDetail = (int) $d->status === (int) ($permintaanStatusId ?? 0);
+                                            @endphp
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
                                                 <td>{{$d->get_barang()->nama}}</td>
                                                 <td>{{$d->get_barang()->deskripsi}}</td>
-                                                <td>{{$d->jumlah}}</td>
+                                                <td class="jumlah-cell">
+                                                    <input
+                                                        type="number"
+                                                        class="form-control detail-jumlah"
+                                                        name="detail_jumlah[{{$d->id}}]"
+                                                        value="{{$d->jumlah}}"
+                                                        min="1"
+                                                        data-original="{{$d->jumlah}}"
+                                                    >
+                                                    <div class="detail-keterangan-wrapper d-none mt-1">
+                                                        <label class="form-label mb-25">Keterangan perubahan jumlah</label>
+                                                        <textarea
+                                                            name="detail_keterangan[{{$d->id}}]"
+                                                            class="form-control detail-keterangan"
+                                                            rows="2"
+                                                            placeholder="Jelaskan kenapa jumlah bertambah atau berkurang"
+                                                        ></textarea>
+                                                    </div>
+                                                </td>
                                                 <td>
-                                                    @if((int) $d->status === (int) ($permintaanStatusId ?? 0)) 
+                                                    @if($canEditDetail)
                                                         <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{$d->id}}">Hapus</button>
                                                     @endif
                                                 </td>

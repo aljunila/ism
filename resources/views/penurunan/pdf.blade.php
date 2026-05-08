@@ -56,7 +56,7 @@
             <table class="table-bordered" width="100%">
             <tr>
                 <td width="25%" style="text-align: center;" rowspan="3"><img src="{{ public_path('img/'.$perusahaan->logo) }}" alt="" width="50%"></td>
-                <td style="text-transform: uppercase;" width="50%" rowspan="3"><h3>{{$form->nama}}</h3></td>
+                <td style="text-transform: uppercase;" width="50%" rowspan="3"><h3>{{$form->nama}}<br>(SPB)<br>(DEPARTEMEN  {!! ($show->bagian==1) ? 'Deck' : 'Mesin' !!})</h3></td>
                 <td width="25%" style="text-align: center;" colspan="3"><b>{{$form->judul}}</b></td>
             </tr>
             <tr>
@@ -68,22 +68,22 @@
         </table>
         <table class="table-bordered" width="100%">
             <tr style="text-align: left;">
-                <td colspan="2">Nama Kapal : {{$show->get_kapal()->nama}}</td>
-                <td colspan="2">Bagian : {!! ($show->bagian==1) ? 'Deck' : 'Mesin' !!} </td>
-                <td>Tanggal : {{ \Carbon\Carbon::parse($show->date)->format('d-m-Y') }}</td>
+                <td colspan="5">Hari ini {{ \Carbon\Carbon::parse($show->tanggal)->translatedFormat('l') }}
+                tanggal {{ \Carbon\Carbon::parse($show->tanggal)->format('d-m-Y') }} telah diturunkan barang-barang ini, 
+                dari kapal ke kantor {!! ($show->id_cabang) ? $show->get_cabang()->nama : '' !!}</td>
             </tr>
             <tr>
                 <td width="5">No</td>
-                <td width="35">Jenis Barang</td>
-                <td width="15">Satuan</td>
-                <td width="15">Jumlah Satuan</td>
-                <td width="30">Keterangan</td>
+                <td width="30">Nama Barang</td>
+                <td width="25">Kondisi Barang</td>
+                <td width="15">Jumlah</td>
+                <td width="25">Keterangan</td>
             </tr>
             @foreach($item as $row)
             <tr>
                 <td>{{$loop->iteration}}</td>
-                <td>{{$row->get_barang()->nama}}</td>
-                <td>{{$row->get_barang()->deskripsi}}</td>
+                <td>{{$row->barang}}</td>
+                <td>{{$row->kondisi}}</td>
                 <td>{{$row->jumlah}}</td>
                 <td></td>
             </tr>

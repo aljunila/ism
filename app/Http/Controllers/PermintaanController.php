@@ -291,11 +291,11 @@ class PermintaanController extends Controller
 
         $barangs = (array) $request->input('item', []);
         $jumlah = (array) $request->input('jumlah', []);
-        $ket = (array) $request->input('ket', []);
+        $keterangan = (array) $request->input('ket', []);
         $validItems = [];
         foreach ($barangs as $item => $value) {
             $jum = $jumlah[$item] ?? null;
-            $ket = $ket[$item] ?? null;
+            $ket = $keterangan[$item] ?? null;
             if ($value && $jum !== null && $jum !== '') {
                 $validItems[] = [
                     'barang' => $value,

@@ -156,13 +156,17 @@
                     </div>
 
                     <div class="col-sm-1">
+                        <input type="number" class="form-control stok" placeholder="Stok" name="stok[]" readonly>
+                    </div>
+
+                    <div class="col-sm-1">
                         <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]">
                     </div>
 
                     <div class="col-sm-2">
                         <select name="ket[]" class="form-control">
-                            <option value="Umum">Umum</option>
-                            <option value="Segera">Segera</option>
+                            <option value="Rusak">Rusak</option>
+                            <option value="Rekondisi">Rekondisi</option>
                         </select>
                     </div>
 
@@ -207,6 +211,36 @@
 
     });
 
+    $(document).on('change', '.select-item', function () {
+
+    let itemId = $(this).val();
+    let id_kapal = $('#id_kapal').val();
+
+    let row = $(this).closest('.field-item');
+
+    $.ajax({
+        url: '/penurunan/datagudang',
+        type: 'POST',
+        data: {
+            item: itemId,
+            id_kapal: id_kapal,
+        },
+        success: function (res) {
+            row.find('.stok').val(res.stok);
+            if (res.stok > 0) {
+                row.find('input[name="jumlah[]"]').prop('disabled', false);
+            } else {
+                row.find('input[name="jumlah[]"]').prop('disabled', true);
+                alert('Stok tidak tersedia');
+            }
+        },
+        error: function () {
+            alert('Gagal mengambil stok');
+        }
+    });
+
+});
+
     $(document).on("click", ".hapus", function () {
         $(this).closest(".field-item").remove();
     });
@@ -232,7 +266,7 @@
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = "{{ url('/permintaan') }}";
+                        window.location.href = "{{ url('/penurunan') }}";
                     });
             },
             error: function(xhr){
@@ -256,8 +290,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Form Permintaan Barang</h4>
-                    <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button>
+                    <h4 class="card-title">Form Penurunan Barang</h4>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -270,7 +303,7 @@
                     </div>
                     @endif
                     <form id="form_permintaan"
-                    data-store-url="{{ route('permintaan.store') }}" data-update-url="{{ isset($data) ? route('permintaan.update', $data->id) : '' }}">
+                    data-store-url="{{ route('penurunan.store') }}" data-update-url="{{ isset($data) ? route('penurunan.update', $data->id) : '' }}">
                     @csrf
                     <div class="row">
                         <div class="col-10">
@@ -308,7 +341,7 @@
                             </div>
                              <div class="mb-1 row" id="form-wrapper">
                                 <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Daftar Barang Permintaan</label>
+                                    <label class="col-form-label" for="first-name">Daftar Barang Penurunan</label>
                                 </div>
                                 <div class="col-sm-9">
                                     @if (isset($data))
@@ -355,40 +388,4 @@
     </div>
 </section>
 
-<div class="modal fade" id="modal-barang" tabindex="-1" aria-labelledby="modal-barang-label" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal-barang-label">Tambah Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-1">
-                    <label class="form-label">Kelompok Barang</label>
-                    <select id="barang-id_kel_barang" class="form-control">
-                        <option value="">-Pilih-</option>
-                        @foreach($kelompok as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Kode</label>
-                    <input type="text" id="barang-kode" class="form-control">
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Nama</label>
-                    <input type="text" id="barang-nama" class="form-control">
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Satuan</label>
-                    <input type="text" id="barang-deskripsi" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="btn-save-barang">Simpan</button>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection

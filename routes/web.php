@@ -52,6 +52,7 @@ use App\Http\Controllers\Data_crew\EvaluasiController;
 use App\Http\Controllers\Data_crew\KonditeController;
 use App\Http\Controllers\Data_crew\KriteriaController;
 use App\Http\Controllers\PermintaanController;
+use App\Http\Controllers\PenurunanController;
 use App\Http\Controllers\Laporan\LapPermintaanController;
 use App\Http\Controllers\Ck_kapal\BerlayarController;
 use App\Http\Controllers\Ck_kapal\LatihanController;
@@ -445,6 +446,20 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('pengiriman/{id}', [PermintaanController::class, 'elemenkirim'])->name('permintaan.elemenkirim');
         Route::post('kirimByIdp', [PermintaanController::class, 'kirimByIdp'])->name('permintaan.kirimByIdp');
         Route::post('dataPurchas/{id}', [PermintaanController::class, 'dataPurchas'])->name('permintaan.dataPurchas');
+    });
+
+    Route::prefix('penurunan')->group(function () {
+        Route::get('/', [PenurunanController::class, 'index'])->name('penurunan');
+        Route::get('form', [PenurunanController::class, 'form'])->name('penurunan.form');
+        Route::post('store', [PenurunanController::class, 'store'])->name('penurunan.store');
+        Route::post('data', [PenurunanController::class, 'data'])->name('penurunan.data');
+        Route::post('datagudang', [PenurunanController::class, 'datagudang'])->name('permintaan.datagudang');
+        Route::get('get/{id}', [PenurunanController::class, 'get'])->name('penurunan.get');
+        Route::get('/pdf/{uid}', [PenurunanController::class, 'pdf'])->name('penurunan.pdf');
+        Route::get('/{id}', [PenurunanController::class, 'elemen'])->name('penurunan.elemen');
+        Route::post('dataByIdp', [PenurunanController::class, 'dataByIdp'])->name('penurunan.dataByIdp');
+        Route::get('pengiriman/{id}', [PenurunanController::class, 'elemenkirim'])->name('penurunan.elemenkirim');
+        Route::post('kirimByIdp', [PenurunanController::class, 'kirimByIdp'])->name('penurunan.kirimByIdp');
     });
 
     Route::prefix('ck_kapal')->group(function(){

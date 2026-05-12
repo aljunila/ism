@@ -10,7 +10,6 @@ use App\Models\DetailPermintaan;
 use App\Models\LogBarang;
 use App\Models\Kapal;
 use App\Models\Perusahaan;
-use App\Models\ChecklistData;
 use App\Models\KodeForm;
 use App\Models\User;
 use App\Models\StatusBarang;
@@ -31,7 +30,6 @@ use Yajra\DataTables\Facades\DataTables;
 use Str;
 use Session;
 use DB;
-use App\Support\RoleContext;
 use Carbon\Carbon;
 
 class PermintaanController extends Controller

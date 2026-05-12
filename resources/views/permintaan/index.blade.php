@@ -443,7 +443,6 @@
                 },    
                 { data: 'bagian', name: 'bagian' },
                 { data: 'created', name: 'created' },
-                { data: 'penerima', name: 'penerima' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -474,6 +473,7 @@
                 },    
                 { data: 'bagian', name: 'bagian' },
                 { data: 'created', name: 'created' },
+                { data: 'penerima', name: 'penerima' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });

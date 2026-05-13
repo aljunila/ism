@@ -60,8 +60,7 @@ class PenurunanController extends Controller
             ->limit(200)
             ->get();
         if ($uid) {
-            $get = $this->visiblePermintaanByUid($uid);
-            abort_unless($get, 404);
+            $get = TurunBarang::where('uid', $uid)->where('is_delete', 0)->first();
             $data['data'] = $get;
             $data['detail'] = DetailTurun::where('id_turun', $get->id)->where('is_delete',0)->get();
         }
@@ -241,6 +240,14 @@ class PenurunanController extends Controller
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
+        $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
+        $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();
+        $ttd = [
+            'buat' => Session::get('id_karyawan'),
+            'setuju' => $get_nahkoda->id,
+            'mengetahui'   => $kepala->id,
+        ];
+
         DB::beginTransaction();
         try {
             $save = TurunBarang::create([
@@ -253,6 +260,7 @@ class PenurunanController extends Controller
                 'nomor' => $nomor,
                 'bagian' => $kat,
                 'tanggal' => $request->input('tanggal'),
+                'ttd' => $ttd,
                 'is_delete' => 0,
                 'created_by' => $senderId,
                 'created_date' => date('Y-m-d H:i:s')
@@ -363,6 +371,11 @@ class PenurunanController extends Controller
         $data['show'] = $show;
         $data['form'] = $form;
         $data['perusahaan'] = Perusahaan::find($id_perusahaan);
+        $ttd = $show->ttd;
+        $data['mengetahui'] = Karyawan::find($ttd['mengetahui']);
+        $data['setuju'] = Karyawan::find($ttd['setuju']);
+        $data['buat'] = Karyawan::find($ttd['buat']);
+        $data['terima'] = Karyawan::find($show->id_penerima);
         $data['item'] =  DB::table('t_detail_turun as a')
                         ->leftjoin('m_barang as c', 'c.id', '=', 'a.id_barang')
                         ->select('a.*', 'c.nama as barang', 'c.deskripsi as satuan')

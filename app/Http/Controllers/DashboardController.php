@@ -68,7 +68,15 @@ class DashboardController extends Controller
                             ->count();
             $data['document'] = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal)->whereNotNull('id_kapal')->get();
             $data['count_doc'] = count($data['document']);
-            $data['doc_kru'] = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal)->whereNotNull('id_karyawan')->get();
+            $data['doc_kru'] =  DB::table('file_upload as a')
+                                ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
+                                ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                                ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
+                                ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
+                                ->where('a.status', 'A')
+                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->whereNotNull('a.id_karyawan')
+                                ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==2) { // admin perusahaan
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->count();
@@ -84,9 +92,15 @@ class DashboardController extends Controller
                                 ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.pemilik', $id_perusahaan)->get();
             $data['count_doc'] = count($data['document']);
             $data['doc_kru'] = DB::table('file_upload as a')
+                                ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
                                 ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
-                                ->select('a.*')
-                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_perusahaan', $id_perusahaan)->get();
+                                ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
+                                ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
+                                ->where('a.status', 'A')
+                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->where('b.id_perusahaan', $id_perusahaan)
+                                ->whereNotNull('a.id_karyawan')
+                                ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==3) { // user kapal
             $id_kapal = Session::get('id_kapal');
@@ -105,10 +119,16 @@ class DashboardController extends Controller
                                 ->where('id_kapal', $id_kapal)
                                 ->get();
             $data['count_doc'] = count($data['document']);
-            $data['doc_kru'] = DB::table('file_upload as a')
+            $data['doc_kru'] =  DB::table('file_upload as a')
+                                ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
                                 ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
-                                ->select('a.*')
-                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.id_kapal', $id_kapal)->get();
+                                ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
+                                ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
+                                ->where('a.status', 'A')
+                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->where('b.id_kapal', $id_kapal)
+                                ->whereNotNull('a.id_karyawan')
+                                ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } else {
             $id_user = Session::get('userid');

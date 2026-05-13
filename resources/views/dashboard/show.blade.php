@@ -461,7 +461,7 @@
 <section id="dashboard-ecommerce">
     <div style="display:flex;justify-content:space-between;margin-bottom:1rem;padding-left:1rem;padding-right:1rem;">
         <div>
-            <h2>Selamat Datang Kembali, {{ Session::get('name') }}</h2>
+            <h2>Selamat Datang Kembali, {{ Session::get('name') }} {{ Session::get('previllage') }}</h2>
             <p class="mb-0 text-white-75">{{ $com->nama ?? '-' }}</p>
         </div>
 
@@ -910,16 +910,11 @@
                                 </thead>
                                 <tbody>
                                     @foreach($doc_kru as $kru)
-                                        @php
-                                            $karyawan = $kru->get_karyawan();
-                                            $kapalKru = $karyawan ? $karyawan->get_kapal() : null;
-                                            $file = $kru->get_file();
-                                        @endphp
                                         <tr>
-                                            <td>{{ $kapalKru->nama ?? '-' }}<br>
-                                                {{ $karyawan->nama ?? '-' }}</td>
+                                            <td>{{ $kru->kapal ?? '-' }}<br>
+                                                {{ $kru->karyawan ?? '-' }}</td>
                                             <td><a type="button" href="{{ asset('file_upload/'.$kru->file) }}" target="_blank" 
-                                                    title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->nama}}">{{ $file->nama ?? ($kru->nama ?? 'File') }}</a></td>
+                                                    title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->file}}">{{ $kru->filename ?? ($kru->filename ?? 'File') }}</a></td>
                                             <td>{{ \Carbon\Carbon::parse($kru->tgl_expired)->format('d-m-Y') }}</td>
                                         </tr>
                                     @endforeach

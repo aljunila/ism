@@ -94,27 +94,44 @@
         </table>
         <table class="table-bordered" width="100%">
             <tr>
-                <td>Pengirim Barang<br>
+                <td>Pengirim Barang,<br>
+                @if($logistik->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $logistik->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$logistik->nama}}</u><br>
+                    BAGIAN LOGISTIK
                 </td>
-                <td>Disetujui Oleh<br>
-                    
-                    <br><br><br>
-                    
+
+                <td>Penerima Barang,<br>
+                @if($terima->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $terima->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$terima->nama}}</u><br>
+                    {{$terima->get_jabatan()->nama}}
                 </td>
-                <td>Penerima Barang<br>
-                    
-                    <br><br><br>
-                    
-                </td>
+
                 <td>Mengetahui 1,<br>
-                    
-                    <br><br><br>
-                    
+                @if($setuju->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $setuju->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$setuju->nama}}</u><br>
+                    NAHKODA
                 </td>
+
                 <td>Mengetahui 2,<br>
-                    
-                    <br><br><br>
-                    
+                @if($mengetahui->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $mengetahui->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$mengetahui->nama}}</u><br>
+                    KEPALA CABANG
                 </td>
             </tr>
         </table>

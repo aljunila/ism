@@ -459,6 +459,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::prefix('penurunan')->group(function () {
         Route::get('/', [PenurunanController::class, 'index'])->name('penurunan');
         Route::get('form', [PenurunanController::class, 'form'])->name('penurunan.form');
+        Route::get('form/{uid}', [PenurunanController::class, 'form'])->name('penurunan.edit');
+        Route::post('update/{id}', [PenurunanController::class, 'update'])->name('penurunan.update');
         Route::post('generate-otp-turun', [PenurunanController::class, 'generateTurunOtp'])->name('penurunan.generateOtpTurun');
         Route::post('store', [PenurunanController::class, 'store'])->name('penurunan.store');
         Route::post('data', [PenurunanController::class, 'data'])->name('penurunan.data');
@@ -469,6 +471,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('dataByIdp', [PenurunanController::class, 'dataByIdp'])->name('penurunan.dataByIdp');
         Route::get('pengiriman/{id}', [PenurunanController::class, 'elemenkirim'])->name('penurunan.elemenkirim');
         Route::post('kirimByIdp', [PenurunanController::class, 'kirimByIdp'])->name('penurunan.kirimByIdp');
+        Route::delete('destroy/{id}', [PenurunanController::class, 'destroy'])->name('penurunan.destroy');
+        Route::delete('deldetail/{id}', [PenurunanController::class, 'deldetail'])->name('penurunan.deldetail');
     });
 
     Route::prefix('ck_kapal')->group(function(){

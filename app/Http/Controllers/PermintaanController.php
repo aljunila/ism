@@ -23,6 +23,7 @@ use App\Models\KirimOtp;
 use App\Models\Gudang;
 use App\Models\FormISM;
 use App\Models\Notifikasi;
+use App\Models\Karyawan;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -592,14 +593,24 @@ class PermintaanController extends Controller
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$bagian.'/'.$tanggal;
 
+        $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
+        $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();
+        $logistik = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 35)->where('status', 'A')->where('resign','N')->first();
+        $ttd = [
+            'buat' => Session::get('id_karyawan'),
+            'setuju' => $get_nahkoda->id,
+            'mengetahui'   => $kepala->id,
+            'logistik' => $logistik->id
+        ];
         $save = null;
-        DB::transaction(function () use ($request, $bagian, $nomor, $validItems, $id_cabang, &$save) {
+        DB::transaction(function () use ($request, $bagian, $nomor, $validItems, $id_cabang, $ttd, &$save) {
             $save = Permintaan::create([
               'uid' => Str::uuid()->toString(),
               'id_kapal' => $request->input('id_kapal'),
               'nomor' => $nomor,
               'bagian' => $bagian,
               'tanggal' => $request->input('tanggal'),
+              'ttd' => $ttd,
               'is_delete' => 0,
               'created_by' => Session::get('userid'),
               'created_date' => date('Y-m-d H:i:s')
@@ -1349,6 +1360,11 @@ class PermintaanController extends Controller
                 ->where('a.id', 47)->first();
         $data['show'] = $show;
         $data['form'] = $form;
+        $ttd = $show->ttd;
+        $data['mengetahui'] = Karyawan::find($ttd['mengetahui']);
+        $data['setuju'] = Karyawan::find($ttd['setuju']);
+        $data['buat'] = Karyawan::find($ttd['buat']);
+        $data['logistik'] = Karyawan::find($ttd['logistik']);
         $data['perusahaan'] = Perusahaan::find($id_perusahaan);
         $data['item'] = DetailPermintaan::where('id_permintaan', $show->id)->where('is_delete', 0)->get(); 
         $data['created'] = User::find($show->created_by);
@@ -1459,6 +1475,7 @@ class PermintaanController extends Controller
         }
 
         $kapal = Kapal::where('status', 'A')->findOrFail($request->input('id_kapal'));
+        $id_cabang = (int) $kapal->id_cabang;
         if ((int) $this->currentRoleJenis() === 2 && (int) $kapal->pemilik !== (int) Session::get('id_perusahaan')) {
             return response()->json(['message' => 'Kapal tidak valid untuk role aktif'], 403);
         }
@@ -1490,6 +1507,15 @@ class PermintaanController extends Controller
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
+        $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
+        $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();
+        $logistik = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 35)->where('status', 'A')->where('resign','N')->first();
+        $ttd = [
+            'setuju' => $get_nahkoda->id,
+            'mengetahui'   => $kepala->id,
+            'logistik' => $logistik->id
+        ];
+
         $checked = $request->check ?? [];
         $jml_kirim = $request->jumlah ?? [];
         $tot_barang = $request->total ?? [];
@@ -1508,6 +1534,7 @@ class PermintaanController extends Controller
                 'nomor' => $nomor,
                 'bagian' => $kat,
                 'tanggal' => $request->input('tanggal'),
+                'ttd' => $ttd,
                 'is_delete' => 0,
                 'created_by' => $senderId,
                 'created_date' => date('Y-m-d H:i:s')
@@ -1672,7 +1699,11 @@ class PermintaanController extends Controller
                         ->leftjoin('m_barang as c', 'c.id', '=', 'b.id_barang')
                         ->select('a.*', 'c.nama as barang', 'c.deskripsi as satuan', 'b.jumlah as jml_minta')
                         ->where('id_kirim', $show->id)->where('a.is_delete', 0)->get();
-        $data['created'] = User::find($show->created_by);
+        $ttd = $show->ttd;
+        $data['mengetahui'] = Karyawan::find($ttd['mengetahui']);
+        $data['setuju'] = Karyawan::find($ttd['setuju']);
+        $data['logistik'] = Karyawan::find($ttd['logistik']);
+        $data['terima'] = Karyawan::find($show->id_penerima);
         $pdf = Pdf::loadView('permintaan.pdfkirim', $data)
                 ->setPaper('a3', 'landscap');
         return $pdf->stream($form->ket.' '.$nama.'.pdf');

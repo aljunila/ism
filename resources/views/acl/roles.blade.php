@@ -59,6 +59,7 @@
                         <option value="2">Admin Kapal</option>
                         <option value="3">Karyawan</option>
                         <option value="4">Admin Pusat</option>
+                        <option value="5">Admin Cabang</option>
                     </select>
                 </div>
                 <div class="mb-1">

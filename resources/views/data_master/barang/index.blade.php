@@ -16,12 +16,18 @@
         <table id="table-barang" class="table table-striped w-100">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Kelompok</th>
-                    <th>Kode</th>
-                    <th>Nama</th>
-                    <th>Satuan</th>
-                    <th>Aksi</th>
+                    <th rowspan="2">No</th>
+                    <th rowspan="2">Kelompok</th>
+                    <th rowspan="2">Kode</th>
+                    <th rowspan="2">Nama</th>
+                    <th rowspan="2">Satuan</th>
+                    <th colspan="2">Jumlah Order</th>
+                    <th rowspan="2">Gambar</th>
+                    <th rowspan="2">Aksi</th>
+                </tr>
+                <tr>
+                    <th>Min</th>
+                    <th>Max</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -38,30 +44,94 @@
             </div>
             <div class="modal-body">
                 <div class="mb-1">
-                    <label class="form-label">Kelompok Barang</label>
-                    <select id="barang-id_kel_barang" class="form-control">
-                        <option value="">-Pilih-</option>
-                        @foreach($kelompok as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Kelompok</label>
+                        </div>
+                        <div class="col-9">
+                            <select id="barang-id_kel_barang" class="form-control">
+                                <option value="">-Pilih-</option>
+                                @foreach($kelompok as $k)
+                                    <option value="{{$k->id}}">{{$k->nama}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-1">
-                    <label class="form-label">Kode</label>
-                    <input type="text" id="barang-kode" class="form-control">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Kode</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" id="barang-kode" class="form-control">
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-1">
-                    <label class="form-label">Nama</label>
-                    <input type="text" id="barang-nama" class="form-control">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Nama</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" id="barang-nama" class="form-control">
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-1">
-                    <label class="form-label">Satuan</label>
-                    <input type="text" id="barang-deskripsi" class="form-control">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Satuan</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" id="barang-deskripsi" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                 <div class="mb-1">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Jumlah</label>
+                        </div>
+                        <div class="col-4">
+                            <input type="number" id="barang-min" class="form-control" placeholder="Minimum">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" id="barang-max" class="form-control" placeholder="Maximum">
+                        </div>
+                    </div>
+                </div>
+                 <div class="mb-1">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Upload Image</label>
+                        </div>
+                        <div class="col-9">
+                            <input type="file" id="barang-img" class="form-control">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" id="btn-save-barang">Simpan</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="filePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Preview File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center" id="previewContent">
+                <!-- isi preview -->
+            </div>
+
         </div>
     </div>
 </div>
@@ -93,6 +163,9 @@
                 { data: 'kode', name: 'kode' },
                 { data: 'nama', name: 'nama' },
                 { data: 'deskripsi', name: 'deskripsi' },
+                { data: 'min', name: 'min' },
+                { data: 'max', name: 'max' },
+                { data: 'deskripsi', name: 'deskripsi' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -103,6 +176,9 @@
             $('#barang-kode').val('');
             $('#barang-deskripsi').val('');
             $('#barang-id_kel_barang').val('');
+            $('#barang-min').val('');
+            $('#barang-max').val('');
+            $('#barang-img').val('');
             $('#btn-save-barang').data('mode', 'create').data('id', '');
         };
 
@@ -114,17 +190,33 @@
         $('#btn-save-barang').on('click', function () {
             const mode = $(this).data('mode') || 'create';
             const id = $(this).data('id');
-            const payload = {
-                nama: $('#barang-nama').val(),
-                kode: $('#barang-kode').val(),
-                deskripsi: $('#barang-deskripsi').val(),
-                id_kel_barang: $('#barang-id_kel_barang').val(),
+            let formData = new FormData();
+
+            formData.append('nama', $('#barang-nama').val());
+            formData.append('kode', $('#barang-kode').val());
+            formData.append('deskripsi', $('#barang-deskripsi').val());
+            formData.append('id_kel_barang', $('#barang-id_kel_barang').val());
+            formData.append('min', $('#barang-min').val());
+            formData.append('max', $('#barang-max').val());
+
+            let file = $('#barang-img')[0].files[0];
+            if (file) {
+                formData.append('file', file);
+            }
+
+             const ajaxOpts = {
+                url: mode === 'edit'
+                    ? '{{ url('data_master/barang') }}/' + id
+                    : '{{ route('barang.store') }}',
+                type: mode === 'edit' ? 'POST' : 'POST', 
+                data: formData,
+                processData: false,
+                contentType: false
             };
-            const ajaxOpts = {
-                url: mode === 'edit' ? '{{ url('data_master/barang') }}/' + id : '{{ route('barang.store') }}',
-                type: mode === 'edit' ? 'PUT' : 'POST',
-                data: payload
-            };
+            if (mode === 'edit') {
+                formData.append('_method', 'PUT');
+            }
+
             $.ajax(ajaxOpts)
             .done(res => {
                 Swal.fire(res.status, res.message, res.status)
@@ -157,6 +249,9 @@
             $('#barang-kode').val(btn.data('kode'));
             $('#barang-deskripsi').val(btn.data('deskripsi'));
             $('#barang-id_kel_barang').val(btn.data('id_kel_barang'));
+            $('#barang-min').val(btn.data('min'));
+            $('#barang-max').val(btn.data('max'));
+            $('#barang-img').val(btn.data('img'));
             $('#btn-save-barang').data('mode', 'edit').data('id', btn.data('id'));
             $('#modal-barang').modal('show');
         });
@@ -184,6 +279,24 @@
                 });
             });
         });
+    });
+
+    $(document).on('click', '.btn-preview', function () {
+
+        let file = $(this).data('file');
+        let url = "{{ asset('file_barang') }}/" + file;
+
+        let ext = file.split('.').pop().toLowerCase();
+
+        let html = '';
+
+        // gambar
+        if (['jpg','jpeg','png'].includes(ext)) {
+            html = `<img src="${url}" class="img-fluid">`;
+        }
+
+        $('#previewContent').html(html);
+        $('#filePreviewModal').modal('show');
     });
 </script>
 @endsection

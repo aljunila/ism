@@ -11,7 +11,11 @@ class Permintaan extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 't_permintaan_barang';
-    protected $fillable = ['id', 'uid', 'id_kapal', 'bagian', 'nomor', 'tanggal', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'id_kapal', 'bagian', 'nomor', 'tanggal', 'ttd', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+
+    protected $casts = [
+        'ttd' => 'array',
+    ];
 
     public function get_kapal()
     {

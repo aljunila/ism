@@ -22,7 +22,13 @@
     <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
     <script>
+    let otpGenerated = false;
+
     function initSearchSelect(selector) {
+        if (typeof TomSelect === 'undefined') {
+            return;
+        }
+
         $(selector).each(function () {
             if (this.tomselect) return;
             new TomSelect(this, {
@@ -33,6 +39,28 @@
                 }
             });
         });
+    }
+
+    function getAjaxErrorMessage(xhr, fallback) {
+        if (xhr.responseJSON?.message) {
+            return xhr.responseJSON.message;
+        }
+
+        if (xhr.responseJSON?.errors) {
+            const firstKey = Object.keys(xhr.responseJSON.errors)[0];
+            if (firstKey && xhr.responseJSON.errors[firstKey]?.length) {
+                return xhr.responseJSON.errors[firstKey][0];
+            }
+        }
+
+        return fallback;
+    }
+
+    function resetOtpState() {
+        otpGenerated = false;
+        $('#otp_code').val('').prop('disabled', true);
+        $('#otp-status').removeClass('text-success text-danger').addClass('text-muted')
+            .text('Generate OTP setelah memilih penerima.');
     }
 
     const resetForm = () => {
@@ -97,7 +125,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "/permintaan/deldetail/" + id,
+                    url: "/penurunan/deldetail/" + id,
                     type: "delete",
                     data: {
                         _token: "{{ csrf_token() }}"
@@ -156,13 +184,17 @@
                     </div>
 
                     <div class="col-sm-1">
+                        <input type="number" class="form-control stok" placeholder="Stok" name="stok[]" readonly>
+                    </div>
+
+                    <div class="col-sm-1">
                         <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]">
                     </div>
 
                     <div class="col-sm-2">
                         <select name="ket[]" class="form-control">
-                            <option value="Umum">Umum</option>
-                            <option value="Segera">Segera</option>
+                            <option value="Rusak">Rusak</option>
+                            <option value="Rekondisi">Rekondisi</option>
                         </select>
                     </div>
 
@@ -207,52 +239,116 @@
 
     });
 
+    $(document).on('change', '.select-item', function () {
+
+    let itemId = $(this).val();
+    let id_kapal = $('#id_kapal').val();
+
+    let row = $(this).closest('.field-item');
+
+    $.ajax({
+        url: '/penurunan/datagudang',
+        type: 'POST',
+        data: {
+            item: itemId,
+            id_kapal: id_kapal,
+        },
+        success: function (res) {
+            row.find('.stok').val(res.stok);
+            if (res.stok > 0) {
+                row.find('input[name="jumlah[]"]').prop('disabled', false);
+            } else {
+                row.find('input[name="jumlah[]"]').prop('disabled', true);
+                alert('Stok tidak tersedia');
+            }
+        },
+        error: function () {
+            alert('Gagal mengambil stok');
+        }
+    });
+
+});
+
     $(document).on("click", ".hapus", function () {
         $(this).closest(".field-item").remove();
     });
 
-    function toggleDetailKeterangan(input) {
-        const original = String($(input).data('original') ?? '');
-        const current = String($(input).val() ?? '');
-        const wrapper = $(input).closest('.jumlah-cell');
-        const reasonBlock = wrapper.find('.detail-keterangan-wrapper');
-        const reasonInput = wrapper.find('.detail-keterangan');
-        const isChanged = current !== '' && current !== original;
+    $('#id_penerima').on('change', function () {
+        resetOtpState();
+        $('#btn-generate-otp').prop('disabled', !$(this).val());
+    });
 
-        reasonBlock.toggleClass('d-none', !isChanged);
-        reasonInput.prop('required', isChanged);
-
-        if (!isChanged) {
-            reasonInput.val('');
+    $('#btn-generate-otp').on('click', function () {
+        const receiverId = $('#id_penerima').val();
+        if (!receiverId) {
+            Swal.fire('Penerima belum dipilih', 'Pilih user penerima terlebih dahulu.', 'warning');
+            return;
         }
-    }
 
-    $(document).on('input change', '.detail-jumlah', function () {
-        toggleDetailKeterangan(this);
+        const btn = $(this);
+        const originalText = btn.html();
+        btn.prop('disabled', true).html('Mengirim...');
+        $('#otp-status').removeClass('text-success text-danger').addClass('text-muted').text('Mengirim OTP ke penerima...');
+
+        $.ajax({
+            url: "{{ route('penurunan.generateOtpTurun') }}",
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                id_penerima: receiverId
+            },
+            success: function(response){
+                otpGenerated = true;
+                $('#otp_code').prop('disabled', false).focus();
+                $('#otp-status').removeClass('text-muted text-danger').addClass('text-success')
+                    .text(response.message ?? 'OTP berhasil dikirim ke penerima.');
+
+                if (typeof window.refreshNotifications === 'function') {
+                    window.refreshNotifications();
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'OTP Terkirim',
+                    text: response.message ?? 'OTP berhasil dikirim ke penerima',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            },
+            error: function(xhr){
+                otpGenerated = false;
+                $('#otp_code').val('').prop('disabled', true);
+                $('#otp-status').removeClass('text-muted text-success').addClass('text-danger')
+                    .text(getAjaxErrorMessage(xhr, 'Gagal mengirim OTP'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: getAjaxErrorMessage(xhr, 'Gagal mengirim OTP')
+                });
+            },
+            complete: function(){
+                btn.prop('disabled', !$('#id_penerima').val()).html(originalText);
+            }
+        });
     });
 
     $('#form_permintaan').on('submit', function(e){
         e.preventDefault(); // cegah submit biasa
         let form = $(this);
-        let invalidChange = false;
 
-        $('.detail-jumlah').each(function () {
-            toggleDetailKeterangan(this);
-            const original = String($(this).data('original') ?? '');
-            const current = String($(this).val() ?? '');
-            const reason = $(this).closest('.jumlah-cell').find('.detail-keterangan').val();
+        if (!$('#id_penerima').val()) {
+            Swal.fire('Penerima wajib dipilih', 'Pilih user penerima sebelum menyimpan.', 'warning');
+            return;
+        }
 
-            if (current !== '' && current !== original && !String(reason || '').trim()) {
-                invalidChange = true;
-            }
-        });
+        const otpCode = ($('#otp_code').val() || '').trim();
+        if (!otpGenerated || !otpCode) {
+            Swal.fire('OTP wajib diisi', 'Generate OTP lalu masukkan kode OTP dari penerima.', 'warning');
+            return;
+        }
 
-        if (invalidChange) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Keterangan wajib diisi',
-                text: 'Isi keterangan untuk setiap jumlah permintaan yang bertambah atau berkurang.'
-            });
+        if (!/^[0-9]{6}$/.test(otpCode)) {
+            Swal.fire('OTP tidak valid', 'Kode OTP harus 6 digit angka.', 'warning');
             return;
         }
 
@@ -274,22 +370,21 @@
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = "{{ url('/permintaan') }}";
+                        window.location.href = "{{ url('/penurunan') }}";
                     });
             },
             error: function(xhr){
-                const errors = xhr.responseJSON?.errors;
-                const firstError = errors ? Object.values(errors).flat()[0] : null;
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: firstError || xhr.responseJSON?.message || 'Gagal menyimpan data'
+                    text: getAjaxErrorMessage(xhr, 'Gagal menyimpan data')
                 });
             }
         });
     });
 
     initSearchSelect('.js-search-select');
+    resetOtpState();
 
     </script>
 @endsection
@@ -300,8 +395,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Form Permintaan Barang</h4>
-                    <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button>
+                    <h4 class="card-title">Form Penurunan Barang</h4>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -314,7 +408,7 @@
                     </div>
                     @endif
                     <form id="form_permintaan"
-                    data-store-url="{{ route('permintaan.store') }}" data-update-url="{{ isset($data) ? route('permintaan.update', $data->id) : '' }}">
+                    data-store-url="{{ route('penurunan.store') }}" data-update-url="{{ isset($data) ? route('penurunan.update', $data->id) : '' }}">
                     @csrf
                     <div class="row">
                         <div class="col-10">
@@ -350,9 +444,36 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="id_penerima">User Penerima</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select name="id_penerima" id="id_penerima" class="js-search-select w-100" required>
+                                        <option value="">Pilih User Penerima</option>
+                                        @foreach($penerima as $user)
+                                            <option value="{{ $user->id }}">
+                                                {{ $user->nama ?? $user->username }} ({{ $user->username }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="otp_code">Kode OTP</label>
+                                </div>
+                                <div class="col-sm-5">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="otp_code" id="otp_code" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="Masukkan OTP dari penerima" disabled required>
+                                        <button type="button" class="btn btn-outline-primary" id="btn-generate-otp" disabled>Generate OTP</button>
+                                    </div>
+                                    <small id="otp-status" class="text-muted">Generate OTP setelah memilih penerima.</small>
+                                </div>
+                            </div>
                              <div class="mb-1 row" id="form-wrapper">
                                 <div class="col-sm-3">
-                                    <label class="col-form-label" for="first-name">Daftar Barang Permintaan</label>
+                                    <label class="col-form-label" for="first-name">Daftar Barang Penurunan</label>
                                 </div>
                                 <div class="col-sm-9">
                                     @if (isset($data))
@@ -368,34 +489,13 @@
                                         </thead>
                                         <tbody>
                                             @foreach($detail as $d)
-                                            @php
-                                                $canEditDetail = (int) $d->status === (int) ($permintaanStatusId ?? 0);
-                                            @endphp
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
                                                 <td>{{$d->get_barang()->nama}}</td>
                                                 <td>{{$d->get_barang()->deskripsi}}</td>
-                                                <td class="jumlah-cell">
-                                                    <input
-                                                        type="number"
-                                                        class="form-control detail-jumlah"
-                                                        name="detail_jumlah[{{$d->id}}]"
-                                                        value="{{$d->jumlah}}"
-                                                        min="1"
-                                                        data-original="{{$d->jumlah}}"
-                                                    >
-                                                    <div class="detail-keterangan-wrapper d-none mt-1">
-                                                        <label class="form-label mb-25">Keterangan perubahan jumlah</label>
-                                                        <textarea
-                                                            name="detail_keterangan[{{$d->id}}]"
-                                                            class="form-control detail-keterangan"
-                                                            rows="2"
-                                                            placeholder="Jelaskan kenapa jumlah bertambah atau berkurang"
-                                                        ></textarea>
-                                                    </div>
-                                                </td>
+                                                <td>{{$d->jumlah}}</td>
                                                 <td>
-                                                    @if($canEditDetail)
+                                                    @if((int) $d->status === (int) ($permintaanStatusId ?? 0)) 
                                                         <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{$d->id}}">Hapus</button>
                                                     @endif
                                                 </td>
@@ -420,40 +520,4 @@
     </div>
 </section>
 
-<div class="modal fade" id="modal-barang" tabindex="-1" aria-labelledby="modal-barang-label" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal-barang-label">Tambah Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-1">
-                    <label class="form-label">Kelompok Barang</label>
-                    <select id="barang-id_kel_barang" class="form-control">
-                        <option value="">-Pilih-</option>
-                        @foreach($kelompok as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Kode</label>
-                    <input type="text" id="barang-kode" class="form-control">
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Nama</label>
-                    <input type="text" id="barang-nama" class="form-control">
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Satuan</label>
-                    <input type="text" id="barang-deskripsi" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="btn-save-barang">Simpan</button>
-            </div>
-        </div>
-    </div>
-</div>
 @endsection

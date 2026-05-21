@@ -69,7 +69,7 @@
         <table class="table-bordered" width="100%">
             <tr style="text-align: left;">
                 <td colspan="2">Nama Kapal : {{$show->get_kapal()->nama}}</td>
-                <td colspan="2">Bagian : {{$show->bagian}}</td>
+                <td colspan="2">Bagian : {!! ($show->bagian==1) ? 'Deck' : 'Mesin' !!} </td>
                 <td>Tanggal : {{ \Carbon\Carbon::parse($show->date)->format('d-m-Y') }}</td>
             </tr>
             <tr>
@@ -91,28 +91,41 @@
         </table>
         <table class="table-bordered" width="100%">
             <tr>
-                <td>Pembuat  Permintaan<br>
-                    @if($created->get_karyawan()->tanda_tangan)
-                    <img src="file://{{ public_path('ttd_karyawan/' . $created->get_karyawan()->tanda_tangan) }}" width="100px" height="75px"><br>
-                    @else
-                    <br><br><br>
-                    @endif
-                    {{$created->get_karyawan()->nama}}
+                <td>Pembuat Permintaan,<br>
+                @if($buat->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $buat->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$buat->nama}}</u><br>
+                    {{$buat->get_jabatan()->nama}}
                 </td>
-                <td>Disetujui Oleh<br>
-                    
-                    <br><br><br>
-                    
+                <td>Disetujui Oleh,<br>
+                @if($setuju->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $setuju->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$setuju->nama}}</u><br>
+                    NAHKODA
                 </td>
-                <td>Diperiksa Oleh<br>
-                    
-                    <br><br><br>
-                    
+                <td>Diperiksa Oleh,<br>
+                @if($logistik->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $logistik->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$logistik->nama}}</u><br>
+                    BAGIAN LOGISTIK
                 </td>
                 <td>Mengetahui,<br>
-                    
-                    <br><br><br>
-                    
+                @if($mengetahui->tanda_tangan)
+                <img src="file://{{ public_path('ttd_karyawan/' . $mengetahui->tanda_tangan) }}" width="100px" height="75px"><br>
+                @else
+                <br><br><br>
+                @endif
+                    <u>{{$mengetahui->nama}}</u><br>
+                    KEPALA CABANG
                 </td>
             </tr>
         </table>

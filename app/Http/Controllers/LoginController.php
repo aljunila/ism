@@ -54,18 +54,7 @@ class LoginController extends Controller
                 $request->session()->regenerate();
 
                 $jenis = (int) ($role->jenis ?? 0);
-                $previllageLegacy = 4;
-                if ($isSuper) {
-                    $previllageLegacy = 1;
-                } elseif ($jenis === 1) {
-                    $previllageLegacy = 2;
-                } elseif ($jenis === 2) {
-                    $previllageLegacy = 3;
-                } elseif ($jenis === 3) {
-                    $previllageLegacy = 4;
-                } elseif ($jenis === 4) {
-                    $previllageLegacy = 5;
-                }
+                $previllageLegacy = $isSuper ? 1 : ($jenis > 0 ? $jenis + 1 : 4);
 
                 Session::put('userid',$data->id);
                 Session::put('username',$data->username);
@@ -76,6 +65,7 @@ class LoginController extends Controller
                 Session::put('id_karyawan',$data->id_karyawan);
                 Session::put('id_perusahaan',$data->id_perusahaan);
                 Session::put('id_kapal',$data->id_kapal);
+                Session::put('id_cabang',$data->get_karyawan()->id_cabang);
                 Session::put('pic',$data->pic);
                 Session::put('login',TRUE);
                 // set context role/perusahaan aktif
@@ -254,7 +244,7 @@ class LoginController extends Controller
                 'username' => $get->nik,
                 'password' => Hash::make($request->input('password1')),
                 'id_previllage' => 4,
-                'role_id' => 6,
+                'role_id' => 8,
                 'id_perusahaan' => $get->id_perusahaan,
                 'id_kapal' => $get->id_kapal,
                 'id_karyawan'=> $get->id,

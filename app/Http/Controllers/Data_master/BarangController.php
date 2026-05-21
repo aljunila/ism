@@ -43,17 +43,32 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
-        $validated = ([
-            'id_kel_barang' => $request->post('id_kel_barang'),
-            'kode' => $request->post('kode'),
-            'nama' => $request->post('nama'),
-            'deskripsi' => $request->post('deskripsi')
-        ]);
         $cek = Barang::where('kode', $request->post('kode'))->where('is_delete', 0)->exists();
         if($cek){
              return response()->json(['status' => 'error', 'message' => 'Maaf, kode tidak boleh sama'],422);
         } else {
-            Barang::create($validated);
+            $validated = ([
+                'id_kel_barang' => $request->post('id_kel_barang'),
+                'kode' => $request->post('kode'),
+                'nama' => $request->post('nama'),
+                'deskripsi' => $request->post('deskripsi'),
+                'min' => $request->post('min'),
+                'max' => $request->post('max'),
+            ]);
+            $save = Barang::create($validated);
+            
+            if($request->hasFile('file')) {
+                $request->validate([
+                'file' => 'required|file|mimes:jpg,jpeg,png|max:20480',
+                ]);
+                $file = $request->file('file');
+                $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
+            
+                // isi dengan nama folder tempat kemana file diupload
+                $tujuan_upload = 'file_barang';
+                $file->move($tujuan_upload,$nama_file);
+                $save = Barang::find($save->id)->update(['img' => $nama_file]); 
+            }
             return response()->json(['status' => 'success', 'message' => 'Data barang berhasil disimpan'],200);
         }
     }

@@ -423,6 +423,99 @@
             color: #ffffff;
         }
 
+        .notification-dropdown-menu {
+            width: 360px;
+            max-width: calc(100vw - 1.5rem);
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .notification-dropdown-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            padding: .85rem 1rem;
+            border-bottom: 1px solid #ebe9f1;
+        }
+
+        .notification-dropdown-title {
+            margin: 0;
+            font-size: .95rem;
+            font-weight: 700;
+            color: #3d3b63;
+        }
+
+        .notification-mark-read {
+            border: 0;
+            background: transparent;
+            color: #0d6efd;
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 0;
+        }
+
+        .notification-list {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            display: block;
+            padding: .85rem 1rem;
+            color: #5e5873;
+            text-decoration: none;
+            border-bottom: 1px solid #f0eef6;
+        }
+
+        .notification-item:hover {
+            color: #5e5873;
+            background: #f8f8fb;
+        }
+
+        .notification-item.unread {
+            background: rgba(13, 110, 253, .06);
+        }
+
+        .notification-item-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+            font-size: .88rem;
+            font-weight: 700;
+            color: #3d3b63;
+        }
+
+        .notification-unread-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            flex: 0 0 8px;
+            background: #ea5455;
+        }
+
+        .notification-item-message {
+            margin: .28rem 0 0;
+            font-size: .8rem;
+            line-height: 1.35;
+            color: #6e6b7b;
+        }
+
+        .notification-item-time {
+            display: block;
+            margin-top: .35rem;
+            font-size: .72rem;
+            color: #a8a4b6;
+        }
+
+        .notification-empty {
+            padding: 1.25rem;
+            text-align: center;
+            color: #a8a4b6;
+            font-size: .86rem;
+        }
+
         body.layout-zahir .app-content,
         body.layout-zahir .footer {
             margin-left: 0 !important;
@@ -691,6 +784,21 @@
             </div>
             <ul class="nav navbar-nav align-items-center ms-auto" id="navbar-right-section">
                 <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="moon"></i></a></li>
+                <li class="nav-item dropdown dropdown-notification me-25">
+                    <a class="nav-link" id="notificationDropdown" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="ficon" data-feather="bell"></i>
+                        <span class="badge rounded-pill bg-danger badge-up" id="notification-count" style="display:none;">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="notificationDropdown">
+                        <div class="notification-dropdown-header">
+                            <h6 class="notification-dropdown-title">Notifikasi</h6>
+                            <button type="button" class="notification-mark-read" id="notification-mark-all">Tandai dibaca</button>
+                        </div>
+                        <div class="notification-list" id="notification-list">
+                            <div class="notification-empty">Memuat notifikasi...</div>
+                        </div>
+                    </div>
+                </li>
                 @php
                     use App\Models\ResetPassword;
                     use App\Models\Perusahaan;
@@ -1130,6 +1238,101 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
         });
+
+        (function () {
+            const countEl = $('#notification-count');
+            const listEl = $('#notification-list');
+            const markAllBtn = $('#notification-mark-all');
+
+            function escapeHtml(value) {
+                return $('<div>').text(value ?? '').html();
+            }
+
+            function renderCount(count) {
+                const total = Number(count || 0);
+                if (total > 0) {
+                    countEl.text(total > 99 ? '99+' : total).show();
+                } else {
+                    countEl.text('0').hide();
+                }
+            }
+
+            function renderNotifications(items) {
+                if (!items || !items.length) {
+                    listEl.html('<div class="notification-empty">Belum ada notifikasi.</div>');
+                    return;
+                }
+
+                const html = items.map(function (item) {
+                    const unreadClass = item.is_read ? '' : ' unread';
+                    const dot = item.is_read ? '' : '<span class="notification-unread-dot"></span>';
+                    const url = item.url || '#';
+                    return `
+                        <a href="${escapeHtml(url)}" class="notification-item notification-item-link${unreadClass}" data-id="${item.id}" data-url="${escapeHtml(url)}">
+                            <span class="notification-item-title">
+                                <span>${escapeHtml(item.judul || 'Notifikasi')}</span>
+                                ${dot}
+                            </span>
+                            <p class="notification-item-message">${escapeHtml(item.pesan || '-')}</p>
+                            <span class="notification-item-time">${formatTgl(item.created_date)}</span>
+                        </a>
+                    `;
+                }).join('');
+
+                listEl.html(html);
+            }
+
+            function loadNotifications() {
+                $.get('{{ route('notifications.index') }}')
+                    .done(function (res) {
+                        renderCount(res.unread_count);
+                        renderNotifications(res.notifications || []);
+                    })
+                    .fail(function () {
+                        renderCount(0);
+                        listEl.html('<div class="notification-empty">Notifikasi belum tersedia.</div>');
+                    });
+            }
+
+            window.refreshNotifications = loadNotifications;
+
+            function markRead(id, callback) {
+                $.post('{{ route('notifications.read') }}', id ? { id: id } : {})
+                    .done(function (res) {
+                        renderCount(res.unread_count);
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    });
+            }
+
+            $('#notificationDropdown').on('shown.bs.dropdown', loadNotifications);
+
+            markAllBtn.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                markRead(null, loadNotifications);
+            });
+
+            $(document).on('click', '.notification-item-link', function (e) {
+                const id = $(this).data('id');
+                const url = $(this).data('url');
+
+                if (!url || url === '#') {
+                    e.preventDefault();
+                    markRead(id, loadNotifications);
+                    return;
+                }
+
+                e.preventDefault();
+                markRead(id, function () {
+                    window.location.href = url;
+                });
+            });
+
+            loadNotifications();
+            setInterval(loadNotifications, 60000);
+        })();
 
         $('#change-pass').on('click', function(e){
             e.preventDefault(); // cegah submit biasa

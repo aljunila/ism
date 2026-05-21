@@ -268,6 +268,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('vendor', [VendorController::class, 'index']);
         Route::get('vendor/data', [VendorController::class, 'data'])->name('vendor.data');
         Route::post('vendor', [VendorController::class, 'store'])->name('vendor.store');
+        Route::post('vendor/quick-store', [VendorController::class, 'quickStore'])->name('vendor.quick-store');
         Route::put('vendor/{id}', [VendorController::class, 'update'])->name('vendor.update');
         Route::delete('vendor/{id}', [VendorController::class, 'destroy'])->name('vendor.destroy');
     });

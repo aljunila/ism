@@ -8,6 +8,7 @@ use App\Models\Cabang;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use DB;
+use Session;
 
 class VendorController extends Controller
 {
@@ -39,6 +40,34 @@ class VendorController extends Controller
     public function all()
     {
         return Vendor::where('is_delete', 0)->get(['id', 'nama', 'kode']);
+    }
+
+    public function quickStore(Request $request)
+    {
+        $request->validate(['nama' => 'required|string|max:50']);
+
+        $idCabang = Session::get('id_cabang');
+        if (!$idCabang) {
+            return response()->json(['message' => 'Cabang tidak ditemukan di sesi'], 422);
+        }
+
+        // Kembalikan yang sudah ada daripada membuat duplikat
+        $existing = Vendor::whereRaw('LOWER(nama) = ?', [strtolower(trim($request->nama))])
+            ->where('id_cabang', $idCabang)
+            ->where('is_delete', 0)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['id' => $existing->id, 'nama' => $existing->nama]);
+        }
+
+        $vendor = Vendor::create([
+            'nama'      => trim($request->nama),
+            'id_cabang' => $idCabang,
+            'is_delete' => 0,
+        ]);
+
+        return response()->json(['id' => $vendor->id, 'nama' => $vendor->nama], 201);
     }
 
     public function store(Request $request)

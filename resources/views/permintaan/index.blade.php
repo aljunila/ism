@@ -317,6 +317,7 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 <script>
     let logTables = {};
+    let vendorSelect = null;
 
     function setDefaultCurrencyIdr() {
         const idrOption = $('#id_currency option').filter(function () {
@@ -537,6 +538,31 @@
 
         $('#pembelian').hide();
         $('#zahir').hide();
+
+        vendorSelect = new TomSelect('#vendor', {
+            placeholder: 'Pilih atau ketik nama vendor baru...',
+            allowEmptyOption: true,
+            createFilter: function (input) {
+                return input.trim().length >= 2;
+            },
+            create: function (input, callback) {
+                $.ajax({
+                    url: '/data_master/vendor/quick-store',
+                    type: 'POST',
+                    data: {
+                        nama: input.trim(),
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (res) {
+                        callback({ value: res.id, text: res.nama });
+                    },
+                    error: function (xhr) {
+                        Swal.fire('Gagal', xhr.responseJSON?.message || 'Vendor tidak dapat disimpan', 'error');
+                        callback();
+                    }
+                });
+            }
+        });
 
         $(document).on('change', '#sedia', updateProcessFormUi);
         $(document).on('change', '#status', updateProcessFormUi);
@@ -786,7 +812,7 @@
                 },
                 success: function(data) {
                      console.log(data);
-                    $('#vendor').val(data.vendor);
+                    if (vendorSelect) vendorSelect.setValue(data.vendor || '');
                     $('#jumlah').val(data.jumlah);
                     $('#amount').val(data.amount);
                 },
@@ -859,7 +885,7 @@
         $('#sedia').val('4');
         $('#status').empty();
         // $('#kode_po').val('');
-        $('#vendor').val('');
+        if (vendorSelect) vendorSelect.setValue('');
         $('#jumlah').val('');
         $('#amount').val('');
         setDefaultCurrencyIdr();

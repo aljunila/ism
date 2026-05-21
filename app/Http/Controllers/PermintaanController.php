@@ -24,6 +24,7 @@ use App\Models\Gudang;
 use App\Models\FormISM;
 use App\Models\Notifikasi;
 use App\Models\Karyawan;
+use App\Models\Vendor;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -366,10 +367,13 @@ class PermintaanController extends Controller
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
             $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
+        } else if($roleJenis==6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get();
         } else {
             $data['kapal'] = Kapal::where('status','A')->get();
         }
         $data['statusbarang'] = StatusBarang::where('is_delete',0)->get();
+        $data['vendor'] = Vendor::where('id_cabang', Session::get('id_cabang'))->get();
         $data['currencies'] = Currency::where('is_delete', 0)->orderBy('is_base', 'DESC')->orderBy('code')->get();
         return view('permintaan.index', $data);
     }
@@ -389,6 +393,8 @@ class PermintaanController extends Controller
 
         if ((int) $roleJenis === 2) {
             $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+        } else if ((int) $roleJenis === 6) {
+            $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
         }
 
         $query->orderByDesc('tanggal')->orderByDesc('id');
@@ -951,8 +957,11 @@ class PermintaanController extends Controller
                 })
                 ->when($tanggal, function($query, $tanggal) {
                     return $query->where('b.tanggal', $tanggal);
-                })
-                ->orderBy('b.id', 'DESC');
+                });
+                if ((int) $roleJenis === 6) {
+                    $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
+                }
+                $query->orderBy('b.id', 'DESC');
 
         $this->applyPermintaanVisibility($query, 'b');
 
@@ -1290,6 +1299,7 @@ class PermintaanController extends Controller
 
     public function datalaporan(Request $request)
     {
+        $roleJenis = Session::get('previllage');
         $status = $request->input('status');
         $query = DB::table('t_detail_permintaan as a')
                 ->leftjoin('t_permintaan_barang as b', 'b.id', '=', 'a.id_permintaan')
@@ -1297,7 +1307,11 @@ class PermintaanController extends Controller
                 ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'b.bagian', 'u.nama as peminta')
                 ->where('a.is_delete', 0)
                 ->orderBy('b.tanggal', 'DESC');
-
+        if ((int) $roleJenis === 6) {
+            $query->whereIn('b.id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
+        } else if ((int) $roleJenis === 3) {
+            $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
+        }
         $this->applyPermintaanVisibility($query, 'b');
 
         return DataTables::of($query)
@@ -1382,6 +1396,8 @@ class PermintaanController extends Controller
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
             $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
+        } else if($roleJenis==6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get();
         } else {
             $data['kapal'] = Kapal::where('status','A')->get();
         }
@@ -1814,6 +1830,8 @@ class PermintaanController extends Controller
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
             $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
+        } else if($roleJenis==6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get();
         } else {
             $data['kapal'] = Kapal::where('status','A')->get();
         }

@@ -14,12 +14,15 @@
                     <li class="nav-item">
                         <a class="nav-link active" id="permintaan-tab" data-bs-toggle="tab" href="#permintaan" aria-controls="permintaan" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Permintaan</a>
                     </li>
+                    @if(Session::get('role_id')!=10)
                     <li class="nav-item">
                         <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="logistik"><i data-feather="permintaan"></i>Logistik</a>
                    </li>
-                        <li class="nav-item">
+                   @endif
+                    <li class="nav-item">
                         <a class="nav-link" id="purchas-tab" data-bs-toggle="tab" href="#purchas" aria-controls="purchas" role="tab" aria-selected="true" data-status="purchasing"><i data-feather="file"></i>Purchasing</a>
                     </li>
+                    @if(Session::get('role_id')!=10)
                     <li class="nav-item">
                         <a class="nav-link" id="po-tab" data-bs-toggle="tab" href="#po" aria-controls="po" role="tab" aria-selected="true" data-status="po"><i data-feather="log-out"></i>P.O.</a>
                     </li>
@@ -32,6 +35,7 @@
                     <li class="nav-item">
                         <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" aria-controls="history" role="tab" aria-selected="true"><i data-feather="clock"></i>History</a>
                     </li>
+                    @endif
                 </ul>
                 <div class="card-header border-bottom">
                     <div class="col-sm-3">
@@ -50,7 +54,9 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="permintaan" aria-labelledby="permintaan-tab" role="tabpanel">
                         <div class="card-body">
+                        @if((Session::get('previllage')==1) or (Session::get('previllage')==3))
                         <a href="/permintaan/form" class="btn btn-primary btn-sm pull-right">Tambah Data</a>
+                        @endif
                             <table id="table-permintaan" class="table table-striped w-100">
                                 <thead>
                                     <tr>
@@ -215,7 +221,12 @@
                                 <label class="col-form-label">Vendor / Toko</label>
                             </div>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" name="vendor" id="vendor" placeholder="Nama vendor/toko">
+                                <select name="vendor" id="vendor" class="form-control">
+                                    <option value="">Pilih</option>
+                                    @foreach($vendor as $v)
+                                        <option value="{{$v->id}}">{{$v->nama}}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="mb-1 row">

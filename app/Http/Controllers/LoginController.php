@@ -54,18 +54,7 @@ class LoginController extends Controller
                 $request->session()->regenerate();
 
                 $jenis = (int) ($role->jenis ?? 0);
-                $previllageLegacy = 4;
-                if ($isSuper) {
-                    $previllageLegacy = 1;
-                } elseif ($jenis === 1) {
-                    $previllageLegacy = 2;
-                } elseif ($jenis === 2) {
-                    $previllageLegacy = 3;
-                } elseif ($jenis === 3) {
-                    $previllageLegacy = 4;
-                } elseif ($jenis === 4) {
-                    $previllageLegacy = 5;
-                }
+                $previllageLegacy = $isSuper ? 1 : ($jenis > 0 ? $jenis + 1 : 4);
 
                 Session::put('userid',$data->id);
                 Session::put('username',$data->username);

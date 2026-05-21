@@ -71,13 +71,7 @@ class EnsureActiveRole
                 $previllageLegacy = 1;
             } else {
                 $jenis = (int) ($role->jenis ?? 0);
-                if ($jenis === 1) {
-                    $previllageLegacy = 2; // admin perusahaan
-                } elseif ($jenis === 2) {
-                    $previllageLegacy = 3; // user kapal
-                } elseif ($jenis === 3) {
-                    $previllageLegacy = 4; // karyawan
-                }
+                $previllageLegacy = $jenis > 0 ? $jenis + 1 : 4;
             }
         }
         session()->put('previllage', $previllageLegacy);

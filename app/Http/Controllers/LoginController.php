@@ -65,7 +65,7 @@ class LoginController extends Controller
                 Session::put('id_karyawan',$data->id_karyawan);
                 Session::put('id_perusahaan',$data->id_perusahaan);
                 Session::put('id_kapal',$data->id_kapal);
-                Session::put('id_cabang',$data->get_karyawan()->id_cabang);
+                Session::put('id_cabang',$data->get_karyawan()?->id_cabang);
                 Session::put('pic',$data->pic);
                 Session::put('login',TRUE);
                 // set context role/perusahaan aktif

@@ -5,6 +5,32 @@
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/dataTables.bootstrap5.min.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/responsive.bootstrap5.min.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/buttons.bootstrap5.min.css')}}">
+  <style>
+    .track-wrap { display: grid; grid-template-columns: 1fr 1.15fr; min-height: 460px; }
+    .track-left { padding: 1.25rem 1.35rem; border-right: 1px solid #ebe9f1; background: #fafafd; }
+    .track-right { padding: 1.25rem 1.35rem; background: #f5f6fa; }
+    .track-label { font-size: .8rem; color: #6e6b7b; margin-bottom: .2rem; }
+    .track-value { font-size: .98rem; font-weight: 600; color: #3b3a45; margin-bottom: .85rem; }
+    .track-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1rem; }
+    .track-timeline { max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #ebe9f1; border-radius: .5rem; padding: .75rem; }
+    .track-timeline-title { font-size: .82rem; font-weight: 700; color: #6e6b7b; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .75rem; }
+    .timeline-item { display: grid; grid-template-columns: 88px 14px 1fr; gap: .6rem; align-items: start; position: relative; padding: .35rem 0 .85rem; }
+    .timeline-item::before { content: ''; position: absolute; left: 103px; top: 22px; bottom: -4px; width: 2px; border-left: 2px dashed #e0deea; }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-time { text-align: right; font-size: .78rem; color: #6e6b7b; line-height: 1.25; }
+    .timeline-dot { width: 14px; height: 14px; border-radius: 50%; background: #b7bfd4; margin-top: .15rem; box-shadow: 0 0 0 4px rgba(170,177,198,.18); }
+    .timeline-content { font-size: .9rem; color: #3b3a45; line-height: 1.4; }
+    .timeline-content .small { color: #8e8aa1; font-size: .8rem; }
+    .timeline-item.is-active .timeline-dot { background: #0d6efd; box-shadow: 0 0 0 4px rgba(13,110,253,.2); position: relative; }
+    .timeline-item.is-active .timeline-dot::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; border: 2px solid rgba(13,110,253,.3); animation: trackPulse 1.8s ease-out infinite; }
+    @keyframes trackPulse { 0% { transform:scale(.85); opacity:.85; } 70% { transform:scale(1.2); opacity:0; } 100% { transform:scale(1.2); opacity:0; } }
+    .timeline-empty { text-align: center; color: #8e8aa1; padding: 1.5rem .5rem; font-size: .9rem; }
+    @media (max-width: 767px) {
+      .track-wrap { grid-template-columns: 1fr; }
+      .track-left { border-right: 0; border-bottom: 1px solid #ebe9f1; }
+      .track-meta-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 @endsection
 <div class="row">
     <div class="col-12">
@@ -127,26 +153,90 @@
     </div>
 </div>
 <div class="modal fade" id="DetailModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-
             <div class="modal-header">
-                <h5 class="modal-title">Detail Permintaan</h5>
+                <h5 class="modal-title">Detail Barang Permintaan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
-            <div class="modal-body">
-                <table class="table table-bordered table-striped" id="tableDetail" width="100%">
-                    <thead>
+            <div class="d-flex flex-wrap align-items-center gap-1 px-1 py-50 border-bottom" id="detail-meta-bar" style="background:#f8f8f8;min-height:36px;">
+                <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
+                    <i data-feather="hash" style="width:12px;height:12px;"></i><span id="meta-nomor">-</span>
+                </span>
+                <span style="color:#d0cfe8;font-size:.75rem;">|</span>
+                <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
+                    <i data-feather="anchor" style="width:12px;height:12px;"></i><span id="meta-kapal">-</span>
+                </span>
+                <span style="color:#d0cfe8;font-size:.75rem;">|</span>
+                <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
+                    <i data-feather="calendar" style="width:12px;height:12px;"></i><span id="meta-tanggal">-</span>
+                </span>
+                <span style="color:#d0cfe8;font-size:.75rem;">|</span>
+                <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
+                    <i data-feather="users" style="width:12px;height:12px;"></i><span id="meta-bagian">-</span>
+                </span>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table table-hover mb-0" id="tableDetail" width="100%">
+                    <thead class="table-light">
                         <tr>
-                            <th>No</th>
+                            <th class="ps-1" style="width:40px;">No</th>
                             <th>Barang</th>
-                            <th>Jumlah</th>
-                            <th>Status</th>
+                            <th style="width:100px;">Jumlah</th>
+                            <th style="width:160px;">Status</th>
+                            <th style="width:80px;"></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="LacakModal" tabindex="-1" style="z-index:1070;">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lacak Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="track-wrap">
+                    <div class="track-left">
+                        <div class="fw-bold mb-1" style="font-size:.95rem;color:#3b3a45;">Detail Permintaan</div>
+                        <div class="track-meta-grid">
+                            <div>
+                                <div class="track-label">Nama Barang</div>
+                                <div class="track-value" id="lacakBarang">-</div>
+                            </div>
+                            <div>
+                                <div class="track-label">Jumlah</div>
+                                <div class="track-value" id="lacakJumlah">-</div>
+                            </div>
+                            <div>
+                                <div class="track-label">Keterangan</div>
+                                <div class="track-value" id="lacakKet">-</div>
+                            </div>
+                            <div>
+                                <div class="track-label">Status Saat Ini</div>
+                                <div class="track-value" id="lacakStatus">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="track-right">
+                        <div class="track-timeline-title">Riwayat Proses</div>
+                        <div class="track-timeline" id="lacakTimeline">
+                            <div class="timeline-empty">Pilih barang untuk melihat riwayat.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -472,11 +562,18 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        return `${row.kapal} <button type="button"  onclick="openDetail(${row.id})" class="btn btn-icon btn-xs btn-flat-primary" title="Detail Barang">
-                        Detail Permintaan</button><br>
-                        No : ${row.nomor}`;
+                        const kapal = escapeHtml(row.kapal || '-');
+                        const nomor = escapeHtml(row.nomor || '-');
+                        return `${kapal} <button type="button"
+                            class="btn btn-icon btn-xs btn-flat-primary detail-perm-btn"
+                            data-id="${row.id}"
+                            data-kapal="${kapal}"
+                            data-nomor="${nomor}"
+                            data-tanggal="${escapeHtml(row.tanggal || '-')}"
+                            data-bagian="${escapeHtml(row.bagian || '-')}"
+                            title="Detail Barang">Detail Permintaan</button><br>No : ${nomor}`;
                     }
-                },    
+                },
                 { data: 'bagian', name: 'bagian' },
                 { data: 'created', name: 'created' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
@@ -535,9 +632,14 @@
                     render: function (data, type, row) {
                         const kapal = escapeHtml(row.kapal || '-');
                         const nomor = escapeHtml(row.nomor || '-');
-                        return `${kapal} <button type="button" onclick="openDetail(${row.id})" class="btn btn-icon btn-xs btn-flat-primary" title="Detail Barang">
-                        Detail Permintaan</button><br>
-                        No : ${nomor}`;
+                        return `${kapal} <button type="button"
+                            class="btn btn-icon btn-xs btn-flat-primary detail-perm-btn"
+                            data-id="${row.id}"
+                            data-kapal="${kapal}"
+                            data-nomor="${nomor}"
+                            data-tanggal="${escapeHtml(row.tanggal || '-')}"
+                            data-bagian="${escapeHtml(row.bagian || '-')}"
+                            title="Detail Barang">Detail Permintaan</button><br>No : ${nomor}`;
                     }
                 },
                 { data: 'bagian', name: 'bagian' },
@@ -562,6 +664,16 @@
 
         $('#pembelian').hide();
         $('#zahir').hide();
+
+        document.getElementById('LacakModal').addEventListener('show.bs.modal', function () {
+            setTimeout(function () {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                if (backdrops.length > 1) backdrops[backdrops.length - 1].style.zIndex = '1065';
+            }, 0);
+        });
+        document.getElementById('LacakModal').addEventListener('hidden.bs.modal', function () {
+            if ($('#DetailModal').hasClass('show')) document.body.classList.add('modal-open');
+        });
 
         const vendorCabangModalEl = document.getElementById('vendorCabangModal');
         vendorCabangModalEl.addEventListener('show.bs.modal', function () {
@@ -838,8 +950,30 @@
         });
     });
 
-    function openDetail(id) {
+    function formatTgl(val) {
+        if (!val) return '-';
+        const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : val;
+    }
+
+    $(document).on('click', '.detail-perm-btn', function () {
+        const btn = $(this);
+        openDetail(btn.data('id'), {
+            kapal:    btn.data('kapal'),
+            nomor:    btn.data('nomor'),
+            tanggal:  btn.data('tanggal'),
+            bagian:   btn.data('bagian')
+        });
+    });
+
+    function openDetail(id, meta) {
         currentId = id;
+        meta = meta || {};
+        $('#meta-nomor').text(meta.nomor   || '-');
+        $('#meta-kapal').text(meta.kapal   || '-');
+        $('#meta-tanggal').text(formatTgl(meta.tanggal) || '-');
+        $('#meta-bagian').text(meta.bagian || '-');
+        feather.replace();
         $('#DetailModal').modal('show');
 
         if ($.fn.DataTable.isDataTable('#tableDetail')) {
@@ -860,15 +994,82 @@
                 }
             },
             columns: [
+                { data: null, orderable: false, render: (d, t, r, m) => m.row + 1 },
+                { data: 'barang' },
                 {
                     data: null,
-                    render: (data, type, row, meta) => meta.row + 1
+                    render: (d, t, row) => `${escapeHtml(row.jumlah || '-')} ${escapeHtml(row.satuan || '')}`
                 },
-                { data: 'barang', },
-                { data: 'jumlah', },
-                { data: 'status', },
-            ]
+                { data: 'status' },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (d, t, row) {
+                        return `<button type="button"
+                            class="btn btn-xs btn-flat-info lacak-btn"
+                            data-id="${row.id}"
+                            data-barang="${escapeHtml(row.barang || '-')}"
+                            data-jumlah="${escapeHtml(row.jumlah || '-')}"
+                            data-satuan="${escapeHtml(row.satuan || '')}"
+                            data-ket="${escapeHtml(row.keterangan || '-')}"
+                            data-status="${escapeHtml(row.status || '-')}">
+                            <i data-feather="map-pin" style="width:12px;height:12px;"></i> Lacak
+                        </button>`;
+                    }
+                }
+            ],
+            drawCallback: function () { feather.replace(); }
         });
+    }
+
+    $(document).on('click', '.lacak-btn', function () {
+        const btn = $(this);
+        openLacak(
+            btn.data('id'),
+            btn.data('barang'),
+            btn.data('jumlah'),
+            btn.data('satuan'),
+            btn.data('ket'),
+            btn.data('status')
+        );
+    });
+
+    function openLacak(id, barang, jumlah, satuan, ket, status) {
+        $('#lacakBarang').text(barang || '-');
+        $('#lacakJumlah').text((`${jumlah} ${satuan}`).trim() || '-');
+        $('#lacakKet').text(ket || '-');
+        $('#lacakStatus').text(status || '-');
+        $('#lacakTimeline').html('<div class="timeline-empty">Memuat riwayat...</div>');
+        $('#LacakModal').modal('show');
+
+        $.get(`/permintaan/getlog/${id}`)
+            .done(function (res) { renderTrackTimeline(res); })
+            .fail(function () {
+                $('#lacakTimeline').html('<div class="timeline-empty">Gagal memuat data riwayat.</div>');
+            });
+    }
+
+    function renderTrackTimeline(rows) {
+        const el = document.getElementById('lacakTimeline');
+        if (!rows || !rows.length) {
+            el.innerHTML = '<div class="timeline-empty">Belum ada riwayat proses.</div>';
+            return;
+        }
+        let html = '';
+        rows.forEach(function (row, i) {
+            const activeClass = i === 0 ? 'is-active' : '';
+            html += `
+                <div class="timeline-item ${activeClass}">
+                    <div class="timeline-time">${formatTgl(row.tanggal)}</div>
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="fw-semibold">${escapeHtml(row.keterangan || row.status || '-')}</div>
+                        <div class="small">Status: ${escapeHtml(row.status || '-')}</div>
+                        <div class="small">Oleh: ${escapeHtml(row.created || '-')}</div>
+                    </div>
+                </div>`;
+        });
+        el.innerHTML = html;
     }
 
     $(document).on('click', '.proses-btn', function () {

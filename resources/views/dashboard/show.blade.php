@@ -16,6 +16,18 @@
         return div.innerHTML;
     }
 
+    function formatTgl(val) {
+        if (!val) return '-';
+        const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : val;
+    }
+
+    function metaChip(icon, text) {
+        return `<span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
+            <i data-feather="${icon}" style="width:12px;height:12px;"></i>${escapeHtml(text)}
+        </span>`;
+    }
+
     function renderLogTimeline(rows) {
         const wrapper = document.getElementById('dashboardLogTimeline');
         if (!wrapper) return;
@@ -27,7 +39,7 @@
 
         let html = '';
         rows.forEach(function (row, idx) {
-            const tanggal = escapeHtml(row.tanggal || '-');
+            const tanggal = formatTgl(row.tanggal);
             const title = escapeHtml(row.keterangan || row.status || '-');
             const status = escapeHtml(row.status || '-');
             const created = escapeHtml(row.created || '-');
@@ -54,7 +66,7 @@
         if (!id) return;
 
         $('#dashboardPermintaanBody').html('<tr><td colspan="5" class="text-center text-muted">Memuat data...</td></tr>');
-        $('#dashboardPermintaanMeta').text('-');
+        $('#dashboardPermintaanMeta').html('');
         $('#DashboardPermintaanModal').modal('show');
 
         $.ajax({
@@ -65,9 +77,14 @@
             const header = res.header || {};
             const items = res.items || [];
 
-            $('#dashboardPermintaanMeta').text(
-                `${header.nomor || '-'} | ${header.tanggal || '-'} | ${header.kapal || '-'} | ${header.bagian || '-'}`
+            const sep = `<span style="color:#d0cfe8;font-size:.75rem;">|</span>`;
+            $('#dashboardPermintaanMeta').html(
+                metaChip('hash', header.nomor || '-') + sep +
+                metaChip('anchor', header.kapal || '-') + sep +
+                metaChip('calendar', formatTgl(header.tanggal) || '-') + sep +
+                metaChip('users', header.bagian || '-')
             );
+            feather.replace();
 
             if (!items.length) {
                 $('#dashboardPermintaanBody').html('<tr><td colspan="5" class="text-center text-muted">Tidak ada barang.</td></tr>');
@@ -86,7 +103,7 @@
                         <td>
                             <button
                                 type="button"
-                                class="btn btn-sm btn-outline-primary btn-dashboard-log"
+                                class="btn btn-xs btn-flat-info btn-dashboard-log"
                                 data-id="${item.id}"
                                 data-nomor="${escapeHtml(header.nomor || '-')}"
                                 data-tanggal="${escapeHtml(header.tanggal || '-')}"
@@ -96,7 +113,7 @@
                                 data-barang="${escapeHtml(item.barang || '-')}"
                                 data-jumlah="${escapeHtml(jumlah || '-')}"
                             >
-                                Lihat Log
+                                <i data-feather="map-pin" style="width:12px;height:12px;"></i> Lacak
                             </button>
                         </td>
                     </tr>
@@ -104,6 +121,7 @@
             });
 
             $('#dashboardPermintaanBody').html(rows);
+            feather.replace();
         })
         .fail(function () {
             $('#dashboardPermintaanBody').html('<tr><td colspan="5" class="text-center text-danger">Gagal memuat detail permintaan.</td></tr>');
@@ -120,7 +138,7 @@
         $('#dashDetailBarang').text($(this).data('barang') || '-');
         $('#dashDetailJumlah').text($(this).data('jumlah') || '-');
         $('#dashDetailNomor').text($(this).data('nomor') || '-');
-        $('#dashDetailTanggal').text($(this).data('tanggal') || '-');
+        $('#dashDetailTanggal').text(formatTgl($(this).data('tanggal')) || '-');
         $('#dashDetailKapal').text($(this).data('kapal') || '-');
         $('#dashDetailBagian').text($(this).data('bagian') || '-');
         $('#dashDetailPeminta').text($(this).data('peminta') || '-');
@@ -625,7 +643,6 @@
     .permintaan-pagination .pagination { margin-bottom:0; }
 
     /* ── Timeline (modal internals — layout only) ── */
-    .permintaan-track-modal .modal-dialog { max-width:1100px; }
     .permintaan-track-wrap {
         display: grid;
         grid-template-columns: 1fr 1.2fr;
@@ -710,14 +727,14 @@
     }
     .timeline-item.is-active .timeline-dot {
         background: #0d6efd;
-        box-shadow: 0 0 0 4px rgba(13,110,253,0.18);
+        box-shadow: 0 0 0 4px rgba(13,110,253,0.2);
     }
     .timeline-item.is-active .timeline-dot::after {
         content: '';
         position: absolute;
         inset: -7px;
         border-radius: 50%;
-        border: 2px solid rgba(13,110,253,0.28);
+        border: 2px solid rgba(13,110,253,0.3);
         animation: timelinePulse 1.8s ease-out infinite;
     }
     @keyframes timelinePulse {
@@ -1064,35 +1081,36 @@
             <div class="modal-header">
                 <div>
                     <h5 class="modal-title">Detail Barang Permintaan</h5>
-                    <small class="text-muted" id="dashboardPermintaanMeta">-</small>
+                    <div id="dashboardPermintaanMeta" class="d-flex flex-wrap align-items-center gap-1 mt-25"></div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Barang</th>
-                                <th>Jumlah</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboardPermintaanBody"></tbody>
-                    </table>
-                </div>
+            <div class="modal-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-1" style="width:40px;">No</th>
+                            <th>Barang</th>
+                            <th style="width:110px;">Jumlah</th>
+                            <th style="width:160px;">Status</th>
+                            <th style="width:80px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboardPermintaanBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade permintaan-track-modal" id="DashboardLogModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Lacak Permintaan</h5>
+                <h5 class="modal-title">Lacak Barang</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
@@ -1105,7 +1123,7 @@
                                 <div class="permintaan-track-value" id="dashDetailBarang">-</div>
                             </div>
                             <div>
-                                <div class="permintaan-track-label">Jumlah Barang</div>
+                                <div class="permintaan-track-label">Jumlah</div>
                                 <div class="permintaan-track-value" id="dashDetailJumlah">-</div>
                             </div>
                             <div>
@@ -1131,12 +1149,15 @@
                         </div>
                     </div>
                     <div class="permintaan-track-right">
-                        <div class="permintaan-track-status">Status: <strong>-</strong></div>
+                        <div class="permintaan-track-status" style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6e7a8a;margin-bottom:.85rem;">Riwayat Proses</div>
                         <div class="permintaan-track-timeline" id="dashboardLogTimeline">
                             <div class="timeline-empty">Memuat riwayat rute...</div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>

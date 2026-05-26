@@ -435,6 +435,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('form/{uid}', [PermintaanController::class, 'form'])->name('permintaan.edit');
         Route::post('store', [PermintaanController::class, 'store'])->name('permintaan.store');
         Route::get('get/{id}', [PermintaanController::class, 'get'])->name('permintaan.get');
+        Route::get('getlog/{id}', [PermintaanController::class, 'getlog'])->name('permintaan.getlog');
         Route::post('update/{id}', [PermintaanController::class, 'update'])->name('permintaan.update');
         Route::delete('destroy/{id}', [PermintaanController::class, 'destroy'])->name('permintaan.destroy');
         Route::delete('deldetail/{id}', [PermintaanController::class, 'deldetail'])->name('permintaan.deldetail');

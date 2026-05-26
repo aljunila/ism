@@ -178,7 +178,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="vendorCabangModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="vendorCabangModal" tabindex="-1" aria-hidden="true" style="z-index:1080;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -562,6 +562,23 @@
 
         $('#pembelian').hide();
         $('#zahir').hide();
+
+        const vendorCabangModalEl = document.getElementById('vendorCabangModal');
+        vendorCabangModalEl.addEventListener('show.bs.modal', function () {
+            // Naikkan backdrop baru di atas prosesModal
+            setTimeout(function () {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                if (backdrops.length > 1) {
+                    backdrops[backdrops.length - 1].style.zIndex = '1075';
+                }
+            }, 0);
+        });
+        vendorCabangModalEl.addEventListener('hidden.bs.modal', function () {
+            // Pastikan prosesModal tetap bisa di-scroll / tidak kehilangan scroll-lock
+            if ($('#prosesModal').hasClass('show')) {
+                document.body.classList.add('modal-open');
+            }
+        });
 
         vendorSelect = new TomSelect('#vendor', {
             placeholder: 'Pilih atau ketik nama vendor baru...',

@@ -178,6 +178,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="vendorCabangModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pilih Cabang untuk Vendor Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-75">Vendor <strong id="vendor-nama-display"></strong> akan ditambahkan ke cabang:</p>
+                <select id="vendor-cabang-select" class="form-control">
+                    <option value="">-- Pilih Cabang --</option>
+                    @foreach($cabang as $c)
+                        <option value="{{ $c->id }}">{{ $c->cabang }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="vendor-cabang-confirm">Tambahkan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade text-start" id="prosesModal" tabindex="-1" aria-labelledby="prosesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -546,6 +570,27 @@
                 return input.trim().length >= 2;
             },
             create: function (input, callback) {
+                function doStore(nama, idCabang) {
+                    const payload = {
+                        nama: nama,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    };
+                    if (idCabang) payload.id_cabang = idCabang;
+
+                    $.ajax({
+                        url: '/data_master/vendor/quick-store',
+                        type: 'POST',
+                        data: payload,
+                        success: function (res) {
+                            callback({ value: res.id, text: res.nama });
+                        },
+                        error: function (xhr) {
+                            Swal.fire('Gagal', xhr.responseJSON?.message || 'Vendor tidak dapat disimpan', 'error');
+                            callback();
+                        }
+                    });
+                }
+
                 $.ajax({
                     url: '/data_master/vendor/quick-store',
                     type: 'POST',
@@ -557,8 +602,25 @@
                         callback({ value: res.id, text: res.nama });
                     },
                     error: function (xhr) {
-                        Swal.fire('Gagal', xhr.responseJSON?.message || 'Vendor tidak dapat disimpan', 'error');
-                        callback();
+                        const json = xhr.responseJSON || {};
+                        if (xhr.status === 422 && json.requires_cabang) {
+                            $('#vendor-nama-display').text(input.trim());
+                            $('#vendor-cabang-select').val('');
+                            $('#vendorCabangModal').modal('show');
+
+                            $('#vendor-cabang-confirm').off('click').on('click', function () {
+                                const idCabang = $('#vendor-cabang-select').val();
+                                if (!idCabang) {
+                                    Swal.fire('Peringatan', 'Pilih cabang terlebih dahulu', 'warning');
+                                    return;
+                                }
+                                $('#vendorCabangModal').modal('hide');
+                                doStore(input.trim(), idCabang);
+                            });
+                        } else {
+                            Swal.fire('Gagal', json.message || 'Vendor tidak dapat disimpan', 'error');
+                            callback();
+                        }
                     }
                 });
             }

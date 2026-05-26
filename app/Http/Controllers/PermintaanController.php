@@ -375,6 +375,7 @@ class PermintaanController extends Controller
         $data['statusbarang'] = StatusBarang::where('is_delete',0)->get();
         $data['vendor'] = Vendor::where('id_cabang', Session::get('id_cabang'))->get();
         $data['currencies'] = Currency::where('is_delete', 0)->orderBy('is_base', 'DESC')->orderBy('code')->get();
+        $data['cabang'] = Cabang::where('is_delete', 0)->get();
         return view('permintaan.index', $data);
     }
 

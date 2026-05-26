@@ -46,9 +46,17 @@ class VendorController extends Controller
     {
         $request->validate(['nama' => 'required|string|max:50']);
 
-        $idCabang = Session::get('id_cabang');
+        $idCabang = Session::get('id_cabang') ?: $request->input('id_cabang');
+
         if (!$idCabang) {
-            return response()->json(['message' => 'Cabang tidak ditemukan di sesi'], 422);
+            return response()->json([
+                'message'         => 'Cabang tidak ditemukan di sesi',
+                'requires_cabang' => true,
+            ], 422);
+        }
+
+        if (!Cabang::where('id', $idCabang)->where('is_delete', 0)->exists()) {
+            return response()->json(['message' => 'Cabang tidak valid'], 422);
         }
 
         // Kembalikan yang sudah ada daripada membuat duplikat

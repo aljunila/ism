@@ -509,6 +509,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('/', [GudangController::class, 'show'])->name('gudang');
         Route::post('data', [GudangController::class, 'getData'])->name('gudang.data');
         Route::put('{id}', [GudangController::class, 'update'])->name('gudang.update');
+        Route::get('{id}/pemakaian', [GudangController::class, 'getPemakaian'])->name('gudang.pemakaian.index');
+        Route::post('{id}/pemakaian', [GudangController::class, 'storePemakaian'])->name('gudang.pemakaian.store');
     });
 
     Route::prefix('refrensi')->group(function () {

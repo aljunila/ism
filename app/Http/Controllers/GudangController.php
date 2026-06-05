@@ -17,6 +17,7 @@ use Str;
 Use DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Support\RoleContext;
+use App\Services\NotificationService;
 
 class GudangController extends Controller
 {
@@ -73,5 +74,61 @@ class GudangController extends Controller
         $up = Gudang::findOrFail($id);
         $up->update($validated);
         return response()->json(['message' => 'Data diperbarui']);
+    }
+
+    public function getPemakaian($id)
+    {
+        $rows = DB::table('t_gudang_pemakaian as p')
+            ->join('t_gudang as g', 'p.id_gudang', '=', 'g.id')
+            ->join('m_barang as b', 'g.id_barang', '=', 'b.id')
+            ->select('p.id', 'p.qty', 'p.tanggal', 'p.keterangan', 'p.created_by', 'p.created_date', 'b.nama as barang')
+            ->where('p.id_gudang', $id)
+            ->orderByDesc('p.tanggal')
+            ->orderByDesc('p.id')
+            ->get();
+
+        return response()->json($rows);
+    }
+
+    public function storePemakaian(Request $request, $id)
+    {
+        $gudang = Gudang::findOrFail($id);
+        $maxQty = (int) $gudang->jumlah;
+
+        $validated = $request->validate([
+            'qty'         => "required|integer|min:1|max:{$maxQty}",
+            'tanggal'     => 'required|date',
+            'keterangan'  => 'nullable|string|max:255',
+        ], [
+            'qty.max' => "QTY tidak boleh melebihi stok tersedia ({$maxQty}).",
+        ]);
+
+        $pembuat = Session::get('name') ?: Session::get('username') ?: 'Unknown';
+
+        DB::table('t_gudang_pemakaian')->insert([
+            'id_gudang'    => $id,
+            'qty'          => $validated['qty'],
+            'tanggal'      => $validated['tanggal'],
+            'keterangan'   => $validated['keterangan'] ?? null,
+            'created_by'   => $pembuat,
+            'created_date' => Carbon::now(),
+        ]);
+
+        $barang = $gudang->get_barang()?->nama ?? '-';
+        $tanggalFormatted = Carbon::parse($validated['tanggal'])->format('d-m-Y');
+
+        // Kirim notifikasi ke semua role yang punya akses menu gudang (menu_id = 81)
+        $roleIds = DB::table('role_menu')->where('menu_id', 81)->pluck('role_id')->toArray();
+        if (!empty($roleIds)) {
+            (new NotificationService())->sendToTargets([
+                'judul'    => 'Pemakaian Barang Gudang',
+                'pesan'    => "{$barang} digunakan berjumlah {$validated['qty']} pada {$tanggalFormatted} oleh {$pembuat}",
+                'tipe'     => 'info',
+                'url'      => '/gudang',
+                'role_ids' => $roleIds,
+            ]);
+        }
+
+        return response()->json(['message' => 'Pemakaian berhasil disimpan']);
     }
 }

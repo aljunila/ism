@@ -8,4 +8,10 @@
         data-keterangan="{{ $row->keterangan }}"
     >Perbarui kondisi
     </button>
+    <button type="button" class="btn btn-sm btn-outline-info btn-pemakaian-gudang"
+        data-id="{{ $row->id }}"
+        data-barang="{{ $row->barang }}"
+        data-stok="{{ $row->jumlah }}"
+    ><i data-feather="package" style="width:13px;height:13px;"></i> Pemakaian
+    </button>
 </div>

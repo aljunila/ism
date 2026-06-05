@@ -9,8 +9,16 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Master - Barang</h4>
-        <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button>
+        <div class="col-sm-12"><h4 class="card-title">Master - Barang</h4></div>
+        <div class="col-sm-4">
+        <select name="kel" id="kel" class="form-control">
+            <option value="">Pilih</option>
+            @foreach ($kelompok as $kel)
+                <option value="{{$kel->id}}">{{$kel->nama}} ({{$kel->kode}})</option>
+            @endforeach
+        </select>
+        </div><div class="col-sm-6"></div>
+        <div class="col-sm-2"><button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button></div>
     </div>
     <div class="card-body">
         <table id="table-barang" class="table table-striped w-100">
@@ -18,8 +26,8 @@
                 <tr>
                     <th rowspan="2">No</th>
                     <th rowspan="2">Kelompok</th>
-                    <th rowspan="2">Kode</th>
                     <th rowspan="2">Nama</th>
+                    <th rowspan="2">Part Number</th>
                     <th rowspan="2">Satuan</th>
                     <th colspan="2">Jumlah Order</th>
                     <th rowspan="2">Gambar</th>
@@ -61,20 +69,20 @@
                 <div class="mb-1">
                     <div class="row">
                         <div class="col-3">
-                            <label class="form-label">Kode</label>
+                            <label class="form-label">Nama</label>
                         </div>
                         <div class="col-9">
-                            <input type="text" id="barang-kode" class="form-control">
+                            <input type="text" id="barang-nama" class="form-control">
                         </div>
                     </div>
                 </div>
                 <div class="mb-1">
                     <div class="row">
                         <div class="col-3">
-                            <label class="form-label">Nama</label>
+                            <label class="form-label">Part Number</label>
                         </div>
                         <div class="col-9">
-                            <input type="text" id="barang-nama" class="form-control">
+                            <input type="text" id="barang-kode" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -153,15 +161,34 @@
             }
         });
 
+        $('#kel').on('change', function () {
+         table.ajax.reload();
+        });
+
         const table = $('#table-barang').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('barang.data') }}',
+            ajax:{
+                url: "/data_master/barang/data",
+                type: "POST",
+                data: function(d){
+                    d.kel= $('#kel').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+                dataSrc: "data"
+            },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'kelompok', name: 'kelompok' },
-                { data: 'kode', name: 'kode' },
+                { 
+                        data: null, 
+                        orderable: false, 
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `${row.kelompok} (${row.part})`;
+                        }
+                },
                 { data: 'nama', name: 'nama' },
+                { data: 'kode', name: 'kode' },
                 { data: 'deskripsi', name: 'deskripsi' },
                 { data: 'min', name: 'min' },
                 { data: 'max', name: 'max' },

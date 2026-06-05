@@ -252,7 +252,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::delete('kelbarang/{id}', [KelBarangController::class, 'destroy'])->name('kelbarang.destroy');
 
         Route::get('barang', [BarangController::class, 'index']);
-        Route::get('barang/data', [BarangController::class, 'data'])->name('barang.data');
+        Route::post('barang/data', [BarangController::class, 'data'])->name('barang.data');
         Route::post('barang', [BarangController::class, 'store'])->name('barang.store');
         Route::put('barang/{id}', [BarangController::class, 'update'])->name('barang.update');
         Route::delete('barang/{id}', [BarangController::class, 'destroy'])->name('kelbarang.destroy');

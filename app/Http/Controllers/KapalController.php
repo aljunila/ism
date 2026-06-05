@@ -57,6 +57,7 @@ class KapalController extends Controller
                     return $query->where('perusahaan.id', $perusahaan);
                 })
                 ->when($roleJenis == 2 && $activeCompany, fn($query) => $query->where('perusahaan.id', $activeCompany))
+                ->when($roleJenis == 6, fn($query) => $query->where('kapal.id_cabang', Session::get('id_cabang')))
                 ->when($kapal, fn($query) => $query->where('kapal.id', $kapal))
                 ->get();
         return response()->json(['data' => $get]);

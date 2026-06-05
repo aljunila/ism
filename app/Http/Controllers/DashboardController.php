@@ -130,6 +130,39 @@ class DashboardController extends Controller
                                 ->whereNotNull('a.id_karyawan')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
+        } elseif($roleJenis==6) { // user kapal
+            $id_cabang = Session::get('id_cabang');
+            $kapal = Kapal::where('id_cabang', $id_cabang)->get();
+            $data['karyawan'] = DB::table('karyawan as a')
+                                ->leftJoin('kapal as b', 'a.id_kapal', '=', 'b.id')
+                                ->select('a.*')
+                                ->where('a.status','A')->where('a.resign','N')
+                                ->where(function ($q) use ($id_cabang) {
+                                    $q->where('a.id_cabang', $id_cabang)->orWhere('b.id_cabang', $id_cabang);
+                                })->count();
+            $data['user'] = DB::table('user')
+                            ->leftjoin('karyawan', 'karyawan.id', 'user.id_karyawan')
+                            ->leftJoin('kapal', 'karyawan.id_kapal', '=', 'kapal.id')
+                            ->where('karyawan.status','A')->where('karyawan.resign','N')
+                            ->where(function ($q) use ($id_cabang) {
+                                    $q->where('karyawan.id_cabang', $id_cabang)->orWhere('kapal.id_cabang', $id_cabang);
+                                })
+                            ->count();
+            $query = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal);
+                    $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
+            $data['document'] = $query->get();
+            $data['count_doc'] = $query->count();
+            $data['doc_kru'] =  DB::table('file_upload as a')
+                                ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
+                                ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                                ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
+                                ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
+                                ->where('a.status', 'A')
+                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->where('c.id_cabang', $id_cabang)
+                                ->whereNotNull('a.id_karyawan')
+                                ->get();
+            $data['count_dockru'] = count($data['doc_kru']);
         } else {
             $id_user = Session::get('userid');
 

@@ -41,14 +41,32 @@ class CutiController extends Controller
 
     public function data()
     {
-        $query = Cuti::where('is_delete', 0)->orderBy('id', 'DESC');
+        $roleJenis = Session::get('previllage');
+        $perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : null;
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : null;
+        $cabang = ($roleJenis == 6) ? Session::get('id_cabang') : null;
+        $query = DB::table('t_cuti as a')
+                ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                ->leftJoin('kapal as c', 'a.id_kapal', '=', 'c.id')
+                ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal')
+                ->where('a.is_delete', 0)
+                ->when($kapal, function($query, $kapal) {
+                    return $query->where('b.id_kapal', $kapal);
+                })
+                ->when($cabang, function($query, $cabang) {
+                    return $query->where(function ($q) use ($cabang) {
+                                    $q->where('b.id_cabang', $cabang)->orWhere('c.id_cabang', $cabang);
+                                });
+                })
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where(function ($q) use ($perusahaan) {
+                                    $q->where('b.id_perusahaan', $perusahaan)->orWhere('c.pemilik', $perusahaan);
+                                });
+                })
+                ->orderBy('a.id', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('karyawan', function ($row) {
-                $karyawan = Karyawan::find($row->id_karyawan);
-                return $karyawan ? $karyawan->nama : '-';
-            })
             ->addColumn('approval', function ($row) {
                 $approval = User::find($row->approved_by);
                 return $approval ? $approval->nama : '-';
@@ -60,10 +78,6 @@ class CutiController extends Controller
             ->addColumn('jenis', function ($row) {
                 $jenis = JenisCuti::find($row->id_m_cuti);
                 return $jenis ? $jenis->nama : '-';
-            })
-            ->addColumn('kapal', function ($row) {
-                $kapal = Kapal::find($row->id_kapal);
-                return $kapal ? $kapal->nama : 'aa';
             })
             ->addColumn('aksi', function ($row) {
                 return view('data_crew.cuti.partials.actions', compact('row'))->render();

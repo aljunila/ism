@@ -37,6 +37,8 @@ class PenurunanController extends Controller
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
             $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
+        }else if($roleJenis==6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get();
         } else {
             $data['kapal'] = Kapal::where('status','A')->get();
         }
@@ -320,6 +322,10 @@ class PenurunanController extends Controller
 
         if ((int) $roleJenis === 2) {
             $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+        } else if ((int) $roleJenis === 3) {
+            $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
+        } else if ((int) $roleJenis === 6) {
+            $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
         }
 
         $query->orderByDesc('tanggal')->orderByDesc('id');

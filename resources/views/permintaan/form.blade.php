@@ -438,12 +438,12 @@
                     </select>
                 </div>
                 <div class="mb-1">
-                    <label class="form-label">Kode</label>
-                    <input type="text" id="barang-kode" class="form-control">
-                </div>
-                <div class="mb-1">
                     <label class="form-label">Nama</label>
                     <input type="text" id="barang-nama" class="form-control">
+                </div>
+                <div class="mb-1">
+                    <label class="form-label">Part Number</label>
+                    <input type="text" id="barang-kode" class="form-control">
                 </div>
                 <div class="mb-1">
                     <label class="form-label">Satuan</label>

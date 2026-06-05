@@ -24,6 +24,7 @@
    <script>
         $('#cuti-id_kapal').hide();
         $('#pengganti').hide();
+        $('#form-wrapper').hide();
 
         $(document).on('change', '#cuti-id_m_cuti', function() {
             let id_m_cuti = $(this).val();
@@ -31,8 +32,10 @@
                 $('#cuti-id_kapal').show();
                 $('#cuti-id_karyawan').hide();
                 $('#pengganti').hide();
+                $('#form-wrapper').show();
             } else {
                 $('#cuti-id_kapal').hide();
+                $('#form-wrapper').hide();
                 $('#cuti-id_karyawan').show();
                 $('#pengganti').show();
             }
@@ -208,7 +211,7 @@
                                     </select>
                                 </div>
                             </div>
-                             <div class="mb-1 row" id="form-wrapper">
+                            <div class="mb-1 row" id="form-wrapper">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Daftar Crew</label>
                                 </div>

@@ -11,8 +11,9 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Penurunan Barang</h4>
+        @if((Session::get('previllage')==1) or (Session::get('previllage')==3))
         <a type="button" href="/penurunan/form" class="btn btn-primary btn-sm">Tambah Data</a>
-         <!-- <button class="btn btn-primary btn-sm" id="btn-add-turun">Tambah Data</button> -->
+        @endif
     </div>
     <div class="card-header border-bottom">
         <div class="col-sm-3">

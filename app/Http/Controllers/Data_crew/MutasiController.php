@@ -31,14 +31,34 @@ class MutasiController extends Controller
 
     public function data()
     {
-        $query = Mutasi::where('status', 'A')->orderBy('id', 'DESC');
+        $roleJenis = Session::get('previllage');
+        $perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : null;
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : null;
+        $cabang = ($roleJenis == 6) ? Session::get('id_cabang') : null;        
+        $query = DB::table('t_mutasi as a')
+                ->leftJoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                ->leftJoin('kapal as c', 'a.dari_kapal', '=', 'c.id')
+                ->leftJoin('kapal as d', 'a.ke_kapal', '=', 'd.id')
+                ->select('a.*', 'b.nama', 'c.nama as d_kapal', 'd.nama as k_kapal')
+                ->when($kapal, function($query, $kapal) {
+                     return $query->where(function ($q) use ($kapal) {
+                                    $q->where('a.dari_kapal', $kapal)->orWhere('a.ke_kapal', $kapal);
+                                });
+                })
+                ->when($cabang, function($query, $cabang) {
+                    return $query->where(function ($q) use ($cabang) {
+                                    $q->where('b.id_cabang', $cabang)->orWhere('c.id_cabang', $cabang)->orWhere('d.id_cabang', $cabang);
+                                });
+                })
+                ->when($perusahaan, function($query, $perusahaan) {
+                    return $query->where(function ($q) use ($perusahaan) {
+                                    $q->where('a.dari_perusahaan', $perusahaan)->orWhere('a.ke_perusahaan', $perusahaan);
+                                });
+                })
+                ->where('a.status', 'A')->orderBy('a.id', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('nama', function ($row) {
-                $karyawan = Karyawan::find($row->id_karyawan);
-                return $karyawan ? $karyawan->nama : '-';
-            })
             ->addColumn('jabatan', function ($row) {
                 $jabatan = Jabatan::find($row->id_jabatan);
                 return $jabatan ? $jabatan->nama : '-';
@@ -50,14 +70,6 @@ class MutasiController extends Controller
             ->addColumn('ke_perusahaan', function ($row) {
                 $ps = Perusahaan::find($row->ke_perusahaan);
                 return $ps ? $ps->kode : '-';
-            })
-            ->addColumn('dari_kapal', function ($row) {
-                $kapal = Kapal::find($row->dari_kapal);
-                return $kapal ? $kapal->nama : '-';
-            })
-            ->addColumn('ke_kapal', function ($row) {
-                $kp = Kapal::find($row->ke_kapal);
-                return $kp ? $kp->nama : '-';
             })
             ->addColumn('aksi', function ($row) {
                 return view('data_crew.mutasi.partials.actions', compact('row'))->render();

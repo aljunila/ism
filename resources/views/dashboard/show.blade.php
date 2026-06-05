@@ -1284,7 +1284,7 @@
                                 <tbody>
                                     @foreach($doc_kru as $kru)
                                         <tr>
-                                            <td>{{ $kru->kapal ?? '-' }}<br>
+                                            <td><b>{{ $kru->kapal ?? '-' }}</b><br>
                                                 {{ $kru->karyawan ?? '-' }}</td>
                                             <td><a type="button" href="{{ asset('file_upload/'.$kru->file) }}" target="_blank" 
                                                     title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->file}}">{{ $kru->filename ?? ($kru->filename ?? 'File') }}</a></td>

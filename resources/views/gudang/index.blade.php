@@ -14,14 +14,22 @@
     </div>
     <div class="card-body">
         <div class="card-header border-bottom">
-            <div class="col-sm-2">
+            <div class="col-sm-3">
                 <select name="jenis" id="jenis" class="form-control">
                     <option value="0">Pilih</option>
                     <option value="1">Gudang Kapal</option>
                     <option value="2">Gudang Cabang</option>
                 </select>
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-4">
+                <select name="kel" id="kel" class="form-control kapal">
+                    <option value="">Pilih Kelompok Barang</option>
+                    @foreach($kelompok as $kel)
+                        <option value="{{$kel->id}}">{{$kel->nama}} ({{$kel->kode}})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-sm-4">
                 <select name="id_kapal" id="id_kapal" class="form-control kapal">
                     <option value="">Pilih Kapal</option>
                     @foreach($kapal as $k)
@@ -34,10 +42,6 @@
                     <option value="{{$c->id}}">{{$c->cabang}}</option>
                     @endforeach
                 </select>
-            </div>
-            <div class="col-sm-3">
-            <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
-            <a href="/karyawan/add" class="btn btn-primary btn-sm"><i data-feather='file-plus'></i> Tambah Data</a>
             </div>
         </div>
         <table id="table-gudang" class="table table-striped w-100">
@@ -247,6 +251,10 @@
             $('#id_kapal').val('');
         });
 
+        $('#kel').on('change', function () {
+         table.ajax.reload();
+        });
+
         const table = $('#table-gudang').DataTable({
             processing: true,
             serverSide: true,
@@ -256,6 +264,7 @@
                 data: function(d){
                     d.id_kapal= $('#id_kapal').val(),
                     d.id_cabang= $('#id_cabang').val(),
+                    d.kel= $('#kel').val(),
                     d._token= "{{ csrf_token() }}"
                 },
             },
@@ -267,7 +276,14 @@
                     orderable: false,
                     searchable: false
                 },
-                { data: 'kelompok', name: 'kelompok' },
+                { 
+                        data: null, 
+                        orderable: false, 
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `${row.kelompok} (${row.part})`;
+                        }
+                },
                 { data: 'barang', name: 'barang' },
                 { data: 'kode', name: 'kode' },
                 { data: 'baik', name: 'baik' },

@@ -10,6 +10,7 @@ use App\Models\Gudang;
 use App\Models\Cabang;
 use App\Models\Kapal;
 use App\Models\Barang;
+use App\Models\KelBarang;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -26,6 +27,7 @@ class GudangController extends Controller
         $data['active'] = "gudang";
         $data['kapal'] = Kapal::where('status', 'A')->get();
         $data['cabang'] = Cabang::where('is_delete', 0)->get();
+        $data['kelompok'] = KelBarang::where('is_delete', 0)->get();
         return view('gudang.index', $data);
     }
 
@@ -34,12 +36,16 @@ class GudangController extends Controller
         $roleJenis = Session::get('previllage');
         $kapal = $request->input('id_kapal');
         $cabang = $request->input('id_cabang');
+        $kel = $request->input('kel');
 
         $data = DB::table('t_gudang as a')
                 ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
                 ->leftJoin('m_kel_barang as c', 'b.id_kel_barang', '=', 'c.id')
-                ->select('a.id', 'b.nama as barang', 'b.kode', 'c.nama as kelompok', 'a.jumlah', 'a.baik', 'a.habis', 'a.keterangan')
+                ->select('a.id', 'b.nama as barang', 'b.kode', 'c.nama as kelompok','c.kode as part', 'a.jumlah', 'a.baik', 'a.habis', 'a.keterangan')
                 ->where('a.is_delete',0)
+                ->when($kel, function($query, $kel) {
+                    return $query->where('b.id_kel_barang', $kel);
+                })
                 ->when($kapal, function($query, $kapal) {
                     return $query->where('id_kapal', $kapal);
                 })

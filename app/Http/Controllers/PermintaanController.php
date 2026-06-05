@@ -394,8 +394,10 @@ class PermintaanController extends Controller
 
         if ((int) $roleJenis === 2) {
             $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+        } else if ((int) $roleJenis === 3) {
+            $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
         } else if ((int) $roleJenis === 6) {
-            $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
+            $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
         }
 
         $query->orderByDesc('tanggal')->orderByDesc('id');
@@ -960,7 +962,7 @@ class PermintaanController extends Controller
                     return $query->where('b.tanggal', $tanggal);
                 });
                 if ((int) $roleJenis === 6) {
-                    $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
+                    $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
                 }
                 $query->orderBy('b.id', 'DESC');
 
@@ -1309,7 +1311,7 @@ class PermintaanController extends Controller
                 ->where('a.is_delete', 0)
                 ->orderBy('b.tanggal', 'DESC');
         if ((int) $roleJenis === 6) {
-            $query->whereIn('b.id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
+            $query->whereIn('b.id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
         } else if ((int) $roleJenis === 3) {
             $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
         }

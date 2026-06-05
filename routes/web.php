@@ -252,7 +252,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::delete('kelbarang/{id}', [KelBarangController::class, 'destroy'])->name('kelbarang.destroy');
 
         Route::get('barang', [BarangController::class, 'index']);
-        Route::get('barang/data', [BarangController::class, 'data'])->name('barang.data');
+        Route::post('barang/data', [BarangController::class, 'data'])->name('barang.data');
         Route::post('barang', [BarangController::class, 'store'])->name('barang.store');
         Route::put('barang/{id}', [BarangController::class, 'update'])->name('barang.update');
         Route::delete('barang/{id}', [BarangController::class, 'destroy'])->name('kelbarang.destroy');
@@ -509,6 +509,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('/', [GudangController::class, 'show'])->name('gudang');
         Route::post('data', [GudangController::class, 'getData'])->name('gudang.data');
         Route::put('{id}', [GudangController::class, 'update'])->name('gudang.update');
+        Route::get('{id}/pemakaian', [GudangController::class, 'getPemakaian'])->name('gudang.pemakaian.index');
+        Route::post('{id}/pemakaian', [GudangController::class, 'storePemakaian'])->name('gudang.pemakaian.store');
     });
 
     Route::prefix('refrensi')->group(function () {

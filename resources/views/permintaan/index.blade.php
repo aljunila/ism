@@ -818,6 +818,9 @@
                         orderable: false, 
                         searchable: false,
                         render: function (data, type, row) {
+                            if (tableId === 'table-workshop') {
+                                return '';
+                            }
                             return `
                                 <button type="button" class="btn btn-sm btn-outline-primary proses-btn" data-id="${row.id}" data-id_kapal="${row.id_kapal}" data-kode_po="${row.kode_po}" data-flow-stage="${row.flow_stage || ''}">
                                     Proses

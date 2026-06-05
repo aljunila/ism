@@ -18,15 +18,23 @@ class BarangController extends Controller
         return view('data_master.barang.index', $data);
     }
 
-     public function data()
+     public function data(Request $request)
     {
-        $query = Barang::where('is_delete', 0);
+        $kel = $request->input('kel');
+        $query = Barang::where('is_delete', 0)
+                ->when($kel, function($query, $kel) {
+                    return $query->where('id_kel_barang', $kel);
+                });
 
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('kelompok', function ($row) {
                 $kel = KelBarang::find($row->id_kel_barang);
                 return $kel ? $kel->nama : '-';
+            })
+            ->addColumn('part', function ($row) {
+                $kel = KelBarang::find($row->id_kel_barang);
+                return $kel ? $kel->kode : '-';
             })
             ->addColumn('aksi', function ($row) {
                 return view('data_master.barang.partials.actions', compact('row'))->render();

@@ -38,18 +38,32 @@ class KaryawanController extends Controller
     {
         $data['active'] = "karyawan";
         $data['perusahaan'] = Perusahaan::get();
-        $data['kapal'] = Kapal::where('status', 'A')->get();
-        $data['cabang'] = Cabang::where('is_delete', 0)->get();
+        if(Session::get('previllage')==2) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', Session::get('id_perusahaan'))->get();  
+            $data['cabang'] = Cabang::where('is_delete', 0)->get();
+        } else if(Session::get('previllage')==3) {
+          $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get(); 
+            $data['cabang'] = Cabang::where('is_delete', 0)->get(); 
+        } else if(Session::get('previllage')==6) {
+          $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get();  
+            $data['cabang'] = Cabang::where('id', Session::get('id_cabang'))->get();
+        } else {
+            $data['kapal'] = Kapal::where('status', 'A')->get();  
+            $data['cabang'] = Cabang::where('is_delete', 0)->get();
+        }
         return view('karyawan.show', $data);
     }
 
     public function getData(Request $request)
     {
         $roleJenis = Session::get('previllage');
-        $perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
-        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
-        $kel = $request->input('kel');
+        $perusahaan = $request->input('id_perusahaan');
+        $kapal = $request->input('id_kapal');
         $cabang = $request->input('id_cabang');
+        $kel = $request->input('kel');
+        if(($kel==2) && ($roleJenis==6)) {
+            $cabang = Session::get('id_cabang');
+        } 
 
         $karyawan = DB::table('karyawan')
                 ->leftJoin('jabatan', 'karyawan.id_jabatan', '=', 'jabatan.id')
@@ -525,8 +539,9 @@ class KaryawanController extends Controller
     public function dataresign(Request $request)
     {
         $roleJenis = Session::get('previllage');
-         $perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : null;
+        $perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : null;
         $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : null;
+        $cabang = ($roleJenis == 6) ? Session::get('id_cabang') : null;
         $kel = $request->input('kel');
 
         $karyawan = DB::table('karyawan')
@@ -552,6 +567,11 @@ class KaryawanController extends Controller
                 })
                 ->when($kapal, function($query, $kapal) {
                     return $query->where('karyawan.id_kapal', $kapal);
+                })
+                ->when($cabang, function($query, $cabang) {
+                    return $query->where(function ($q) use ($cabang) {
+                                    $q->where('karyawan.id_cabang', $cabang)->orWhere('kapal.id_cabang', $cabang);
+                                });
                 });
         // print_r($kapal);die();
         return DataTables::of($karyawan)

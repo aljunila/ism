@@ -122,13 +122,13 @@
                 {
                     data: null,
                     render: function(data, type, row) {
-                        return `${row.dari_perusahaan} <br> ${row.dari_kapal}`;
+                        return `${row.dari_perusahaan} <br> ${row.d_kapal}`;
                     }
                 },
                 {
                     data: null,
                     render: function(data, type, row) {
-                        return `${row.ke_perusahaan} <br> ${row.ke_kapal}`;
+                        return `${row.ke_perusahaan} <br> ${row.k_kapal}`;
                     }
                 },
                 { data: 'tgl_naik', name: 'tgl_naik' },

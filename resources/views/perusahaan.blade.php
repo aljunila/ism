@@ -3,7 +3,7 @@
     use App\Models\Kapal;
     use Illuminate\Support\Facades\DB;
 @endphp
-    @if(Session::get('previllage')==1)
+    @if(in_array(Session::get('previllage'), [1, 5, 6]))
 @php
     $perusahaan = Perusahaan::get();
 @endphp

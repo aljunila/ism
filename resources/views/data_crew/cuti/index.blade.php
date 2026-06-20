@@ -225,9 +225,11 @@
             if(id_m_cuti==9){
                 $('#cuti-id_kapal').show();
                 $('#cuti-id_karyawan').hide();
+                $('#cuti-id_pengganti').hide();
             } else {
                 $('#cuti-id_kapal').hide();
                 $('#cuti-id_karyawan').show();
+                $('#cuti-id_pengganti').show();
             }
         })
 

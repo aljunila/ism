@@ -57,6 +57,7 @@ use App\Http\Controllers\PenurunanController;
 use App\Http\Controllers\Laporan\LapPermintaanController;
 use App\Http\Controllers\Ck_kapal\BerlayarController;
 use App\Http\Controllers\Ck_kapal\LatihanController;
+use App\Http\Controllers\Laporan\LapGudangController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -503,6 +504,12 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('permintaan/data', [PermintaanController::class, 'datalaporan'])->name('lappermintaan.data');
         Route::post('permintaan', [PermintaanController::class, 'store'])->name('lappermintaan.store');
         Route::get('permintaan/getlog/{id}', [PermintaanController::class, 'getlog'])->name('lappermintaan.getlog');
+
+        Route::get('gudang', [LapGudangController::class, 'index']);
+        Route::post('gudang/data', [LapGudangController::class, 'data'])->name('lapgudang.data');
+        Route::get('gudang/pdf/{uid}', [LapGudangController::class, 'pdf'])->name('lapgudang.pdf');
+        Route::get('gudang/{uid}', [LapGudangController::class, 'elemen'])->name('lapgudang.elemen');
+        Route::get('gudang/getlog/{id}', [LapGudangController::class, 'getlog'])->name('lapgudang.getlog');
     });
 
     Route::prefix('gudang')->group(function () {

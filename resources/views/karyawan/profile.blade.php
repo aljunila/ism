@@ -625,10 +625,12 @@
                                         <td width="10%">{{$f->tgl_terbit}}</td>
                                         <td width="10%">{{$f->tgl_expired}}</td>
                                         <td width="20%">
+                                            @if(Session::get('previllage')!=4)
                                                 <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn" 
                                                     title="Upload File" data-id="{{$f->id}}" data-file="{{$f->nama}}">
                                                     <i data-feather='upload'></i>
                                                 </button>
+                                            @endif
                                             @if(!empty($f->file))
                                                 <a type="button" href="{{ asset('file_upload/'.$f->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
                                                     title="Buka File" data-id="{{$f->id}}" data-file="{{$f->nama}}">

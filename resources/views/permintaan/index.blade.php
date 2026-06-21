@@ -40,15 +40,24 @@
                     <li class="nav-item">
                         <a class="nav-link active" id="permintaan-tab" data-bs-toggle="tab" href="#permintaan" aria-controls="permintaan" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Permintaan</a>
                     </li>
-                    @if(Session::get('role_id')!=10)
-                    <li class="nav-item">
-                        <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="logistik"><i data-feather="permintaan"></i>Logistik</a>
-                   </li>
-                   @endif
+                    @if(Session::get('role_id')==10)
                     <li class="nav-item">
                         <a class="nav-link" id="purchas-tab" data-bs-toggle="tab" href="#purchas" aria-controls="purchas" role="tab" aria-selected="true" data-status="purchasing"><i data-feather="file"></i>Purchasing</a>
                     </li>
-                    @if(Session::get('role_id')!=10)
+                    @elseif(Session::get('role_id')==4)
+                    <li class="nav-item">
+                        <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Kapal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" aria-controls="history" role="tab" aria-selected="true"><i data-feather="clock"></i>History</a>
+                    </li>
+                    @else
+                    <li class="nav-item">
+                        <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="logistik"><i data-feather="permintaan"></i>Logistik</a>
+                   </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="purchas-tab" data-bs-toggle="tab" href="#purchas" aria-controls="purchas" role="tab" aria-selected="true" data-status="purchasing"><i data-feather="file"></i>Purchasing</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" id="po-tab" data-bs-toggle="tab" href="#po" aria-controls="po" role="tab" aria-selected="true" data-status="po"><i data-feather="log-out"></i>P.O.</a>
                     </li>
@@ -57,9 +66,6 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Kapal</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" aria-controls="history" role="tab" aria-selected="true"><i data-feather="clock"></i>History</a>
                     </li>
                     @endif
                 </ul>

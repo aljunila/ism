@@ -382,7 +382,8 @@ class PenurunanController extends Controller
         $data['mengetahui'] = Karyawan::find($ttd['mengetahui']);
         $data['setuju'] = Karyawan::find($ttd['setuju']);
         $data['buat'] = Karyawan::find($ttd['buat']);
-        $data['terima'] = Karyawan::find($show->id_penerima);
+        $terima = User::find($show->id_penerima);
+        $data['terima'] = Karyawan::find($terima->id_karyawan);
         $data['item'] =  DB::table('t_detail_turun as a')
                         ->leftjoin('m_barang as c', 'c.id', '=', 'a.id_barang')
                         ->select('a.*', 'c.nama as barang', 'c.deskripsi as satuan')

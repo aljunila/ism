@@ -1722,7 +1722,8 @@ class PermintaanController extends Controller
         $data['mengetahui'] = Karyawan::find($ttd['mengetahui']);
         $data['setuju'] = Karyawan::find($ttd['setuju']);
         $data['logistik'] = Karyawan::find($ttd['logistik']);
-        $data['terima'] = Karyawan::find($show->id_penerima);
+        $terima = User::find($show->id_penerima);
+        $data['terima'] = Karyawan::find($terima->id_karyawan);
         $pdf = Pdf::loadView('permintaan.pdfkirim', $data)
                 ->setPaper('a3', 'landscap');
         return $pdf->stream($form->ket.' '.$nama.'.pdf');

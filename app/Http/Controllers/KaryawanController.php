@@ -57,8 +57,8 @@ class KaryawanController extends Controller
     public function getData(Request $request)
     {
         $roleJenis = Session::get('previllage');
-        $perusahaan = $request->input('id_perusahaan');
-        $kapal = $request->input('id_kapal');
+        $perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $cabang = $request->input('id_cabang');
         $kel = $request->input('kel');
         if(($kel==2) && ($roleJenis==6)) {

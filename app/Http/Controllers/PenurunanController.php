@@ -11,6 +11,7 @@ use App\Models\ChecklistData;
 use App\Models\KodeForm;
 use App\Models\User;
 use App\Models\Cabang;
+use App\Models\Karyawan;
 use App\Models\TurunBarang;
 use App\Models\DetailTurun;
 use App\Models\TurunOtp;

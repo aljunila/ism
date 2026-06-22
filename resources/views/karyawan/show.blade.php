@@ -304,13 +304,15 @@
                         <div class="tab-pane active" id="aktif" aria-labelledby="aktif-tab" role="tabpanel">
                             <div class="card-header border-bottom">
                                 <div class="col-sm-12"><h4 class="card-title">Daftar Karyawan</h4></div>
+                                @if(Session::get('previllage')!=3)
                                 <div class="col-sm-2">
-                                <select name="kel" id="kel" class="form-control">
-                                    <option value="0">Pilih</option>
-                                    <option value="1">Laut</option>
-                                    <option value="2">Darat</option>
-                                </select>
+                                    <select name="kel" id="kel" class="form-control">
+                                        <option value="0">Pilih</option>
+                                        <option value="1">Laut</option>
+                                        <option value="2">Darat</option>
+                                    </select>
                                 </div>
+                                @endif
                                 @include('perusahaan')
                                 <div class="col-sm-2">
                                     <select name="id_kapal" id="id_kapal" class="form-control kapal">

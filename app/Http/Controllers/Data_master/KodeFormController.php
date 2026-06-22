@@ -130,15 +130,15 @@ class KodeFormController extends Controller
 
     public function ism()
     {
-        $id_perusahaan = Session::get('id_perusahaan');
         $roleJenis = Session::get('previllage');
+        $id_perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
 
         $query = DB::table('t_ism')
                 ->leftjoin('kode_form', 't_ism.id_form', '=', 'kode_form.id')
                 ->select('t_ism.*', 'kode_form.nama')
                 ->where('t_ism.is_delete', 0)
                 ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
-                ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
+                ->when($id_perusahaan, function ($q) use ($id_perusahaan) {
                     return $q->where('t_ism.id_perusahaan', $id_perusahaan);
                 })
                 ->orderBy('t_ism.id_perusahaan', 'asc')->orderBy('t_ism.judul', 'asc');

@@ -1,4 +1,5 @@
 <div class="d-flex gap-50">
+    @if(Session::get('previllage')!=3)
     @if ($row->status== 1)
     <button type="button" class="btn btn-sm btn-outline-success btn-edit-cuti" 
         data-id="{{ $row->id }}"
@@ -12,6 +13,7 @@
         data-id_pengganti="{{ $row->id_pengganti }}"
         >Setujui</button>
     <button type="button" data-id="{{ $row->id }}" class="btn btn-sm btn-outline-warning btn-reject-cuti">Tolak</button>
+    @endif
     @endif
     <button type="button" data-id="{{ $row->id }}" class="btn btn-sm btn-outline-danger btn-delete-cuti">Hapus</button>
 </div>

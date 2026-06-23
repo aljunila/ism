@@ -14,6 +14,7 @@
     </div>
     <div class="card-body">
         <div class="card-header border-bottom">
+            @if(Session::get('previllage')!=3)
             <div class="col-sm-3">
                 <select name="jenis" id="jenis" class="form-control">
                     <option value="0">Pilih</option>
@@ -21,6 +22,7 @@
                     <option value="2">Gudang Cabang</option>
                 </select>
             </div>
+            @endif
             <div class="col-sm-4">
                 <select name="kel" id="kel" class="form-control kapal">
                     <option value="">Pilih Kelompok Barang</option>
@@ -57,7 +59,7 @@
                 </tr>
                  <tr>
                     <th>Baik</th>
-                    <th>Habis/Rusak</th>
+                    <th>Rusak</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -102,7 +104,7 @@
                             <input type="number" id="gudang-baik" class="form-control" placeholder="Baik">
                         </div>
                         <div class="col-4">
-                            <input type="number" id="gudang-habis" class="form-control" placeholder="Rusak/Habis">
+                            <input type="number" id="gudang-habis" class="form-control" placeholder="Rusak">
                         </div>
                     </div>
                 </div>

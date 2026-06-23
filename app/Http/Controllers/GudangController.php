@@ -34,7 +34,7 @@ class GudangController extends Controller
     public function getData(Request $request)
     {
         $roleJenis = Session::get('previllage');
-        $kapal = $request->input('id_kapal');
+        $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $cabang = $request->input('id_cabang');
         $kel = $request->input('kel');
 
@@ -119,6 +119,8 @@ class GudangController extends Controller
             'created_by'   => $pembuat,
             'created_date' => Carbon::now(),
         ]);
+        $jum = $maxQty-$validated['qty'];
+        $update = Gudang::find($id)->update(['jumlah' => $jum]); 
 
         $barang = $gudang->get_barang()?->nama ?? '-';
         $tanggalFormatted = Carbon::parse($validated['tanggal'])->format('d-m-Y');

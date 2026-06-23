@@ -47,7 +47,7 @@ class LatihanController extends Controller
                     return $q->where('a.id_perusahaan', $id_perusahaan);
                 })
                 ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
-                    return $q->where('c.id_kapal', $id_kapal);
+                    return $q->where('a.id_kapal', $id_kapal);
                 })
                 ->orderBy('a.id', 'DESC');
 

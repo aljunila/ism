@@ -29,7 +29,7 @@ class CutiController extends Controller
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
-            $$data['kapal'] = Kapal::find(Session::get('id_kapal'));
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
         } else {
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();
@@ -237,7 +237,7 @@ class CutiController extends Controller
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
-            $$data['kapal'] = Kapal::find(Session::get('id_kapal'));
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->where('id_perusahaan', $id_perusahaan)->get();
         } else {
             $data['karyawan'] = Karyawan::where('status','A')->where('resign', 'N')->get();

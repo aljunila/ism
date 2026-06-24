@@ -103,7 +103,7 @@ class LatihanController extends Controller
         if ($request->hasFile('file')) {
 
             $request->validate([
-                'file.*' => 'file|mimes:jpg,jpeg,png,mp4|max:51200'
+                'file.*' => 'file|mimes:jpg,jpeg,png,mp4,pdf|max:51200'
             ]);
 
             foreach ($request->file('file') as $file) {
@@ -137,7 +137,7 @@ class LatihanController extends Controller
     public function update(Request $request, $id)
     {
         $kapal = kapal::find($request->input('id_kapal'));
-        $mengetahui = Karyawan::where('id_perusahaan', $show->id_perusahaan)->where('status','A')->where('resign', 'N')->where('id_jabatan',5)->first();
+        $mengetahui = Karyawan::where('id_perusahaan', $kapal->pemilik)->where('status','A')->where('resign', 'N')->where('id_jabatan',5)->first();
         $pj = [
             'mengetahui' => $mengetahui->id,
             'manager'   => $request->input('manager'),
@@ -146,7 +146,7 @@ class LatihanController extends Controller
         $up = ChecklistData::find($id)->update([
           'id_form' => $request->input('id_form'),
           'id_kapal' => $request->input('id_kapal'),
-          'id_perusahaan' => $kapal->id_perusahaan,
+          'id_perusahaan' => $kapal->pemilik,
           'pj' => $pj,
           'date' => $request->input('date'),
           'changed_by' => Session::get('userid'),

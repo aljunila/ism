@@ -580,7 +580,14 @@
                             title="Detail Barang">Detail Permintaan</button><br>No : ${nomor}`;
                     }
                 },
-                { data: 'bagian', name: 'bagian' },
+                { data: 'bagian', 
+                    name : 'bagian',
+                    render: function (data, type, row) {
+                        if (data == 1) return '<a class="badge badge-light-primary">Deck</a>';
+                        if (data == 2) return '<a class="badge badge-light-success">Mesin</a>';
+                        return '-';
+                    }
+                },
                 { data: 'created', name: 'created' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]

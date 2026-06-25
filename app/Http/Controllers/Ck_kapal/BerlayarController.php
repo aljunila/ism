@@ -24,7 +24,15 @@ class BerlayarController extends Controller
     public function index()
     {
         $data['active'] = "/ck_kapal/berlayar";    
-        $data['kapal'] = Kapal::where('status','A')->get();
+        if(Session::get('previllage')==2) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', Session::get('id_perusahaan'))->get(); 
+        } else if(Session::get('previllage')==3) {
+          $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get(); 
+        } else if(Session::get('previllage')==6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get(); 
+        } else {
+            $data['kapal'] = Kapal::where('status', 'A')->get();  
+        }
         $data['pelabuhan'] = Pelabuhan::where('is_delete',0)->get();
         $data['form'] = KodeForm::where('id_menu', 79)->get();
         return view('ck_kapal.berlayar.index', $data);

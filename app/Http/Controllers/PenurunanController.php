@@ -261,7 +261,7 @@ class PenurunanController extends Controller
                 'otp_verified_at' => Carbon::now(),
                 'id_cabang' => $id_cabang,
                 'nomor' => $nomor,
-                'bagian' => $kat,
+                'bagian' => $bagian,
                 'tanggal' => $request->input('tanggal'),
                 'ttd' => $ttd,
                 'is_delete' => 0,

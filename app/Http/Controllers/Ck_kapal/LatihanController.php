@@ -25,17 +25,25 @@ class LatihanController extends Controller
     public function index()
     {
         $data['active'] = "/ck_kapal/latihan";    
-        $data['kapal'] = Kapal::where('status','A')->get();
-        $data['pelabuhan'] = Pelabuhan::where('is_delete',0)->get();
+        if(Session::get('previllage')==2) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', Session::get('id_perusahaan'))->get(); 
+        } else if(Session::get('previllage')==3) {
+          $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get(); 
+        } else if(Session::get('previllage')==6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_cabang'))->get(); 
+        } else {
+            $data['kapal'] = Kapal::where('status', 'A')->get();  
+        }
         $data['form'] = KodeForm::where('id_menu', 80)->get();
         return view('ck_kapal.latihan.index', $data);
     }
 
-    public function data()
+    public function data(Request $request)
     {
-        $id_perusahaan = Session::get('id_perusahaan');
-        $id_kapal = Session::get('id_kapal');
         $roleJenis = Session::get('previllage');
+        $id_perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
+        $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
+        $id_cabang = ($roleJenis == 6) ? Session::get('id_cabang') : null;
         
         $query = DB::table('checklist_data as a')
                 ->leftjoin('kode_form as b', 'a.id_form', '=', 'b.id') 
@@ -48,6 +56,9 @@ class LatihanController extends Controller
                 })
                 ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
                     return $q->where('a.id_kapal', $id_kapal);
+                })
+                ->when($roleJenis == 6 && $id_cabang, function ($q) use ($id_cabang) {
+                    return $q->where('c.id_cabang', $id_cabang);
                 })
                 ->orderBy('a.id', 'DESC');
 

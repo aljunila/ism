@@ -502,7 +502,8 @@ class PermintaanController extends Controller
 
         $tanggal = date('Y-m-d');
         $nomorTanggal = Carbon::parse($tanggal)->format('dmY');
-        $nomor = $kapal->call_sign . '/' . $source->bagian . '/' . $nomorTanggal;
+        $kat = ((int) $source->bagian === 1) ? 'Deck' : 'Mesin';
+        $nomor = $kapal->call_sign . '/' . $kat . '/' . $nomorTanggal;
         $statusId = $this->statusPermintaanId();
         $idCabang = (int) ($kapal->id_cabang ?? 0);
         $newPermintaan = null;
@@ -599,8 +600,9 @@ class PermintaanController extends Controller
         }
 
         $bagian = $request->input('bagian');
+        $kat = ((int) $bagian === 1) ? 'Deck' : 'Mesin';
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
-        $nomor = $kapal->call_sign.'/'.$bagian.'/'.$tanggal;
+        $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
         $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
         $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();

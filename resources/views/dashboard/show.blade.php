@@ -772,7 +772,7 @@
         <span class="h-blob h-blob-3"></span>
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
             <div>
-                <div class="dash-hero-name">Selamat Datang Kembali, {{ Session::get('name') }}</div>
+                <div class="dash-hero-name">Selamat Datang Kembali, {{ Session::get('name') }} {{ Session::get('previllage') }}</div>
                 <div class="dash-hero-company">{{ $com->nama ?? '-' }}</div>
             </div>
             <div class="dash-hero-right d-flex flex-column align-items-end gap-50">

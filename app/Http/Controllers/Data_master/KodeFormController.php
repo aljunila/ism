@@ -128,11 +128,10 @@ class KodeFormController extends Controller
         return view('data_master.kode_form.form', $data);
     }
 
-    public function ism()
+    public function ism(Request $request)
     {
         $roleJenis = Session::get('previllage');
         $id_perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
-
         $query = DB::table('t_ism')
                 ->leftjoin('kode_form', 't_ism.id_form', '=', 'kode_form.id')
                 ->select('t_ism.*', 'kode_form.nama')

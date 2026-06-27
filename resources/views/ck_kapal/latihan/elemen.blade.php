@@ -60,30 +60,15 @@
                     let parts = data.split(' ')[0].split('-'); 
                     return parts[2] + '-' + parts[1] + '-' + parts[0]; 
                 }
-            },
-            {
-                data: null,
-                name: null,
-                render: function (data, type, row) {
-                    return `${row.kapal} <button type="button"  onclick="openDetail(${row.id})" class="btn btn-icon btn-xs btn-flat-primary" title="Detail Barang">
-                    Gambar & Video</button>`;
-                }
-            },    
-            { data: 'pelabuhan', name: 'pelabuhan' },
+            },   
+            { data: 'kapal', name: 'kapal' },
             { 
-                data: null,
-                render: function(data, type, row){
-                    if(row.file) {
-                    return `
-                    <a href="{{ asset('checklist') }}/${row.file}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
-                            <i data-feather='file'></i>
-                        </a>
-                    `;
-                } else {
-                    return ``;
-                }
-                }
-            },
+                    data: null,
+                    render: function(data, type, row){
+                        return `<button type="button"  onclick="openDetail(${row.id})" class="btn btn-icon btn-sm btn-primary" title="Detail File">
+                        Buka File</button>`;
+                    }
+                },
             ],
                 drawCallback: function(settings) {
                 feather.replace(); 
@@ -219,8 +204,7 @@
                             <th>No.</th>
                             <th>Tanggal</th>
                             <th>Nama Kapal</th>
-                            <th>Pembuat Permintaan</th>
-                            <th>PDF</th>
+                            <th>File</th>
                             </tr>
                         </thead>
                         <tbody>

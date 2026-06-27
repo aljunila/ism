@@ -22,8 +22,7 @@
                     <th>Form/Laporan</th>
                     <th>Tanggal</th>
                     <th>Kapal</th>
-                    <th>Dari Pelabuhan</th>
-                    <th>PDF</th>
+                    <th>File</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -52,15 +51,6 @@
                 <div class="mb-1">
                     <label class="form-label">Tanggal</label>
                     <input type="date" id="date" class="form-control">
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Dari Pelabuhan</label>
-                    <select id="id_pelabuhan" class="form-control">
-                        <option value="">-Pilih-</option>
-                        @foreach($form as $f)
-                            <option value="{{$f->id}}">{{$f->nama}}</option>
-                        @endforeach
-                    </select>
                 </div>
                 <div class="mb-1">
                     <label class="form-label">Jenis latihan</label>
@@ -157,27 +147,12 @@
                         return parts[2] + '-' + parts[1] + '-' + parts[0]; 
                     }
                 },
-                {
-                    data: null,
-                    name: null,
-                    render: function (data, type, row) {
-                        return `${row.kapal} <button type="button"  onclick="openDetail(${row.id})" class="btn btn-icon btn-xs btn-flat-primary" title="Detail Barang">
-                        Gambar & Video</button>`;
-                    }
-                },    
-                { data: 'pelabuhan', name: 'pelabuhan' },
+                { data: 'kapal', name: 'kapal' }, 
                 { 
                     data: null,
                     render: function(data, type, row){
-                        if(row.file) {
-                        return `
-                        <a href="{{ asset('checklist') }}/${row.file}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
-                                <i data-feather='file'></i>
-                            </a>
-                        `;
-                    } else {
-                        return ``;
-                    }
+                        return `<button type="button"  onclick="openDetail(${row.id})" class="btn btn-icon btn-sm btn-primary" title="Detail File">
+                        Buka File</button>`;
                     }
                 },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
@@ -187,32 +162,10 @@
         }
         });
 
-        let getPelabuhanUrl = "{{ route('getPelabuhan', ':id') }}";
-
-        $(document).on('change', '#id_kapal', function() {
-            var kapalID = $(this).val();
-            if (kapalID) {
-                $.ajax({
-                    url: getPelabuhanUrl.replace(':id', kapalID),
-                    type: "GET",
-                    dataType: "json",
-                    success: function(data) {
-                        $('#id_pelabuhan').empty().append('<option value="">-Pilih-</option>');           
-                        $.each(data, function(key, value) {
-                            $('#id_pelabuhan').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
-                        });
-                    }
-                });
-            } else {
-                $('#id_pelabuhan').empty().append('<option value="">Tidak ada data</option>');
-            }
-        });
-
         const resetForm = () => {
             $('#modal-latihan-label').text('Tambah Data');
             $('#id_kapal').val('');
             $('#id_form').val('');
-            $('#id_pelabuhan').val('');
             $('#date').val('');
             $('#btn-save-latihan').data('mode', 'create').data('id', '');
         };
@@ -230,7 +183,6 @@
 
             formData.append('id_kapal', $('#id_kapal').val());
             formData.append('id_form', $('#id_form').val());
-            formData.append('id_pelabuhan', $('#id_pelabuhan').val());
             formData.append('date', $('#date').val());
 
             let files = $('#file_upload')[0].files;
@@ -268,7 +220,6 @@
             $('#modal-latihan-label').text('Edit Data');
             $('#id_kapal').val(btn.data('id_kapal'));
             $('#id_form').val(btn.data('id_form'));
-            $('#id_pelabuhan').val(btn.data('id_pelabuhan'));
             $('#date').val(btn.data('date'));
             $('#btn-save-latihan').data('mode', 'edit').data('id', btn.data('id'));
             $('#modal-latihan').modal('show');

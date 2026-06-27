@@ -68,10 +68,6 @@ class LatihanController extends Controller
                 $kapal = Kapal::find($row->id_kapal);
                 return $kapal ? $kapal->nama : '-';
             })
-           ->addColumn('pelabuhan', function ($row) {
-            $ket = json_decode($row->keterangan, true);
-            return $ket['plb_asal'] ?? '-';
-            })
             ->addColumn('kode', function ($row) {
                 $kode = KodeForm::find($row->id_form);
                 return $kode ? $kode->nama : '-';
@@ -93,12 +89,6 @@ class LatihanController extends Controller
     {
         $kapal = Kapal::find($request->input('id_kapal'));
 
-        $plb_asal = Pelabuhan::find($request->input('id_pelabuhan'));
-        $plb_tujuan = Pelabuhan::where('id_cabang', $plb_asal->id_cabang)->where('id', '!=', $plb_asal->id)->first();
-        $keterangan = [
-            'plb_asal' => $plb_asal->nama,
-            'plb_tujuan' => $plb_tujuan->nama
-        ];
         $save = ChecklistData::create([
           'uid' => Str::uuid()->toString(),
           'id_form' => $request->input('id_form'),
@@ -106,7 +96,6 @@ class LatihanController extends Controller
           'id_kapal' => $kapal->id,
           'date' => $request->input('date'),
           'status' => 'A',
-          'keterangan' => $keterangan,
           'created_by' => Session::get('userid'),
           'created_date' => date('Y-m-d')
        ]);

@@ -134,7 +134,7 @@ class KodeFormController extends Controller
         $id_perusahaan = (($roleJenis == 2) or ($roleJenis == 3)) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
         $query = DB::table('t_ism')
                 ->leftjoin('kode_form', 't_ism.id_form', '=', 'kode_form.id')
-                ->select('t_ism.*', 'kode_form.nama')
+                ->select('t_ism.*', 'kode_form.nama as nama_form', 'kode_form.link')
                 ->where('t_ism.is_delete', 0)
                 ->when((($roleJenis == 1) or ($roleJenis == 5)), function ($q) { return $q; })
                 ->when($id_perusahaan, function ($q) use ($id_perusahaan) {

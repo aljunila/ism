@@ -379,6 +379,7 @@
             .done(function (res) {
                 Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, timer: 1600, showConfirmButton: false });
                 $('#modal-pemakaian').modal('hide');
+                table.ajax.reload();
             })
             .fail(function (xhr) {
                 const errors = xhr.responseJSON?.errors;

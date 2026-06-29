@@ -88,6 +88,9 @@ class BerlayarController extends Controller
     public function store(Request $request)
     {
         $kapal = Kapal::find($request->input('id_kapal'));
+        if (!$kapal) {
+            return response()->json(['message' => 'Kapal tidak ditemukan'], 422);
+        }
 
         $plb_asal = Pelabuhan::find($request->input('id_pelabuhan'));
         if (!$plb_asal) {
@@ -106,6 +109,7 @@ class BerlayarController extends Controller
           'date' => $request->input('date'),
           'status' => 'A',
           'keterangan' => $keterangan,
+          'file' => null,
           'created_by' => Session::get('userid'),
           'created_date' => date('Y-m-d')
        ]);

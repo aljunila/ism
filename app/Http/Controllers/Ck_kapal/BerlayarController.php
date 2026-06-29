@@ -90,10 +90,13 @@ class BerlayarController extends Controller
         $kapal = Kapal::find($request->input('id_kapal'));
 
         $plb_asal = Pelabuhan::find($request->input('id_pelabuhan'));
+        if (!$plb_asal) {
+            return response()->json(['message' => 'Pelabuhan asal tidak ditemukan'], 422);
+        }
         $plb_tujuan = Pelabuhan::where('id_cabang', $plb_asal->id_cabang)->where('id', '!=', $plb_asal->id)->first();
         $keterangan = [
             'plb_asal' => $plb_asal->nama,
-            'plb_tujuan' => $plb_tujuan->nama
+            'plb_tujuan' => $plb_tujuan ? $plb_tujuan->nama : '-'
         ];
         $save = ChecklistData::create([
           'uid' => Str::uuid()->toString(),

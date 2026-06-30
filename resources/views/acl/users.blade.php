@@ -155,12 +155,13 @@
             });
         };
 
-        const loadKaryawan = (perusahaanId = '') => {
+        const loadKaryawan = (perusahaanId = '', callback = null) => {
             $.get('{{ url('/api/karyawan/all') }}', { perusahaan_id: perusahaanId }, function (res) {
                 tsKaryawan.clearOptions();
                 tsKaryawan.addOption({value: '', text: 'Pilih Karyawan'});
                 res.forEach(k => tsKaryawan.addOption({value: k.id, text: `${k.nama} (${k.nik})`}));
                 tsKaryawan.refreshOptions(false);
+                if (typeof callback === 'function') callback();
             });
         };
 
@@ -309,8 +310,15 @@
                     tsPerusahaan.clear(true);
                     tsKaryawan.clear(true);
                 } else {
-                    tsPerusahaan.setValue(user.id_perusahaan || '');
-                    tsKaryawan.setValue(user.id_karyawan || '');
+                    const perusahaanId = user.id_perusahaan || '';
+                    const karyawanId   = user.id_karyawan   || '';
+                    // Set perusahaan silently agar onChange tidak memicu loadKaryawan lebih dulu
+                    tsPerusahaan.setValue(String(perusahaanId), true);
+                    // Load karyawan untuk perusahaan ini, baru set nilai setelah options siap
+                    loadKaryawan(perusahaanId, () => {
+                        if (karyawanId) tsKaryawan.setValue(String(karyawanId), true);
+                    });
+                    refreshAdditionalCompanies();
                     $('#wrap-perusahaan, #wrap-karyawan').show();
                 }
 

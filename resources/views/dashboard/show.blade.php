@@ -260,6 +260,35 @@
         $('#notification-target-user-wrapper').toggle(target === 'user');
         $('#notification-target-role-wrapper').toggle(target === 'role');
     });
+
+    function filterTable(inputId, tableId, noResultId) {
+        const val = $('#' + inputId).val().toLowerCase().trim();
+        let visible = 0;
+        $('#' + tableId + ' tbody tr').each(function () {
+            const match = $(this).text().toLowerCase().includes(val);
+            $(this).toggle(match);
+            if (match) visible++;
+        });
+        $('#' + noResultId).toggle(visible === 0);
+    }
+
+    $('#search-doc-kapal').on('input', function () {
+        filterTable('search-doc-kapal', 'table-doc-kapal', 'no-result-kapal');
+    });
+
+    $('#search-doc-kru').on('input', function () {
+        filterTable('search-doc-kru', 'table-doc-kru', 'no-result-kru');
+    });
+
+    // Reset search saat modal ditutup
+    $('#large').on('hidden.bs.modal', function () {
+        $('#search-doc-kapal').val('');
+        filterTable('search-doc-kapal', 'table-doc-kapal', 'no-result-kapal');
+    });
+    $('#krumodal').on('hidden.bs.modal', function () {
+        $('#search-doc-kru').val('');
+        filterTable('search-doc-kru', 'table-doc-kru', 'no-result-kru');
+    });
 </script>
 @endsection
 @section('content')
@@ -1217,88 +1246,94 @@
     </div>
 </div>
 
-<div class="modal-size-lg d-inline-block">
-    <div class="modal fade text-start" id="large" tabindex="-1" aria-labelledby="myModalLabel17" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel17">List Dokumen Kapal</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card-body">
-                            <table class="table table-bordered table-striped" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th width="35%">Kapal</th>
-                                        <th width="45%">Nama Document</th>
-                                        <th width="20%">Tgl Expired</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($document as $d)
-                                        @php
-                                            $kapal = $d->get_kapal();
-                                            $pemilik = $kapal ? $kapal->get_pemilik() : null;
-                                            $file = $d->get_file();
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $pemilik->nama ?? '-' }}<br>
-                                                {{ $kapal->nama ?? '-' }}</td>
-                                            <td><a type="button" href="{{ asset('file_upload/'.$d->file) }}" target="_blank" 
-                                                    title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">{{ $file->nama ?? ($d->nama ?? 'File') }}</a></td>
-                                            <td>{{ \Carbon\Carbon::parse($d->tgl_expired)->format('d-m-Y') }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        
+<div class="modal fade text-start" id="large" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title mb-50">List Dokumen Kapal</h4>
+                    <div class="position-relative">
+                        <i data-feather="search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#a3adb8;pointer-events:none;"></i>
+                        <input type="text" id="search-doc-kapal" class="form-control form-control-sm ps-2" style="padding-left:30px!important;min-width:240px;" placeholder="Cari kapal atau dokumen...">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept</button>
+                <button type="button" class="btn-close ms-1" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped mb-0" id="table-doc-kapal" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="35%">Kapal</th>
+                                <th width="45%">Nama Document</th>
+                                <th width="20%">Tgl Expired</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($document as $d)
+                                @php
+                                    $kapal = $d->get_kapal();
+                                    $pemilik = $kapal ? $kapal->get_pemilik() : null;
+                                    $file = $d->get_file();
+                                @endphp
+                                <tr>
+                                    <td>{{ $pemilik->nama ?? '-' }}<br>{{ $kapal->nama ?? '-' }}</td>
+                                    <td><a href="{{ asset('file_upload/'.$d->file) }}" target="_blank"
+                                            title="Buka File">{{ $file->nama ?? ($d->nama ?? 'File') }}</a></td>
+                                    <td>{{ \Carbon\Carbon::parse($d->tgl_expired)->format('d-m-Y') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div id="no-result-kapal" class="text-center text-muted py-3" style="display:none;">Tidak ada data yang cocok.</div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal-size-lg d-inline-block">
-    <div class="modal fade text-start" id="krumodal" tabindex="-1" aria-labelledby="myModalLabel17" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel17">List Dokumen Kru</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="card-body">
-                            <table class="table table-bordered table-striped" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th width="35%">Kapal</th>
-                                        <th width="45%">Nama Document</th>
-                                        <th width="20%">Tgl Expired</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($doc_kru as $kru)
-                                        <tr>
-                                            <td><b>{{ $kru->kapal ?? '-' }}</b><br>
-                                                {{ $kru->karyawan ?? '-' }}</td>
-                                            <td><a type="button" href="{{ asset('file_upload/'.$kru->file) }}" target="_blank" 
-                                                    title="Buka File" data-id="{{$kru->id}}" data-file="{{$kru->file}}">{{ $kru->filename ?? ($kru->filename ?? 'File') }}</a></td>
-                                            <td>{{ \Carbon\Carbon::parse($kru->tgl_expired)->format('d-m-Y') }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        
+<div class="modal fade text-start" id="krumodal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title mb-50">List Dokumen Kru</h4>
+                    <div class="position-relative">
+                        <i data-feather="search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:#a3adb8;pointer-events:none;"></i>
+                        <input type="text" id="search-doc-kru" class="form-control form-control-sm" style="padding-left:30px!important;min-width:240px;" placeholder="Cari kapal, kru atau dokumen...">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept</button>
+                <button type="button" class="btn-close ms-1" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped mb-0" id="table-doc-kru" width="100%">
+                        <thead>
+                            <tr>
+                                <th width="35%">Kapal / Kru</th>
+                                <th width="45%">Nama Document</th>
+                                <th width="20%">Tgl Expired</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($doc_kru as $kru)
+                                <tr>
+                                    <td><b>{{ $kru->kapal ?? '-' }}</b><br>{{ $kru->karyawan ?? '-' }}</td>
+                                    <td><a href="{{ asset('file_upload/'.$kru->file) }}" target="_blank"
+                                            title="Buka File">{{ $kru->filename ?? 'File' }}</a></td>
+                                    <td>{{ \Carbon\Carbon::parse($kru->tgl_expired)->format('d-m-Y') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div id="no-result-kru" class="text-center text-muted py-3" style="display:none;">Tidak ada data yang cocok.</div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>

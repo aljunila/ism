@@ -180,11 +180,15 @@
         });
 
         const resetModal = () => {
+            $('#modal-user-label').text('Tambah User');
             $('#user_username, #user_password, #user_nama').val('');
+            $('#user_username').prop('disabled', false);
+            $('#btn-save-user').data('mode', 'create').data('id', '');
             tsRole.clear(true);
             tsPerusahaan.clear(true);
             tsKaryawan.clear(true);
             $('#additional-rows').empty();
+            $('#wrap-perusahaan, #wrap-karyawan').show();
         };
 
         $('#btn-add-user').on('click', function () {
@@ -271,7 +275,8 @@
             const ajaxOpts = {
                 url: mode === 'edit' ? '{{ url('acl/users') }}/' + id : '{{ route('acl.users.store') }}',
                 type: mode === 'edit' ? 'PUT' : 'POST',
-                data: payload
+                contentType: 'application/json',
+                data: JSON.stringify(payload)
             };
 
             $.ajax(ajaxOpts)

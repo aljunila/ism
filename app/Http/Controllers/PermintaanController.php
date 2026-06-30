@@ -1529,12 +1529,12 @@ class PermintaanController extends Controller
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
         $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
-        $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();
-        $logistik = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 35)->where('status', 'A')->where('resign','N')->first();
+        $kepala = $id_cabang ? Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first() : null;
+        $logistik = $id_cabang ? Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 35)->where('status', 'A')->where('resign','N')->first() : null;
         $ttd = [
-            'setuju' => $get_nahkoda->id,
-            'mengetahui'   => $kepala->id,
-            'logistik' => $logistik->id
+            'setuju'     => $get_nahkoda?->id,
+            'mengetahui' => $kepala?->id,
+            'logistik'   => $logistik?->id,
         ];
 
         $checked = $request->check ?? [];
@@ -1542,7 +1542,7 @@ class PermintaanController extends Controller
         $tot_barang = $request->total ?? [];
         $barang = $request->barang ?? [];
         $gudang = $request->gudang ?? [];
-        $keterangan = $request->ket ?? [];
+        $ket_arr = $request->ket ?? [];
         
         DB::beginTransaction();
         try {
@@ -1565,7 +1565,7 @@ class PermintaanController extends Controller
                     $tot = $tot_barang[$id] ?? 0;
                     $id_barang = $barang[$id] ?? 0;
                     $id_gudang = $gudang[$id] ?? 0;
-                    $ket = $keterangan[$id] ?? 0;
+                    $ket = $ket_arr[$id] ?? '';
                     $savedetail = DetailKirim::create([
                         'uid' => Str::uuid()->toString(),
                         'id_kirim' => $save->id,
@@ -1577,22 +1577,20 @@ class PermintaanController extends Controller
                         'created_date' => date('Y-m-d H:i:s')
                     ]);
 
-                    if($jumlah<=$tot) {
+                    if ($jumlah <= $tot) {
                         DetailPermintaan::where('id', $id)->update([
                             'flow_stage' => "selesai",
                             'status'    => 3,
                             'changed_by' => Session::get('userid'),
                             'changed_date' => date('Y-m-d H:i:s')
                         ]);
-
-                        $statusId=3;
+                        $statusId = 3;
                         $eventCode = "permintaan_done";
-                        $keterangan = "Barang sudah dikirim ke kapal";
-                        
+                        $logKet = "Barang sudah dikirim ke kapal";
                     } else {
-                        $statusId=2;
+                        $statusId = 2;
                         $eventCode = "flow_workshop";
-                        $keterangan = "Barang dikirim sebagian";
+                        $logKet = "Barang dikirim sebagian";
                     }
 
                     $cek = Gudang::where('id_kapal', $save->id_kapal)
@@ -1600,10 +1598,8 @@ class PermintaanController extends Controller
                         ->orderByDesc('id')
                         ->first();
                     if ($cek) {
-                        $idgudang = $cek->id;
-                        $total= $cek->jumlah + $jumlah;
-                        Gudang::where('id', $idgudang)->update([
-                            'jumlah' => $total,
+                        Gudang::where('id', $cek->id)->update([
+                            'jumlah' => $cek->jumlah + $jumlah,
                             'changed_date' => date('Y-m-d H:i:s')
                         ]);
                     } else {
@@ -1614,12 +1610,11 @@ class PermintaanController extends Controller
                             'jumlah' => $jumlah,
                             'changed_date' => date('Y-m-d H:i:s')
                         ]);
-                    } 
-                    if($id_gudang) {
+                    }
+                    if ($id_gudang) {
                         $show = Gudang::findOrFail($id_gudang);
-                        $minus = max(0, $show->jumlah - $jumlah);
                         $show->update([
-                            'jumlah' => $minus,
+                            'jumlah' => max(0, $show->jumlah - $jumlah),
                             'changed_date' => now()
                         ]);
                     }
@@ -1629,7 +1624,7 @@ class PermintaanController extends Controller
                         $save->tanggal,
                         $statusId,
                         $eventCode,
-                        $keterangan
+                        $logKet
                     );
                 }
 
@@ -1762,13 +1757,14 @@ class PermintaanController extends Controller
 
         $data = DB::table('t_detail_permintaan as a')
         ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
+        ->leftJoin('t_permintaan_barang as d', 'd.id', '=', 'a.id_permintaan')
         ->leftJoin('t_gudang as c', function ($join) {
             $join->on('c.id_barang', '=', 'b.id')
-                 ->on('c.id_cabang', '=', 'a.id_cabang');
+                 ->on('c.id_kapal', '=', 'd.id_kapal');
         })
-        ->leftJoin('t_permintaan_barang as d', 'd.id', '=', 'a.id_permintaan')
         ->select('a.id', 'b.id as id_barang', 'b.nama as barang', 'd.nomor', 'd.tanggal', 'a.jumlah as jml_minta', 'c.jumlah as stok', 'c.id as idgudang')
         ->where('d.id_kapal', $kapal)
+        ->where('a.is_delete', 0)
         ->where('a.flow_stage', 'workshop')
         ->get();
         return DataTables::of($data)->make(true);

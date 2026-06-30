@@ -62,6 +62,7 @@ class PenurunanController extends Controller
             ->orderBy('user.nama')
             ->limit(200)
             ->get();
+        $data['kelompok'] = KelBarang::where('is_delete', 0)->get();
         if ($uid) {
             $get = TurunBarang::where('uid', $uid)->where('is_delete', 0)->first();
             $data['data'] = $get;
@@ -244,11 +245,11 @@ class PenurunanController extends Controller
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
         $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
-        $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();
+        $kepala = $id_cabang ? Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first() : null;
         $ttd = [
-            'buat' => Session::get('id_karyawan'),
-            'setuju' => $get_nahkoda->id,
-            'mengetahui'   => $kepala->id,
+            'buat'       => Session::get('id_karyawan'),
+            'setuju'     => $get_nahkoda?->id,
+            'mengetahui' => $kepala?->id,
         ];
 
         DB::beginTransaction();
@@ -356,9 +357,9 @@ class PenurunanController extends Controller
     {
 
         $result = DB::table('t_detail_turun as a')
-                ->leftjoin('m_barang as c', 'c.id', '=', 'b.id_barang')
+                ->leftjoin('m_barang as c', 'c.id', '=', 'a.id_barang')
                 ->select('a.*', 'c.nama as barang', 'c.deskripsi as satuan')
-                ->where('id_turun', $id)->where('a.is_delete', 0)->get();
+                ->where('a.id_turun', $id)->where('a.is_delete', 0)->get();
 
         return response()->json($result);
     }
@@ -507,6 +508,59 @@ class PenurunanController extends Controller
         return response()->json([
             'stok' => $cek ? $cek->jumlah : 0
         ]);
+    }
+
+    public function riwayat()
+    {
+        $data['active'] = "riwayat_penurunan";
+        $roleJenis = Session::get('previllage');
+        $id_perusahaan = Session::get('id_perusahaan');
+
+        if ($roleJenis == 2) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('pemilik', $id_perusahaan)->get();
+        } elseif ($roleJenis == 3) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id', Session::get('id_kapal'))->get();
+        } elseif ($roleJenis == 6) {
+            $data['kapal'] = Kapal::where('status', 'A')->where('id_cabang', Session::get('id_perusahaan'))->get();
+        } else {
+            $data['kapal'] = Kapal::where('status', 'A')->get();
+        }
+
+        return view('penurunan.riwayat', $data);
+    }
+
+    public function riwayatData(Request $request)
+    {
+        $roleJenis = Session::get('previllage');
+        $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
+        $tanggal_dari   = $request->input('tanggal_dari');
+        $tanggal_sampai = $request->input('tanggal_sampai');
+        $bagian = $request->input('bagian');
+
+        $query = TurunBarang::where('is_delete', 0)
+            ->withCount(['details as jumlah_item' => fn($q) => $q->where('is_delete', 0)])
+            ->when($id_kapal,       fn($q, $v) => $q->where('id_kapal', $v))
+            ->when($tanggal_dari,   fn($q, $v) => $q->where('tanggal', '>=', $v))
+            ->when($tanggal_sampai, fn($q, $v) => $q->where('tanggal', '<=', $v))
+            ->when($bagian,         fn($q, $v) => $q->where('bagian', $v));
+
+        if ((int) $roleJenis === 2) {
+            $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+        } elseif ((int) $roleJenis === 3) {
+            $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
+        } elseif ((int) $roleJenis === 6) {
+            $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_perusahaan'))->pluck('id'));
+        }
+
+        $query->orderByDesc('tanggal')->orderByDesc('id');
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('kapal',     fn($row) => optional(Kapal::find($row->id_kapal))->nama ?? '-')
+            ->addColumn('penerima',  fn($row) => optional(User::find($row->id_penerima))->nama ?? '-')
+            ->addColumn('pembuat',   fn($row) => optional(User::find($row->created_by))->nama ?? '-')
+            ->addColumn('bagian_label', fn($row) => (int) $row->bagian === 1 ? 'DECK' : 'MESIN')
+            ->make(true);
     }
 
 }

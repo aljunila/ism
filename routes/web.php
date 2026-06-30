@@ -468,6 +468,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('store', [PenurunanController::class, 'store'])->name('penurunan.store');
         Route::post('data', [PenurunanController::class, 'data'])->name('penurunan.data');
         Route::post('datagudang', [PenurunanController::class, 'datagudang'])->name('permintaan.datagudang');
+        Route::get('riwayat', [PenurunanController::class, 'riwayat'])->name('penurunan.riwayat');
+        Route::post('riwayat/data', [PenurunanController::class, 'riwayatData'])->name('penurunan.riwayat.data');
         Route::get('get/{id}', [PenurunanController::class, 'get'])->name('penurunan.get');
         Route::get('/pdf/{uid}', [PenurunanController::class, 'pdf'])->name('penurunan.pdf');
         Route::get('/{id}', [PenurunanController::class, 'elemen'])->name('penurunan.elemen');

@@ -394,8 +394,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Form Penurunan Barang</h4>
+                    <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Barang</button>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -519,5 +520,42 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="modal-barang" tabindex="-1" aria-labelledby="modal-barang-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-barang-label">Tambah Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <label class="form-label">Kelompok Barang</label>
+                    <select id="barang-id_kel_barang" class="form-control">
+                        <option value="">-Pilih-</option>
+                        @foreach($kelompok as $k)
+                            <option value="{{$k->id}}">{{$k->nama}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label">Nama</label>
+                    <input type="text" id="barang-nama" class="form-control">
+                </div>
+                <div class="mb-1">
+                    <label class="form-label">Part Number</label>
+                    <input type="text" id="barang-kode" class="form-control">
+                </div>
+                <div class="mb-1">
+                    <label class="form-label">Satuan</label>
+                    <input type="text" id="barang-deskripsi" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-save-barang">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection

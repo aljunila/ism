@@ -82,9 +82,10 @@
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'judul', name: 'judul' },
                 { 
-                    data: null,
+                    data: 'nama_form',
+                    name:'kode_form.nama',
                     render: function(data, type, row){
-                        return `<a href="${data.link}/${data.uid}" target="_blank">${data.nama}</a>`;
+                        return `<a href="${row.link}/${row.uid}" target="_blank">${data}</a>`;
                     }
                 },
                 { data: 'perusahaan', name: 'perusahaan' },

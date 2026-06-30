@@ -173,12 +173,7 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'ket', name: 'ket' },
-                { 
-                    data: null,
-                    render: function(data, type, row){
-                        return `${data.nama}`;
-                    }
-                },
+                { data: 'nama', name: 'nama' },
                 { data: 'pj', name: 'pj' },
                 { data: 'kode_file', name: 'kode_file' },  
                 { data: 'periode', name: 'periode' },   

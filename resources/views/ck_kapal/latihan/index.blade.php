@@ -10,7 +10,7 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Kapal - Berlayar</h4>
+        <h4 class="card-title">Kapal - Laporan Latihan</h4>
         <!-- <a type="button" href="/data_crew/familiarisasi/form" class="btn btn-primary btn-sm">Tambah Data</a> -->
          <button class="btn btn-primary btn-sm" id="btn-add-latihan">Tambah Data</button>
     </div>

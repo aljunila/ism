@@ -19,6 +19,8 @@ use Session;
 use DB;
 use App\Support\RoleContext;
 use Carbon\Carbon;
+use App\Exports\LapGudangExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LapGudangController extends Controller
 {
@@ -101,5 +103,14 @@ class LapGudangController extends Controller
         $data['form'] = KodeForm::find($get->id_form);
         $data['id_perusahaan'] = $get->id_perusahaan;
         return view('laporan.gudang.elemen', $data);
+    }
+
+     public function export(Request $request)
+    {
+        $id = $request->input('id');
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
+
+        return Excel::download(new LapGudangExport($id, $start, $end), 'lap_gudang.xlsx');
     }
 }

@@ -11,6 +11,7 @@ use App\Models\Cabang;
 use App\Models\Kapal;
 use App\Models\Barang;
 use App\Models\KelBarang;
+use App\Models\LogGudang;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -121,6 +122,15 @@ class GudangController extends Controller
         ]);
         $jum = $maxQty-$validated['qty'];
         $update = Gudang::find($id)->update(['jumlah' => $jum]); 
+
+        $updatelog = LogGudang::insert([
+            'id_gudang'    => $id,
+            'total'        => $jum,
+            'tanggal'      => $validated['tanggal'],
+            'keterangan'   => $validated['keterangan'] ?? null,
+            'created_by'   => $pembuat,
+            'created_date' => Carbon::now(),
+        ]);
 
         $barang = $gudang->get_barang()?->nama ?? '-';
         $tanggalFormatted = Carbon::parse($validated['tanggal'])->format('d-m-Y');

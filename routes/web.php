@@ -54,10 +54,12 @@ use App\Http\Controllers\Data_crew\KonditeController;
 use App\Http\Controllers\Data_crew\KriteriaController;
 use App\Http\Controllers\PermintaanController;
 use App\Http\Controllers\PenurunanController;
-use App\Http\Controllers\Laporan\LapPermintaanController;
 use App\Http\Controllers\Ck_kapal\BerlayarController;
 use App\Http\Controllers\Ck_kapal\LatihanController;
+use App\Http\Controllers\Laporan\LapPermintaanController;
 use App\Http\Controllers\Laporan\LapGudangController;
+use App\Http\Controllers\Laporan\LapCrewController;
+use App\Http\Controllers\Laporan\LapKapalController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -512,6 +514,17 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('gudang/pdf/{uid}', [LapGudangController::class, 'pdf'])->name('lapgudang.pdf');
         Route::get('gudang/{uid}', [LapGudangController::class, 'elemen'])->name('lapgudang.elemen');
         Route::get('gudang/getlog/{id}', [LapGudangController::class, 'getlog'])->name('lapgudang.getlog');
+        Route::post('gudang/export', [LapGudangController::class, 'export'])->name('lapgudang.export');
+
+        Route::get('crew', [LapCrewController::class, 'index']);
+        Route::post('crew/data', [LapCrewController::class, 'data'])->name('lapcrew.data');
+        Route::get('/crew/{id}/merge-pdf', [LapCrewController::class, 'mergePdf']);
+        Route::get('/crew/{id}/download-zip', [LapCrewController::class, 'downloadZip']);
+
+        Route::get('kapal', [LapKapalController::class, 'index']);
+        Route::post('kapal/data', [LapKapalController::class, 'data'])->name('lapkapal.data');
+        Route::get('/kapal/{id}/merge-pdf', [LapKapalController::class, 'mergePdf']);
+        Route::get('/kapal/{id}/download-zip', [LapKapalController::class, 'downloadZip']);
     });
 
     Route::prefix('gudang')->group(function () {

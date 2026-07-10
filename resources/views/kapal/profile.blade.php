@@ -51,7 +51,7 @@
                 { data: 'nama' },
                 { data: 'ket' },
                 { 
-                    data: null,
+                    data: 'penerbit',
                     render: function(data, type, row) {
                        return `
                             ${row.penerbit ?? '-'}
@@ -59,49 +59,53 @@
                         `; }
                 },
                 { 
-                    data: null,
+                    data: 'tgl_terbit',
                     render: function(data, type, row) {
                        return `
                             ${row.tgl_terbit ? `Terbit : ${row.tgl_terbit} ` : '-'}
                             ${row.tgl_expired ? `<br>Expired : ${row.tgl_expired}` : ''}
                         `; }
                 },
-                { 
-                    data: null,
-                    render: function (data, type, row) {
+                {
+                data: null,
+                orderable: false,
+                searchable: false,
+                defaultContent: '',
+                render: function(data, type, row) {
 
-                        // JIKA ADA FILE
-                        if (row.file) {
-                            return `
-                                <a href="{{ asset('file_upload') }}/${row.file}"
-                                    class="btn btn-icon rounded-circle btn-xs btn-flat-success"
-                                    title="Buka File" target="_blank">
-                                    <i data-feather="file"></i>
-                                </a>
+                    if (row.file) {
+                        return `
+                            <a href="{{ asset('file_upload') }}/${row.file}"
+                                class="btn btn-icon rounded-circle btn-xs btn-flat-success"
+                                target="_blank">
+                                <i data-feather="file"></i>
+                            </a>
+                        
+                        @if(Session::get('previllage') != 3)
+                            <button type="button"
+                                class="btn btn-icon rounded-circle btn-xs btn-flat-danger delete-btn"
+                                data-id="${row.id_upload}"
+                                data-file="${row.file}">
+                                <i data-feather="trash"></i>
+                            </button>
+                        
+                        @endif
+                        `; 
+                    }
 
-                                <button type="button"
-                                    class="btn btn-icon rounded-circle btn-xs btn-flat-danger delete-btn"
-                                    title="Hapus File"
-                                    data-id="${row.id_upload}"
-                                    data-file="${row.file}">
-                                    <i data-feather="trash"></i>
-                                </button>
-                            `;
-                        }
-
-                        // JIKA TIDAK ADA FILE
+                    @if(Session::get('previllage') != 3)
                         return `
                             <button type="button"
                                 class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-btn"
-                                title="Upload File"
-                                data-id="${row.id}"
-                                data-file="${row.nama}">
+                                data-id="${row.id}">
                                 <i data-feather="upload"></i>
                             </button>
                         `;
-                    }
+                    @else
+                        return '';
+                    @endif
                 }
-
+            }
             ],
             drawCallback: function(settings) {
             feather.replace(); // supaya icon feather muncul ulang

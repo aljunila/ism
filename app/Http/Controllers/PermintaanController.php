@@ -25,6 +25,7 @@ use App\Models\FormISM;
 use App\Models\Notifikasi;
 use App\Models\Karyawan;
 use App\Models\Vendor;
+use App\Models\LogGudang;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -1602,15 +1603,28 @@ class PermintaanController extends Controller
                             'jumlah' => $cek->jumlah + $jumlah,
                             'changed_date' => date('Y-m-d H:i:s')
                         ]);
+                        $id_gudangkapal = $cek->id;
+                        $total = $cek->jumlah + $jumlah;
                     } else {
-                        Gudang::create([
-                            'uid' => Str::uuid()->toString(),
-                            'id_barang' => $id_barang,
-                            'id_kapal' => $save->id_kapal,
-                            'jumlah' => $jumlah,
-                            'changed_date' => date('Y-m-d H:i:s')
+                        $savegudang = Gudang::create([
+                                    'uid' => Str::uuid()->toString(),
+                                    'id_barang' => $id_barang,
+                                    'id_kapal' => $save->id_kapal,
+                                    'jumlah' => $jumlah,
+                                    'changed_date' => date('Y-m-d H:i:s')
                         ]);
+                        $id_gudangkapal = $savegudang->id;
+                        $total = $savegudang->jumlah;
                     }
+                    $pembuat = Session::get('name') ?: Session::get('username') ?: 'Unknown';
+                    $updatelog = LogGudang::insert([
+                        'id_gudang'    => $id_gudangkapal,
+                        'total'        => $total,
+                        'tanggal'      => $request->input('tanggal'),
+                        'keterangan'   => "Penambahan barang",
+                        'created_by'   => $pembuat,
+                        'created_date' => Carbon::now(),
+                    ]);
                     if ($id_gudang) {
                         $show = Gudang::findOrFail($id_gudang);
                         $show->update([

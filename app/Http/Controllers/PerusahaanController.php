@@ -22,12 +22,12 @@ class PerusahaanController extends Controller
     {
         $roleJenis = Session::get('previllage'); // mapped dari role.jenis
         $id_perusahaan = Session::get('id_perusahaan');
-        if($roleJenis==1) { // superadmin
-            $data['daftar'] = Perusahaan::where('status','A')->get();
-        } else {
+        if($roleJenis==2) { // superadmin
             $data['daftar'] = Perusahaan::where('status','A')
                 ->when($id_perusahaan, fn($q) => $q->where('id', $id_perusahaan))
                 ->get();
+        } else {
+            $data['daftar'] = Perusahaan::where('status','A')->get();
         }
         $data['active'] = "perusahaan";
         return view('perusahaan.show', $data);

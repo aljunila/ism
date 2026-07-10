@@ -27,18 +27,6 @@ class KapalController extends Controller
         $roleJenis = Session::get('previllage');
         $activeCompany = Session::get('id_perusahaan');
         $activeShip = Session::get('id_kapal');
-
-        $data['daftar'] = Kapal::where('status', 'A')
-            ->when($roleJenis == 1, function ($q) {
-                return $q;
-            })
-            ->when($roleJenis == 2 && $activeCompany, function ($q) use ($activeCompany) {
-                return $q->where('pemilik', $activeCompany);
-            })
-            ->when($roleJenis == 3 && $activeShip, function ($q) use ($activeShip) {
-                return $q->where('id', $activeShip);
-            })
-            ->get();
         $data['active'] = "kapal";
         return view('kapal.show', $data);
     }

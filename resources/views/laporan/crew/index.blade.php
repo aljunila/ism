@@ -247,6 +247,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
+                                    <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
                                 </div>
                             </div>
                             <!-- </form> -->

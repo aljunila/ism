@@ -111,6 +111,7 @@
                         @include('perusahaan')
                         <div class="col-sm-5"></div>
                         <div class="col-sm-3">
+                            <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
                         </div>
                     </div>
                     <div class="card-body">

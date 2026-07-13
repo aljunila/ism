@@ -329,7 +329,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
-                                <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
+                                <!-- <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button> -->
                                 <a href="/karyawan/add" class="btn btn-primary btn-sm"><i data-feather='file-plus'></i> Tambah Data</a>
                                 </div>
                             </div>

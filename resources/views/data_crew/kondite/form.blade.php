@@ -188,8 +188,13 @@
             const btn = $(this);
             let data = $(this).data('data');
 
-            if (typeof data === 'string') {
-                data = JSON.parse(data);
+            if (typeof data === 'string' && data.trim() !== '') {
+                try {
+                    data = JSON.parse(data);
+                } catch (e) {
+                    console.error('JSON tidak valid:', data);
+                    return;
+                }
             }
             
             console.log(data);

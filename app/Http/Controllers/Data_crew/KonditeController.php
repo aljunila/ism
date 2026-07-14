@@ -86,7 +86,7 @@ class KonditeController extends Controller
                 'created_date' => $date
             ]);
 
-            $karyawan = DB::table('karyawan')->where('id_kapal', $request->input('id_kapal'))->where('status', 'A')->where('resign','N')->get();
+            $karyawan = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('status', 'A')->where('resign','N')->get();
             foreach($karyawan as $data) {
                 $insert = Kondite::create([
                     'uid' => Str::uuid()->toString(),

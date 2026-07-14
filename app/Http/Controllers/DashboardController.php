@@ -74,7 +74,7 @@ class DashboardController extends Controller
                                 ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
                                 ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
                                 ->where('a.status', 'A')
-                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->whereNotNull('a.id_karyawan')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
@@ -86,10 +86,9 @@ class DashboardController extends Controller
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->where('karyawan.id_perusahaan', $id_perusahaan)
                             ->count();
-            $data['document'] = DB::table('file_upload as a')
-                                ->leftJoin('kapal as b', 'a.id_kapal', '=', 'b.id')
-                                ->select('a.*')
-                                ->where('a.status', 'A')->where('a.tgl_expired', '<=', $tanggal)->where('b.pemilik', $id_perusahaan)->get();
+            $query = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal);
+            $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+            $data['document'] = $query->get();
             $data['count_doc'] = count($data['document']);
             $data['doc_kru'] = DB::table('file_upload as a')
                                 ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
@@ -97,7 +96,7 @@ class DashboardController extends Controller
                                 ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
                                 ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
                                 ->where('a.status', 'A')
-                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('b.id_perusahaan', $id_perusahaan)
                                 ->whereNotNull('a.id_karyawan')
                                 ->get();
@@ -125,7 +124,7 @@ class DashboardController extends Controller
                                 ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
                                 ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
                                 ->where('a.status', 'A')
-                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('b.id_kapal', $id_kapal)
                                 ->whereNotNull('a.id_karyawan')
                                 ->get();
@@ -158,7 +157,7 @@ class DashboardController extends Controller
                                 ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
                                 ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
                                 ->where('a.status', 'A')
-                                ->whereDate('a.tgl_expired', '<=', '2026-06-26')
+                                ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('c.id_cabang', $id_cabang)
                                 ->whereNotNull('a.id_karyawan')
                                 ->get();

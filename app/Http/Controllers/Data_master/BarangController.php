@@ -103,7 +103,20 @@ class BarangController extends Controller
     public function databyKat(Request $request)
     {
         $id_bagian = $request->input('bagian');
-        $get = KelBarang::where('kategori', $id_bagian)->where('is_delete', 0)->get();
+        $id_kapal = $request->input('id_kapal');
+        if($id_bagian==2){
+            $get = DB::table('t_gudang as a')
+                    ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
+                    ->leftJoin('m_kel_barang as c', 'b.id_kel_barang', '=', 'c.id')
+                    ->select('b.*')
+                    ->where('a.id_kapal', $id_kapal)->where('a.is_delete', 0)->where('c.kategori', 2)->get();
+        } else {
+            $get = DB::table('m_barang as a')
+                    ->leftJoin('m_kel_barang as b', 'a.id_kel_barang', '=', 'b.id')
+                    ->select('a.*')
+                    ->where('a.is_delete', 0)->where('b.kategori', $id_bagian)->get();
+        }
+        
         return response()->json($get);
     }
 
@@ -112,5 +125,27 @@ class BarangController extends Controller
         $id_kel = $request->input('id_kel_barang');
         $get = Barang::where('id_kel_barang', $id_kel)->where('is_delete', 0)->get();
         return response()->json($get);
+    }
+
+    public function storeAjax(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required',
+            'id_kelompok' => 'required',
+        ]);
+
+        $barang = Barang::create([
+            'nama' => $request->nama,
+            'kode' => $request->kode,
+            'id_kel_barang' => $request->id_kelompok,
+            'deskripsi' => 'Pcs',
+            'is_delete' => 0,
+        ]);
+
+        return response()->json([
+            'id' => $barang->id,
+            'nama' => $barang->nama,
+            'kode' => $barang->kode
+        ]);
     }
 }

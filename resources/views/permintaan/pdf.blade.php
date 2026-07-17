@@ -85,7 +85,7 @@
                 <td>{{$row->get_barang()->nama}}</td>
                 <td>{{$row->get_barang()->deskripsi}}</td>
                 <td>{{$row->jumlah}}</td>
-                <td></td>
+                <td>{{$row->ket}}</td>
             </tr>
             @endforeach
         </table>

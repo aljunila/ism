@@ -585,6 +585,7 @@
                     render: function (data, type, row) {
                         if (data == 1) return '<a class="badge badge-light-primary">Deck</a>';
                         if (data == 2) return '<a class="badge badge-light-success">Mesin</a>';
+                        if (data == 3) return '<a class="badge badge-light-warning">Electrict</a>';
                         return '-';
                     }
                 },

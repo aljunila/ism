@@ -22,17 +22,52 @@
     <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 
     <script>
-    function initSearchSelect(selector) {
-        $(selector).each(function () {
-            if (this.tomselect) return;
-            new TomSelect(this, {
-                create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
+    let currentTomSelect = null;
+    let namaBarangBaru = '';
+
+    function initTomSelect(element) {
+        if (!element || element.tomselect) return;
+        let ts = new TomSelect(element, {
+            create: false,
+            persist: false,
+            placeholder: 'Pilih Barang',
+
+            load: function(query, callback) {
+
+                // hapus option tambah sebelumnya
+                this.removeOption('__new__');
+
+                if (query.length >= 2) {
+
+                    this.addOption({
+                        value: '__new__',
+                        text: '➕ Tambah Barang "' + query + '"'
+                    });
+
+                    namaBarangBaru = query;
                 }
-            });
+
+                callback();
+            },
+
+            onChange: function(value) {
+
+                if (value === '__new__') {
+
+                    currentTomSelect = this;
+
+                    $('#barang-kelompok-select').val('');
+                    $('#barang-kode-baru').val('');
+
+                    $('#modalBarang').modal('show');
+
+                    this.clear();
+                }
+
+            }
+
         });
+
     }
 
     const resetForm = () => {
@@ -126,14 +161,16 @@
 
     $("#tambah").click(function () {
         let bagian = $('#bagian').val();
+        let id_kapal = $('#id_kapal').val();
         $.ajax({
             url: '/data_master/barang/databyKat',
             type: 'POST',
             data: {
-                bagian: bagian
+                bagian: bagian,
+                id_kapal: id_kapal
             },
             success: function (res) {
-                let options = `<option value="">Pilih Kelompok</option>`;
+                let options = `<option value="">Pilih Barang</option>`;
                 res.forEach(function (b) {
                     options += `<option value="${b.id}">
                                     ${b.nama} (${b.kode})
@@ -144,18 +181,12 @@
                     <div class="col-sm-3"></div>
 
                     <div class="col-sm-3">
-                        <select name="kel[]" class="form-control select-kelompok">
+                        <select name="item[]" class="form-control barang">
                             ${options}
                         </select>
                     </div>
 
                     <div class="col-sm-2">
-                        <select name="item[]" id="item" class="form-control select-item">
-                            <option value="">Pilih Barang</option>
-                        </select>
-                    </div>
-
-                    <div class="col-sm-1">
                         <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]">
                     </div>
 
@@ -173,40 +204,15 @@
 
                 $("#field-container").append(field);
 
-                // init select2 / search select
-                initSearchSelect("#field-container .js-search-select:last");
+                let select = $("#field-container .barang").last()[0];
+                initTomSelect(select);
             },
             error: function () {
                 alert('Gagal load data barang');
             }
         });
     });
-
-    $(document).on('change', '.select-kelompok', function () {
-        let kelompokId = $(this).val();
-        let parent = $(this).closest('.field-item');
-        let itemSelect = parent.find('.select-item');
-        if (!kelompokId) {
-            itemSelect.html('<option value="">Pilih Barang</option>');
-            return;
-        }
-
-        $.ajax({
-            url: '/data_master/barang/barangbyKel',
-            type: 'GET',
-            data: { id_kel_barang: kelompokId },
-            success: function (res) {
-                let options = '<option value="">Pilih Barang</option>';
-                res.forEach(function (b) {
-                    options += `<option value="${b.id}">${b.nama} (${b.kode})</option>`;
-                });
-                itemSelect.html(options);
-                initSearchSelect(itemSelect);
-            }
-        });
-
-    });
-
+        
     $(document).on("click", ".hapus", function () {
         $(this).closest(".field-item").remove();
     });
@@ -289,7 +295,32 @@
         });
     });
 
-    initSearchSelect('.js-search-select');
+    $(document).on('click','#barang-confirm',function(){
+
+    $.ajax({
+        url:'/data_master/barang/storeAjax',
+        type:'POST',
+        data:{
+            nama:namaBarangBaru,
+            kode:$('#barang-kode').val(),
+            id_kelompok:$('#barang-kelompok-select').val(),
+            _token:$('meta[name="csrf-token"]').attr('content')
+        },
+        success:function(res){
+
+            currentTomSelect.addOption({
+                value:res.id,
+                text:res.nama+' ('+res.kode+')'
+            });
+
+            currentTomSelect.setValue(res.id);
+
+            $('#modalBarang').modal('hide');
+
+        }
+    });
+
+});
 
     </script>
 @endsection
@@ -301,7 +332,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Form Permintaan Barang</h4>
-                    <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button>
+                    <!-- <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button> -->
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -323,7 +354,7 @@
                                     <label class="col-form-label" for="first-name">Pilih Kapal</label>
                                 </div>
                                 <div class="col-sm-3">
-                                    <select name="id_kapal" id="id_kapal" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
+                                    <select name="id_kapal" id="id_kapal" class="form-control" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="">Pilih Kapal</option>
                                         @foreach($kapal as $kp)
                                             <option value="{{$kp->id}}" @selected (isset($data) && $kp->id==$data->id_kapal)>{{$kp->nama}}</option>
@@ -344,9 +375,10 @@
                                     <label class="col-form-label" for="first-name">Bagian</label>
                                 </div>
                                 <div class="col-sm-3">
-                                    <select name="bagian" id="bagian" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
+                                    <select name="bagian" id="bagian" class="form-control" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>
+                                        <option value="3" @selected (isset($data) && $data->bagian==3)>ELECTRICIANT</option>
                                     </select>
                                 </div>
                             </div>
@@ -410,7 +442,7 @@
                             <div id="field-container"></div>
                         </div>
                         <div class="col-sm-9 offset-sm-3">
-                            <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>
+                            <button type="submit" class="btn btn-sm btn-primary me-1" id="simpan_data">Buat Permintaan</button>
                         </div>
                     </div>
                     </form>
@@ -420,40 +452,32 @@
     </div>
 </section>
 
-<div class="modal fade" id="modal-barang" tabindex="-1" aria-labelledby="modal-barang-label" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalBarang" tabindex="-1" aria-hidden="true" style="z-index:1080;">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-barang-label">Tambah Data</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Pilih Kelompok untuk Barang Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-1">
-                    <label class="form-label">Kelompok Barang</label>
-                    <select id="barang-id_kel_barang" class="form-control">
-                        <option value="">-Pilih-</option>
-                        @foreach($kelompok as $k)
-                            <option value="{{$k->id}}">{{$k->nama}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-1">
-                    <label class="form-label">Nama</label>
-                    <input type="text" id="barang-nama" class="form-control">
-                </div>
+                <p class="mb-75">Barang akan ditambahkan ke kelompok:</p>
+                <select id="barang-kelompok-select" class="form-control">
+                    <option value="">-- Pilih Kelompok --</option>
+                    @foreach($kelompok as $k)
+                        <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                    @endforeach
+                </select>
                 <div class="mb-1">
                     <label class="form-label">Part Number</label>
                     <input type="text" id="barang-kode" class="form-control">
                 </div>
-                <div class="mb-1">
-                    <label class="form-label">Satuan</label>
-                    <input type="text" id="barang-deskripsi" class="form-control">
-                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="btn-save-barang">Simpan</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="barang-confirm">Tambahkan</button>
             </div>
         </div>
     </div>
 </div>
+
 @endsection

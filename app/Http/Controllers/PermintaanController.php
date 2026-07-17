@@ -503,7 +503,13 @@ class PermintaanController extends Controller
 
         $tanggal = date('Y-m-d');
         $nomorTanggal = Carbon::parse($tanggal)->format('dmY');
-        $kat = ((int) $source->bagian === 1) ? 'Deck' : 'Mesin';
+        $kategori = [
+            1 => 'Deck',
+            2 => 'Mesin',
+            3 => 'Elect',
+        ];
+
+        $kat = $kategori[(int) $source->bagian] ?? '-';
         $nomor = $kapal->call_sign . '/' . $kat . '/' . $nomorTanggal;
         $statusId = $this->statusPermintaanId();
         $idCabang = (int) ($kapal->id_cabang ?? 0);
@@ -601,7 +607,13 @@ class PermintaanController extends Controller
         }
 
         $bagian = $request->input('bagian');
-        $kat = ((int) $bagian === 1) ? 'Deck' : 'Mesin';
+        $kategori = [
+            1 => 'Deck',
+            2 => 'Mesin',
+            3 => 'Elect',
+        ];
+
+        $kat = $kategori[(int) $bagian] ?? '-';
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 

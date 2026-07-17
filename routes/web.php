@@ -261,6 +261,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::delete('barang/{id}', [BarangController::class, 'destroy'])->name('kelbarang.destroy');
         Route::post('barang/databyKat', [BarangController::class, 'databyKat'])->name('barang.databyKat');
         Route::get('barang/barangbyKel', [BarangController::class, 'barangbyKel'])->name('barang.barangbyKel');
+        Route::post('/barang/storeAjax', [BarangController::class,'storeAjax']);
 
         Route::get('divisi', [DivisiController::class, 'index']);
         Route::get('divisi/data', [DivisiController::class, 'data'])->name('divisi.data');

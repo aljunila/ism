@@ -104,6 +104,7 @@
                 id: id,
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
+                bagian: $('#bagian').val(),
                 _token: "{{ csrf_token() }}"
             },
             success: function(data){
@@ -125,9 +126,17 @@
                         <div class="col-12"><h4 class="card-title">Laporan Gudang Kapal</h4></div>
                         @include('perusahaan')
                         <div class="col-sm-3">
+                            <select name="bagian" id="bagian" class="form-control" >
+                                <option value="0">Semua</option>
+                                <option value="1">DECK</option>
+                                <option value="2">MESIN</option>
+                                <option value="3">ELECTRICIANT</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
                             <input type="date" name="start_date" id="start_date" class="form-control" placeholder="start date">
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-2">
                             <input type="date" name="end_date" id="end_date" class="form-control" placeholder="end date">
                         </div>
                     </div>

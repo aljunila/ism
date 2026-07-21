@@ -67,4 +67,24 @@ class KelBarangController extends Controller
         $up->update(['is_delete' => 1]);
         return response()->json(['message' => 'Data dihapus']);
     }
+
+    function getKelompok(Request $request) {
+        $idbagian = $request->input('idbagian');
+        $id_kapal = $request->input('id_kapal');
+        if($idbagian!=2) {
+            $get = KelBarang::where('kategori', $idbagian)->where('is_delete', 0)->get();
+        } else {
+            $get = DB::table('m_kel_barang as a')
+                ->leftJoin('m_barang as b', 'a.id', '=', 'b.id_kel_barang')
+                ->leftJoin('t_gudang as c', 'b.id', '=', 'c.id_barang')
+                ->select('a.id', 'a.nama', 'a.kode')
+                ->where('c.id_kapal', $id_kapal)
+                ->where('c.is_delete', 0)
+                ->where('a.kategori', 2)
+                ->distinct()
+                ->orderBy('a.nama')
+                ->get();
+        }
+        return response()->json($get);
+    }
 }

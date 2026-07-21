@@ -253,6 +253,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('kelbarang', [KelBarangController::class, 'store'])->name('kelbarang.store');
         Route::put('kelbarang/{id}', [KelBarangController::class, 'update'])->name('kelbarang.update');
         Route::delete('kelbarang/{id}', [KelBarangController::class, 'destroy'])->name('kelbarang.destroy');
+        Route::post('kelbarang/get', [KelBarangController::class, 'getKelompok']);
 
         Route::get('barang', [BarangController::class, 'index']);
         Route::post('barang/data', [BarangController::class, 'data'])->name('barang.data');
@@ -505,10 +506,11 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     });
 
     Route::prefix('laporan')->group(function () {
-        Route::get('permintaan', [PermintaanController::class, 'laporan']);
-        Route::get('permintaan/data', [PermintaanController::class, 'datalaporan'])->name('lappermintaan.data');
-        Route::post('permintaan', [PermintaanController::class, 'store'])->name('lappermintaan.store');
+        Route::get('permintaan', [LapPermintaanController::class, 'laporan']);
+        Route::post('permintaan/data', [LapPermintaanController::class, 'datalaporan'])->name('lappermintaan.data');
+        Route::post('permintaan', [LapPermintaanController::class, 'store'])->name('lappermintaan.store');
         Route::get('permintaan/getlog/{id}', [PermintaanController::class, 'getlog'])->name('lappermintaan.getlog');
+        Route::post('permintaan/export', [LapPermintaanController::class, 'export'])->name('lappermintaan.export');
 
         Route::get('gudang', [LapGudangController::class, 'index']);
         Route::post('gudang/data', [LapGudangController::class, 'data'])->name('lapgudang.data');

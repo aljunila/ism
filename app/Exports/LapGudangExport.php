@@ -16,19 +16,25 @@ class LapGudangExport implements FromView
     protected $id;
     protected $start;
     protected $end;
+    protected $bagian;
 
-    public function __construct($id, $start, $end)
+    public function __construct($id, $start, $end, $bagian)
     {
         $this->id = $id;
         $this->start = $start;
         $this->end = $end;
+        $this->bagian = $bagian;
     }
 
    public function view(): View
     {
         $kapal = Kapal::where('id', $this->id)->first();
         $namakapal = $kapal->nama;
-        $kategori = KelBarang::where('is_delete', 0)->get();
+        if($this->bagian!=0){
+            $kategori = KelBarang::where('is_delete', 0)->where('kategori', $this->bagian)->get();
+        } else {
+            $kategori = KelBarang::where('is_delete', 0)->get();
+        }
 
         $kategori = $kategori->filter(function ($kel) {
             $kel->barang = DB::table('t_gudang as a')

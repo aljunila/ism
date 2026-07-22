@@ -54,11 +54,11 @@ class LapPermintaanController extends Controller
                 })
                 ->orderBy('b.tanggal', 'DESC');
          if ((int) $roleJenis === 2) {
-            $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
+            $query->whereIn('b.id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
         } else if ((int) $roleJenis === 3) {
-            $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
+            $query->whereIn('b.id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
         } else if ((int) $roleJenis === 6) {
-            $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
+            $query->whereIn('b.id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
         }
         $this->applyPermintaanVisibility($query, 'b');
 

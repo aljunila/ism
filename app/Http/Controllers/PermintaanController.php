@@ -1309,49 +1309,6 @@ class PermintaanController extends Controller
         return response()->json(['success' => true, 'message' => 'Proses permintaan berhasil diperbarui']);
     }
 
-     public function laporan()
-    {
-        $data['active'] = "lappermintaan";
-        return view('laporan.permintaan.index', $data);
-    }
-
-    public function datalaporan(Request $request)
-    {
-        $roleJenis = Session::get('previllage');
-        $status = $request->input('status');
-        $query = DB::table('t_detail_permintaan as a')
-                ->leftjoin('t_permintaan_barang as b', 'b.id', '=', 'a.id_permintaan')
-                ->leftjoin('user as u', 'u.id', '=', 'b.created_by')
-                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'b.bagian', 'u.nama as peminta')
-                ->where('a.is_delete', 0)
-                ->orderBy('b.tanggal', 'DESC');
-        if ((int) $roleJenis === 6) {
-            $query->whereIn('b.id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
-        } else if ((int) $roleJenis === 3) {
-            $query->whereIn('id_kapal', Kapal::where('id', Session::get('id_kapal'))->pluck('id'));
-        }
-        $this->applyPermintaanVisibility($query, 'b');
-
-        return DataTables::of($query)
-            ->addIndexColumn()
-            ->addColumn('kapal', function ($row) {
-                $kapal = Kapal::find($row->id_kapal);
-                return $kapal ? $kapal->nama : '-';
-            })
-            ->addColumn('barang', function ($row) {
-                $barang = Barang::find($row->id_barang);
-                return $barang ? $barang->nama : '-';
-            })
-            ->addColumn('satuan', function ($row) {
-                $barang = Barang::find($row->id_barang);
-                return $barang ? $barang->deskripsi : '-';
-            })
-            ->addColumn('status', function ($row) {
-                return $this->normalizedStatusName($row->status);
-            })
-            ->make(true);
-    }
-
     public function getlog($id) 
     {
         $detail = $this->visibleDetailById((int) $id);

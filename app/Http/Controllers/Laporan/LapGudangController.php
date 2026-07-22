@@ -105,12 +105,13 @@ class LapGudangController extends Controller
         return view('laporan.gudang.elemen', $data);
     }
 
-     public function export(Request $request)
+    public function export(Request $request)
     {
         $id = $request->input('id');
         $start = $request->input('start_date');
         $end = $request->input('end_date');
+        $bagian = $request->input('bagian');
 
-        return Excel::download(new LapGudangExport($id, $start, $end), 'lap_gudang.xlsx');
+        return Excel::download(new LapGudangExport($id, $start, $end, $bagian), 'lap_gudang.xlsx');
     }
 }

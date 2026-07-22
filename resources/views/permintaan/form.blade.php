@@ -296,31 +296,53 @@
     });
 
     $(document).on('click','#barang-confirm',function(){
+        $.ajax({
+            url:'/data_master/barang/storeAjax',
+            type:'POST',
+            data:{
+                nama:namaBarangBaru,
+                kode:$('#barang-kode').val(),
+                id_kelompok:$('#barang-kelompok-select').val(),
+                _token:$('meta[name="csrf-token"]').attr('content')
+            },
+            success:function(res){
 
-    $.ajax({
-        url:'/data_master/barang/storeAjax',
-        type:'POST',
-        data:{
-            nama:namaBarangBaru,
-            kode:$('#barang-kode').val(),
-            id_kelompok:$('#barang-kelompok-select').val(),
-            _token:$('meta[name="csrf-token"]').attr('content')
-        },
-        success:function(res){
+                currentTomSelect.addOption({
+                    value:res.id,
+                    text:res.nama+' ('+res.kode+')'
+                });
 
-            currentTomSelect.addOption({
-                value:res.id,
-                text:res.nama+' ('+res.kode+')'
-            });
+                currentTomSelect.setValue(res.id);
 
-            currentTomSelect.setValue(res.id);
+                $('#modalBarang').modal('hide');
 
-            $('#modalBarang').modal('hide');
-
-        }
+            }
+        });
     });
 
-});
+    $(document).on('change', '#bagian', function() {
+        var idbagian = $(this).val();
+        var id_kapal = $('#id_kapal').val();
+        if (idbagian) {
+            $.ajax({
+                url: '/data_master/kelbarang/get',
+                type: "POST",
+                dataType: "json",
+                data: {
+                    idbagian: idbagian,
+                    id_kapal: id_kapal
+                },
+                success: function(data) {
+                    $('#barang-kelompok-select').empty().append('<option value="">Semua</option>');           
+                    $.each(data, function(key, value) {
+                        $('#barang-kelompok-select').append('<option value="'+ value.id +'">'+ value.nama +'('+ value.kode +')</option>');
+                    });
+                }
+            });
+        } else {
+            $('#barang-kelompok-select').empty().append('<option value="">Tidak ada data</option>');
+        }
+    });
 
     </script>
 @endsection

@@ -185,6 +185,23 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Laporan - Permintaan</h4>
+        <div class="col-sm-3">
+            <select name="id_kapal" id="id_kapal" class="form-control">
+                <option value="">Pilih Kapal</option>
+            @foreach($kapal as $kp)
+                <option value="{{$kp->id}}" @selected (isset($trip) && $kp->id==$trip->id_kapal)>{{$kp->nama}}</option>
+            @endforeach
+            </select>
+        </div>  
+        <div class="col-sm-2">
+            <input type="date" name="start_date" id="start_date" class="form-control" placeholder="start date">
+        </div>
+        <div class="col-sm-2">
+            <input type="date" name="end_date" id="end_date" class="form-control" placeholder="end date">
+        </div>
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
+        </div>
     </div>
     <div class="card-body">
         <table id="table-permintaan" class="table table-striped w-100">
@@ -271,6 +288,7 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 <script src="{{ url('/app-assets/vendors/js/tom-select.min.js') }}"></script>
 <script>
+    let table;
     $(function () {
         $.ajaxSetup({
             headers: {
@@ -278,10 +296,19 @@
             }
         });
 
-        const table = $('#table-permintaan').DataTable({
+        table = $('#table-permintaan').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('lappermintaan.data') }}',
+            ajax:{
+                url: "/laporan/permintaan/data",
+                type: "POST",
+                data: function(d){
+                    d.id_kapal= $('#id_kapal').val(),
+                    d.start_date= $('#start_date').val(),
+                    d.end_date= $('#end_date').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+            },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },     
                 { data: 'barang', name: 'barang' },
@@ -339,6 +366,14 @@
             };
             openLog(detail);
         });
+    });
+
+    $('#id_kapal').on('change', function () {
+        table.ajax.reload();
+    });
+
+    $('#end_date').on('change', function () {
+        table.ajax.reload();
     });
 
     function escapeHtml(value) {
@@ -408,5 +443,25 @@
             $('#logTimeline').html('<div class="timeline-empty">Gagal memuat data rute.</div>');
         });
     }
+
+    $(document).on('click', '#download', function() {
+        $.ajax({
+            url: "/laporan/permintaan/export",
+            method: "POST",
+            xhrFields: { responseType: 'blob' },
+            data: {
+                id_kapal: $('#id_kapal').val(),
+                start_date: $('#start_date').val(),
+                end_date: $('#end_date').val(),
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(data){
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(data);
+                link.download = "lap_permintaan.xlsx";
+                link.click();
+            }
+        })
+    });
 </script>
 @endsection

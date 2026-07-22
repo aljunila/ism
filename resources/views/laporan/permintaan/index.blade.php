@@ -311,7 +311,15 @@
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },     
-                { data: 'barang', name: 'barang' },
+                {
+                    data: null,
+                    name: 'barang',
+                    render: function (data, type, row) {
+                        return row.kode
+                            ? `${row.barang} (${row.kode})`
+                            : row.barang;
+                    }
+                },
                 {
                     data: null,
                     name: null,
@@ -328,7 +336,13 @@
                         No : ${row.nomor}`;
                     }
                 },
-                { data: 'status', name: 'status' },
+                {
+                    data: 'procurement_channel',
+                    name: 'procurement_channel',
+                    render: function(data, type, row) {
+                        return data ?? 'logistik';
+                    }
+                },
                 { data: null,
                     name: null,
                     render: function (data, type, row) {

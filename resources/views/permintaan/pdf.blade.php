@@ -82,7 +82,7 @@
             @foreach($item as $row)
             <tr>
                 <td>{{$loop->iteration}}</td>
-                <td>{{$row->get_barang()->nama}}</td>
+                <td>{{$row->get_barang()->nama}} @if($row->get_barang()->kode) ({{ $row->get_barang()->kode }}) @endif</td>
                 <td>{{$row->get_barang()->deskripsi}}</td>
                 <td>{{$row->jumlah}}</td>
                 <td>{{$row->ket}}</td>

@@ -12,7 +12,7 @@
     @foreach($data as $show)
     <tr>
 
-        <td>{{ $show->barang }}</td>
+        <td>{{ $show->barang }} @if($show->kode) ({{$show->kode}}) @endif</td>
         <td>{{ $show->jumlah }}</td>
         <td>{{ $show->tanggal }}</td>
         <td>{{ $show->kapal }}<br>{{ $show->nomor }}</td>

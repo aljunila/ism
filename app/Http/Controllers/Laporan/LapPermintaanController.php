@@ -72,6 +72,10 @@ class LapPermintaanController extends Controller
                 $barang = Barang::find($row->id_barang);
                 return $barang ? $barang->nama : '-';
             })
+            ->addColumn('kode', function ($row) {
+                $barang = Barang::find($row->id_barang);
+                return $barang ? $barang->kode : '-';
+            })
             ->addColumn('satuan', function ($row) {
                 $barang = Barang::find($row->id_barang);
                 return $barang ? $barang->deskripsi : '-';

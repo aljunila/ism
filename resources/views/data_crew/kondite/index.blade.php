@@ -10,9 +10,11 @@
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Crew - Kondite</h4>
-        <!-- <a type="button" href="/data_crew/familiarisasi/form" class="btn btn-primary btn-sm">Tambah Data</a> -->
-         <button class="btn btn-primary btn-sm" id="btn-add-kondite">Tambah Data</button>
+        <div class="col-sm-10"><h4 class="card-title">Crew - Kondite</h4></div>
+        <div class="col-sm-2">
+            <button class="btn btn-primary btn-sm" id="btn-add-kondite">Tambah Data</button>
+            <a href="/checklist/item/el0608" class="btn btn-danger btn-sm">Setting Form</a>
+        </div>
     </div>
     <div class="card-body">
         <table id="table-kondite" class="table table-striped w-100">

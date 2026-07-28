@@ -324,7 +324,8 @@
                             <label class="col-form-label">Pembelian</label>
                         </div>
                         <div class="col-sm-9">
-                            <select name="status" id="status" class="form-control"></select>
+                            <select name="status" id="status" class="form-control">
+                            </select>
                         </div>
                     </div>
                     <div class="mb-1 row" id="zahir">
@@ -333,6 +334,14 @@
                         </div>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="kode_po" id="kode_po">
+                        </div>
+                    </div>
+                    <div class="mb-1 row" id="ket">
+                        <div class="col-sm-3">
+                            <label class="col-form-label">Keterangan</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" name="ket" id="ket">
                         </div>
                     </div>
                     <div id="finance_block" style="display:none;">
@@ -474,7 +483,8 @@
         if (stage === 'logistik') {
             const showPembelian = flowStage !== 'gudang' && target === '0';
             $('#pembelian').toggle(showPembelian);
-            $('#zahir').toggle(showPembelian && (routeValue || '').startsWith('3|'));
+            $('#zahir').toggle(showPembelian && (routeValue || '').startsWith('3'));
+            $('#ket').toggle(showPembelian && (routeValue || '').startsWith('2'));
             $('#finance_block').hide();
             $('#shipping_mode_row').hide();
             $('#shipping_point_row').hide();
@@ -818,9 +828,6 @@
                             if (row.flow_view) {
                                 html += `<br>Flow : ${row.flow_view}`;
                             }
-                            if (row.cabang!="-") {
-                                html += `<br>Pembelian di ${row.cabang}`;
-                            }
                             if (row.kode_po) {
                                 html += `<br>Kode PO : ${row.kode_po}`;
                             }
@@ -1160,15 +1167,11 @@
     }
 
     function loadStatusBarang(idkapal) {
-        return $.get(`/permintaan/getcabang/${idkapal}`, function(res){
             let html = '';
-            res.forEach(function(item){
-                html += `<option value="2|${item.id}">Cabang ${item.cabang}</option>`;
-            });
-            html += `<option value="3|0">Purchasing Order</option>`;
+            html += `<option value="2">Purchasing</option>`;
+            html += `<option value="3">Purchasing Order</option>`;
             $('#status').html(html);
             updateProcessFormUi();
-        });
     }
 
     function configureProcessForm(stage, idkapal, flowStage) {

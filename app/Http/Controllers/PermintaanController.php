@@ -1075,14 +1075,13 @@ class PermintaanController extends Controller
         $vendor = $request->input('vendor');
         $jumlah = $request->input('jumlah');
         $kodePo = $request->input('kode_po');
+        $ketPurchas = $request->input('ket');
         $id_cabang = $up->id_cabang;
         $id_barang = $up->id_barang;
         $id_kapal = $up->get_permintaan()->id_kapal;
 
         if($request->input('sedia')==0){
-            $get = explode("|", $request->input('status'));
-            $target = $get[0] ?? '';
-            $id_cabang = $get[1] ?? null;
+            $target = $request->input('status');
         } else {
             $target = $request->input('sedia');
         }
@@ -1104,13 +1103,9 @@ class PermintaanController extends Controller
                 $flowStage = 'selesai';
                 $keterangan = 'Barang dinaikkan ke kapal';
             } elseif ((string) $target === '2') {
-                if (!$id_cabang) {
-                    return response()->json(['message' => 'Cabang pembelian wajib dipilih'], 422);
-                }
                 $flowStage = 'purchasing';
                 $procurementChannel = 'purchasing';
-                $namaCabang = $id_cabang ? optional(Cabang::find($id_cabang))->cabang : null;
-                $keterangan = 'Barang sedang di PO/Purchasing' . ($namaCabang ? ' (Pembelian di ' . $namaCabang . ')' : '');
+                $keterangan = 'Barang sedang di PO/Purchasing' . ($ketPurchas ? ' (Keterangan : ' . $ketPurchas . ')' : '');
             } elseif ((string) $target === '3') {
                 $flowStage = 'po';
                 $procurementChannel = 'po';

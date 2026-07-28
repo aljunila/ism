@@ -76,7 +76,6 @@ class KonditeController extends Controller
             $kapal = Kapal::find($request->input('id_kapal'));
             $save = PeriodeKondite::create([
                 'uid' => Str::uuid()->toString(),
-                'kode' => $request->input('kode'),
                 'id_perusahaan' => $kapal->pemilik,
                 'id_kapal' => $request->input('id_kapal'),
                 'bulan' => $request->input('bulan'),

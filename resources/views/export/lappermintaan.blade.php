@@ -16,7 +16,7 @@
         <td>{{ $show->jumlah }}</td>
         <td>{{ $show->tanggal }}</td>
         <td>{{ $show->kapal }}<br>{{ $show->nomor }}</td>
-        <td>{{ $show->procurement_channel ?? 'Logistik' }}</td>
+        <td>{{ $show->flow_stage }}</td>
     </tr>
     @endforeach
 </table>

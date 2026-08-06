@@ -5,7 +5,22 @@
 <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/pages/dashboard-ecommerce.css')}}">
 <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/charts/chart-apex.css')}}">
 <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/extensions/ext-component-toastr.css')}}">
-    
+<style>
+   td.expired-danger {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+td.expired-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+td.expired-success {
+    background-color: #198754 !important;
+    color: #fff !important;
+}
+</style>  
 @endsection
 
 @section('scriptfooter')
@@ -51,7 +66,6 @@
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div><strong>${title}</strong></div>
-                        <div class="small">Status: ${status}</div>
                         <div class="small">Diproses oleh: ${created}</div>
                     </div>
                 </div>
@@ -99,7 +113,7 @@
                         <td>${idx + 1}</td>
                         <td>${escapeHtml(item.barang || '-')}</td>
                         <td>${escapeHtml(jumlah || '-')}</td>
-                        <td>${escapeHtml(item.status || '-')}</td>
+                        <td>${escapeHtml(item.flow_stage || '-')}</td>
                         <td>
                             <button
                                 type="button"
@@ -1078,7 +1092,7 @@
                         </div>
                         <div class="permintaan-meta-field" style="grid-column:1/-1;">
                             <span class="permintaan-meta-label">Bagian</span>
-                            <span class="permintaan-meta-value" title="{{ $permintaan->bagian ?? '-' }}">{{ $permintaan->bagian ?? '-' }}</span>
+                            <span class="permintaan-meta-value" title="{{ $permintaan->bagian ?? '-' }}">@if($permintaan->bagian==1) Deck @elseif($permintaan->bagian==2) Mesin @else Electrical @endif</span>
                         </div>
                     </div>
                     <button
@@ -1275,13 +1289,31 @@
                                     $kapal = $d->get_kapal();
                                     $pemilik = $kapal ? $kapal->get_pemilik() : null;
                                     $file = $d->get_file();
+
+                                    if ($d->tgl_expired) {
+                                        $expired = \Carbon\Carbon::parse($d->tgl_expired)->startOfDay();
+                                        $Sisa = now()->startOfDay()->diffInDays($expired, false);
+                                        $expired_date = $expired->format('d-m-Y');
+                                        $style = '';
+
+                                        if ($Sisa <= 15) {
+                                            $style = 'expired-danger';
+                                        } elseif ($Sisa <= 30) {
+                                            $style = 'expired-warning';
+                                        } elseif ($Sisa <= 45) {
+                                            $style = 'expired-success';
+                                        }
+                                    } else {
+                                        $expired_date = '-';
+                                        $style= '';
+                                    }
+                                    
                                 @endphp
                                 <tr>
                                     <td>{{ $pemilik->nama ?? '-' }}<br>{{ $kapal->nama ?? '-' }}</td>
                                     <td><a href="{{ asset('file_upload/'.$d->file) }}" target="_blank"
                                             title="Buka File">{{ $file->nama ?? ($d->nama ?? 'File') }}</a></td>
-                                    <td>{{ \Carbon\Carbon::parse($d->tgl_expired)->format('d-m-Y') }}</td>
-                                </tr>
+                                    <td>{{ $expired_date }}</td> 
                             @endforeach
                         </tbody>
                     </table>

@@ -327,6 +327,7 @@ class DashboardController extends Controller
             ->select(
                 'a.id',
                 'a.jumlah',
+                'a.flow_stage',
                 'b.nama as barang',
                 'b.deskripsi as satuan',
                 'c.nama as status',

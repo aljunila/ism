@@ -130,7 +130,7 @@
                                 <option value="0">Semua</option>
                                 <option value="1">DECK</option>
                                 <option value="2">MESIN</option>
-                                <option value="3">ELECTRICIANT</option>
+                                <option value="3">ELECTRICAL</option>
                             </select>
                         </div>
                         <div class="col-sm-2">

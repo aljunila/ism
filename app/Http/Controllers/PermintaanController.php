@@ -1753,7 +1753,7 @@ class PermintaanController extends Controller
             'd.nomor',
             'd.tanggal',
             'a.jumlah as jml_minta',
-            'c.id as id_gudang',
+            'c.id as idgudang',
             DB::raw('COALESCE(c.jumlah, 0) as stok')
         )
         ->where('d.id_kapal', $kapal)

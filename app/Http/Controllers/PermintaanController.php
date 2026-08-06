@@ -1741,12 +1741,21 @@ class PermintaanController extends Controller
         $data = DB::table('t_detail_permintaan as a')
         ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
         ->leftJoin('t_permintaan_barang as d', 'd.id', '=', 'a.id_permintaan')
-        ->leftJoin('t_gudang as c','c.id_barang', '=', 'b.id')
-        ->leftJoin('kapal as e', function ($join) {
-            $join->on('c.id_cabang', '=', 'e.id_cabang')
-                 ->on('d.id_kapal', '=', 'e.id');
+        ->leftJoin('kapal as e', 'e.id', '=', 'd.id_kapal')
+        ->leftJoin('t_gudang as c', function ($join) {
+            $join->on('c.id_barang', '=', 'a.id_barang')
+                ->on('c.id_cabang', '=', 'e.id_cabang');
         })
-        ->select('a.id', 'b.id as id_barang', 'b.nama as barang', 'd.nomor', 'd.tanggal', 'a.jumlah as jml_minta', 'c.jumlah as stok', 'c.id as idgudang')
+        ->select(
+            'a.id',
+            'b.id as id_barang',
+            'b.nama as barang',
+            'd.nomor',
+            'd.tanggal',
+            'a.jumlah as jml_minta',
+            'c.id as id_gudang',
+            DB::raw('COALESCE(c.jumlah, 0) as stok')
+        )
         ->where('d.id_kapal', $kapal)
         ->where('a.is_delete', 0)
         ->where('a.flow_stage', 'workshop')

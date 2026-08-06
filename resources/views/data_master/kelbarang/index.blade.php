@@ -42,6 +42,7 @@
                     <select id="kel-kategori" class="form-control">
                         <option value="1">Deck</option>
                         <option value="2">Mesin</option>
+                        <option value="3">Electrical</option>
                     </select>
                 </div>
             </div>

@@ -316,6 +316,7 @@
                                     <select name="bagian" id="bagian" class="form-control js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="1" @selected (isset($data) && $data->bagian=="1")>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian=="2")>MESIN</option>
+                                        <option value="3" @selected (isset($data) && $data->bagian=="3")>ELECTRICAL</option>
                                     </select>
                                 </div>
                             </div>

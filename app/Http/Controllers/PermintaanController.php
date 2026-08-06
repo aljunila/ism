@@ -1489,7 +1489,12 @@ class PermintaanController extends Controller
         }
 
         $bagian = $request->input('bagian');
-        if($bagian==1) { $kat= 'Deck'; } else { $kat= 'Mesin'; }
+        $kategori = [
+            1 => 'Deck',
+            2 => 'Mesin',
+            3 => 'Elect',
+        ];
+        $kat = $kategori[(int) $bagian] ?? '-';
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 
@@ -1736,9 +1741,10 @@ class PermintaanController extends Controller
         $data = DB::table('t_detail_permintaan as a')
         ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
         ->leftJoin('t_permintaan_barang as d', 'd.id', '=', 'a.id_permintaan')
-        ->leftJoin('t_gudang as c', function ($join) {
-            $join->on('c.id_barang', '=', 'b.id')
-                 ->on('c.id_kapal', '=', 'd.id_kapal');
+        ->leftJoin('t_gudang as c','c.id_barang', '=', 'b.id')
+        ->leftJoin('kapal as e', function ($join) {
+            $join->on('c.id_cabang', '=', 'e.id_cabang')
+                 ->on('d.id_kapal', '=', 'e.id');
         })
         ->select('a.id', 'b.id as id_barang', 'b.nama as barang', 'd.nomor', 'd.tanggal', 'a.jumlah as jml_minta', 'c.jumlah as stok', 'c.id as idgudang')
         ->where('d.id_kapal', $kapal)

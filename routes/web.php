@@ -461,6 +461,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('pengiriman/{id}', [PermintaanController::class, 'elemenkirim'])->name('permintaan.elemenkirim');
         Route::post('kirimByIdp', [PermintaanController::class, 'kirimByIdp'])->name('permintaan.kirimByIdp');
         Route::post('dataPurchas/{id}', [PermintaanController::class, 'dataPurchas'])->name('permintaan.dataPurchas');
+        Route::post('userkapal', [PermintaanController::class, 'userkapal'])->name('permintaan.userkapal');
     });
 
     Route::prefix('penurunan')->group(function () {
@@ -482,6 +483,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('kirimByIdp', [PenurunanController::class, 'kirimByIdp'])->name('penurunan.kirimByIdp');
         Route::delete('destroy/{id}', [PenurunanController::class, 'destroy'])->name('penurunan.destroy');
         Route::delete('deldetail/{id}', [PenurunanController::class, 'deldetail'])->name('penurunan.deldetail');
+        Route::post('userdarat', [PenurunanController::class, 'userdarat'])->name('permintaan.userdarat');
+        Route::post('gudangkapal', [PenurunanController::class, 'gudangkapal'])->name('barang.gudangkapal');
     });
 
     Route::prefix('ck_kapal')->group(function(){

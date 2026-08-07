@@ -563,4 +563,26 @@ class PenurunanController extends Controller
             ->make(true);
     }
 
+    function userdarat(Request $request) {
+        $kapal = Kapal::find($request->input('id_kapal'));
+        $user = DB::table('user as a')
+                ->leftjoin('karyawan as b', 'a.id_karyawan', '=', 'b.id')
+                ->select('a.id','a.nama')
+                ->where('b.id_cabang', $kapal->id_cabang)->where('a.is_delete', 0)
+                ->where('b.status', 'A')->where('b.resign','N')->where('a.id_kapal', NULL)->get();
+        return response()->json($user);
+    }
+
+    function gudangkapal(Request $request) {
+        $id_kapal = $request->input('id_kapal');
+        $bagian = $request->input('bagian');
+
+        $get = DB::table('t_gudang as a')
+                ->leftjoin('m_barang as b', 'a.id_barang', '=', 'b.id')
+                ->leftjoin('m_kel_barang as c', 'b.id_kel_barang', '=', 'c.id')
+                ->select('b.id', 'b.nama', 'b.kode', 'c.nama as kel', 'a.id as id_gudang')
+                ->where('a.id_kapal', $id_kapal)->where('c.kategori', $bagian)->get();
+        return response()->json($get);
+    }
+
 }

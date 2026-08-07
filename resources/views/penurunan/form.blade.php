@@ -154,11 +154,13 @@
 
     $("#tambah").click(function () {
         let bagian = $('#bagian').val();
+        let id_kapal = $('#id_kapal').val();
         $.ajax({
-            url: '/data_master/barang/databyKat',
+            url: '/penurunan/gudangkapal',
             type: 'POST',
             data: {
-                bagian: bagian
+                bagian: bagian,
+                id_kapal: id_kapal
             },
             success: function (res) {
                 let options = `<option value="">Pilih Kelompok</option>`;
@@ -171,15 +173,9 @@
                 <div class="mb-1 row field-item">
                     <div class="col-sm-3"></div>
 
-                    <div class="col-sm-3">
-                        <select name="kel[]" class="form-control select-kelompok">
+                     <div class="col-sm-3">
+                        <select name="item[]" class="form-control select-item">
                             ${options}
-                        </select>
-                    </div>
-
-                    <div class="col-sm-2">
-                        <select name="item[]" id="item" class="form-control select-item">
-                            <option value="">Pilih Barang</option>
                         </select>
                     </div>
 
@@ -206,7 +202,7 @@
                 $("#field-container").append(field);
 
                 // init select2 / search select
-                initSearchSelect("#field-container .js-search-select:last");
+                initSearchSelect("#field-container .select-item:last");
             },
             error: function () {
                 alert('Gagal load data barang');
@@ -240,34 +236,30 @@
     });
 
     $(document).on('change', '.select-item', function () {
-
-    let itemId = $(this).val();
-    let id_kapal = $('#id_kapal').val();
-
-    let row = $(this).closest('.field-item');
-
-    $.ajax({
-        url: '/penurunan/datagudang',
-        type: 'POST',
-        data: {
-            item: itemId,
-            id_kapal: id_kapal,
-        },
-        success: function (res) {
-            row.find('.stok').val(res.stok);
-            if (res.stok > 0) {
-                row.find('input[name="jumlah[]"]').prop('disabled', false);
-            } else {
-                row.find('input[name="jumlah[]"]').prop('disabled', true);
-                alert('Stok tidak tersedia');
+        let itemId = $(this).val();
+        let id_kapal = $('#id_kapal').val();
+        let row = $(this).closest('.field-item');
+        $.ajax({
+            url: '/penurunan/datagudang',
+            type: 'POST',
+            data: {
+                item: itemId,
+                id_kapal: id_kapal,
+            },
+            success: function (res) {
+                row.find('.stok').val(res.stok);
+                if (res.stok > 0) {
+                    row.find('input[name="jumlah[]"]').prop('disabled', false);
+                } else {
+                    row.find('input[name="jumlah[]"]').prop('disabled', true);
+                    alert('Stok tidak tersedia');
+                }
+            },
+            error: function () {
+                alert('Gagal mengambil stok');
             }
-        },
-        error: function () {
-            alert('Gagal mengambil stok');
-        }
+        });
     });
-
-});
 
     $(document).on("click", ".hapus", function () {
         $(this).closest(".field-item").remove();
@@ -328,6 +320,25 @@
             },
             complete: function(){
                 btn.prop('disabled', !$('#id_penerima').val()).html(originalText);
+            }
+        });
+    });
+
+    $(document).on('change', '#id_kapal', function() {
+        var id_kapal = $(this).val();
+        $.ajax({
+            url: "/penurunan/userdarat",
+            type: "POST",
+            dataType: "json",
+            data: {
+                id_kapal: id_kapal
+            },
+            success: function(data) {
+                $('#id_penerima').empty().append('<option value="">Semua</option>');           
+                $.each(data, function(key, value) {
+                    console.log(value);
+                    $('#id_penerima').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                });
             }
         });
     });
@@ -442,6 +453,7 @@
                                     <select name="bagian" id="bagian" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>
+                                        <option value="3" @selected (isset($data) && $data->bagian==3)>ELECTRICAL</option>
                                     </select>
                                 </div>
                             </div>
@@ -450,13 +462,8 @@
                                     <label class="col-form-label" for="id_penerima">User Penerima</label>
                                 </div>
                                 <div class="col-sm-3">
-                                    <select name="id_penerima" id="id_penerima" class="js-search-select w-100" required>
+                                    <select name="id_penerima" id="id_penerima" class="form-control" required>
                                         <option value="">Pilih User Penerima</option>
-                                        @foreach($penerima as $user)
-                                            <option value="{{ $user->id }}">
-                                                {{ $user->nama ?? $user->username }} ({{ $user->username }})
-                                            </option>
-                                        @endforeach
                                     </select>
                                 </div>
                             </div>

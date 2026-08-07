@@ -261,6 +261,24 @@
         });
     });
 
+    $(document).on('change', '#id_kapal', function() {
+        var id_kapal = $(this).val();
+        $.ajax({
+            url: "/permintaan/userkapal",
+            type: "POST",
+            dataType: "json",
+            data: {
+                id_kapal: id_kapal
+            },
+            success: function(data) {
+                $('#id_penerima').empty().append('<option value="">Semua</option>');           
+                $.each(data, function(key, value) {
+                    console.log(value);
+                    $('#id_penerima').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                });
+            }
+        });
+    });
     </script>
 @endsection
 
@@ -324,13 +342,8 @@
                                     <label class="col-form-label" for="id_penerima">User Penerima</label>
                                 </div>
                                 <div class="col-sm-6">
-                                    <select name="id_penerima" id="id_penerima" class="form-control js-search-select w-100" required>
+                                    <select name="id_penerima" id="id_penerima" class="form-control" required>
                                         <option value="">Pilih User Penerima</option>
-                                        @foreach($penerima as $user)
-                                            <option value="{{ $user->id }}">
-                                                {{ $user->nama ?? $user->username }} ({{ $user->username }})
-                                            </option>
-                                        @endforeach
                                     </select>
                                 </div>
                             </div>

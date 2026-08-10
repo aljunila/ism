@@ -1895,4 +1895,10 @@ class PermintaanController extends Controller
         }
         return response()->json($get);
     }
+
+    function userkapal(Request $request) {
+        $id_kapal = $request->input('id_kapal');
+        $user = User::where('id_kapal', $id_kapal)->select('id','nama')->where('is_delete', 0)->get();
+         return response()->json($user);
+    }
 }

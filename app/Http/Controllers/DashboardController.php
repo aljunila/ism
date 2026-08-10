@@ -372,6 +372,7 @@ class DashboardController extends Controller
                 'a.keterangan',
                 'b.nama as status',
                 'c.nama as created',
+                'a.img',
                 DB::raw('COALESCE(b.flag_permintaan, 0) as flag_permintaan'),
                 DB::raw('COALESCE(b.flag_proses, 0) as flag_proses'),
                 DB::raw('COALESCE(b.flag_berlangsung, 0) as flag_berlangsung')

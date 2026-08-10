@@ -434,6 +434,23 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="filePreviewModal" tabindex="-1" style="z-index:1080;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Preview File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center" id="previewContent">
+                <!-- isi preview -->
+            </div>
+
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scriptfooter')
@@ -512,6 +529,7 @@
             const isDone = target === '4';
             $('#pembelian').hide();
             $('#zahir').hide();
+            $('#ket').hide();
             $('#finance_block').show();
             $('#shipping_mode_row').toggle(isDone);
             $('#shipping_point_row').toggle(isDone && shippingMode === 'transit');
@@ -1024,7 +1042,7 @@
                     data: null,
                     render: (d, t, row) => `${escapeHtml(row.jumlah || '-')} ${escapeHtml(row.satuan || '')}`
                 },
-                { data: 'status' },
+                { data: 'flow_stage' },
                 {
                     data: null,
                     orderable: false,
@@ -1082,19 +1100,48 @@
         let html = '';
         rows.forEach(function (row, i) {
             const activeClass = i === 0 ? 'is-active' : '';
+            let imageHtml = '';
+            if (row.img) {
+                imageHtml = `
+                    <div class="small">
+                        Image: <a href="#"
+                                    class="btn-preview"
+                                    data-file="${row.img}">Klik disini untuk lihat
+                                </a>
+                    </div>
+                `;
+            }
             html += `
                 <div class="timeline-item ${activeClass}">
                     <div class="timeline-time">${formatTgl(row.tanggal)}</div>
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div class="fw-semibold">${escapeHtml(row.keterangan || row.status || '-')}</div>
-                        <div class="small">Status: ${escapeHtml(row.status || '-')}</div>
                         <div class="small">Oleh: ${escapeHtml(row.created || '-')}</div>
+                        ${imageHtml}
                     </div>
                 </div>`;
         });
         el.innerHTML = html;
     }
+
+    $(document).on('click', '.btn-preview', function () {
+        
+        let file = $(this).data('file');
+        let url = "{{ asset('file_permintaan_log') }}/" + file;
+
+        let ext = file.split('.').pop().toLowerCase();
+        
+        let html = '';
+
+        // gambar
+        if (['jpg','jpeg','png','gif'].includes(ext)) {
+            html = `<img src="${url}" class="img-fluid">`;
+        }
+
+        $('#previewContent').html(html);
+        $('#filePreviewModal').modal('show');
+    });
 
     $(document).on('click', '.proses-btn', function () {
         let id = $(this).data('id');

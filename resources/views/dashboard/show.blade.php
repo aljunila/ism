@@ -59,7 +59,17 @@ td.expired-success {
             const status = escapeHtml(row.status || '-');
             const created = escapeHtml(row.created || '-');
             const activeClass = idx === 0 ? 'is-active' : '';
-
+            let imageHtml = '';
+            if (row.img) {
+                imageHtml = `
+                    <div class="small">
+                        Image: <a href="#"
+                                    class="btn-preview"
+                                    data-file="${row.img}">Klik disini untuk lihat
+                                </a>
+                    </div>
+                `;
+            }
             html += `
                 <div class="timeline-item ${activeClass}">
                     <div class="timeline-time">${tanggal}</div>
@@ -67,6 +77,7 @@ td.expired-success {
                     <div class="timeline-content">
                         <div><strong>${title}</strong></div>
                         <div class="small">Diproses oleh: ${created}</div>
+                         ${imageHtml}
                     </div>
                 </div>
             `;
@@ -273,6 +284,24 @@ td.expired-success {
         const target = $('input[name="notification_target"]:checked').val();
         $('#notification-target-user-wrapper').toggle(target === 'user');
         $('#notification-target-role-wrapper').toggle(target === 'role');
+    });
+
+    $(document).on('click', '.btn-preview', function () {
+        
+        let file = $(this).data('file');
+        let url = "{{ asset('file_permintaan_log') }}/" + file;
+
+        let ext = file.split('.').pop().toLowerCase();
+        
+        let html = '';
+
+        // gambar
+        if (['jpg','jpeg','png','gif'].includes(ext)) {
+            html = `<img src="${url}" class="img-fluid">`;
+        }
+
+        $('#previewContent').html(html);
+        $('#filePreviewModal').modal('show');
     });
 
     function filterTable(inputId, tableId, noResultId) {
@@ -1367,6 +1396,23 @@ td.expired-success {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="filePreviewModal" tabindex="-1" style="z-index:1080;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Preview File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center" id="previewContent">
+                <!-- isi preview -->
+            </div>
+
         </div>
     </div>
 </div>

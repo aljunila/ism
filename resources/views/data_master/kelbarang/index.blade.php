@@ -100,8 +100,12 @@
                     render: function(data, type, row) {
                         if(data==1){
                             return `Deck`;
-                        } else {
+                        } else if(data==2){
                             return `Mesin`;
+                        } else if(data==3){
+                            return `Kelistrikan`;
+                        } else {
+                            return `Alat Kebersihan`;
                         }
                     }
                 },

@@ -51,7 +51,7 @@ class KelBarangController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'kategori' => 'required|integer|max:2',
+            'kategori' => 'required|integer|max:10',
             'nama' => 'required|string|max:50',
             'kode' => 'nullable|string|max:50',
             'ket' => 'nullable|string|max:100',

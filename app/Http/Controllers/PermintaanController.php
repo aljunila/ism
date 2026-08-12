@@ -515,13 +515,27 @@ class PermintaanController extends Controller
         $idCabang = (int) ($kapal->id_cabang ?? 0);
         $newPermintaan = null;
 
-        DB::transaction(function () use ($source, $details, $tanggal, $nomor, $statusId, $idCabang, &$newPermintaan) {
+        $nama_file = null;
+        if($request->hasFile('file')) {
+            $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480',
+            ]);
+            $file = $request->file('file');
+            $nama_file = 'permintaan-' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        
+            // isi dengan nama folder tempat kemana file diupload
+            $tujuan_upload = 'file_permintaan_log';
+            $file->move($tujuan_upload,$nama_file); 
+        }
+
+        DB::transaction(function () use ($source, $details, $tanggal, $nomor, $statusId, $idCabang, $nama_file, &$newPermintaan) {
             $newPermintaan = Permintaan::create([
                 'uid' => Str::uuid()->toString(),
                 'id_kapal' => $source->id_kapal,
                 'nomor' => $nomor,
                 'bagian' => $source->bagian,
                 'tanggal' => $tanggal,
+                'file' => $nama_file,
                 'is_delete' => 0,
                 'created_by' => Session::get('userid'),
                 'created_date' => date('Y-m-d H:i:s')
@@ -610,7 +624,8 @@ class PermintaanController extends Controller
         $kategori = [
             1 => 'Deck',
             2 => 'Mesin',
-            3 => 'Elect',
+            3 => 'Listrik',
+            4 => 'AB',
         ];
 
         $kat = $kategori[(int) $bagian] ?? '-';
@@ -626,8 +641,22 @@ class PermintaanController extends Controller
             'mengetahui'   => $kepala->id,
             'logistik' => $logistik->id
         ];
+
+        $nama_file = null;
+        if($request->hasFile('file')) {
+            $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:20480',
+            ]);
+            $file = $request->file('file');
+            $nama_file = 'permintaan-' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        
+            // isi dengan nama folder tempat kemana file diupload
+            $tujuan_upload = 'file_permintaan_log';
+            $file->move($tujuan_upload,$nama_file); 
+        }
+
         $save = null;
-        DB::transaction(function () use ($request, $bagian, $nomor, $validItems, $id_cabang, $ttd, &$save) {
+        DB::transaction(function () use ($request, $bagian, $nomor, $validItems, $id_cabang, $ttd, $nama_file, &$save) {
             $save = Permintaan::create([
               'uid' => Str::uuid()->toString(),
               'id_kapal' => $request->input('id_kapal'),
@@ -635,6 +664,7 @@ class PermintaanController extends Controller
               'bagian' => $bagian,
               'tanggal' => $request->input('tanggal'),
               'ttd' => $ttd,
+              'file' => $nama_file,
               'is_delete' => 0,
               'created_by' => Session::get('userid'),
               'created_date' => date('Y-m-d H:i:s')
@@ -1493,6 +1523,7 @@ class PermintaanController extends Controller
             1 => 'Deck',
             2 => 'Mesin',
             3 => 'Elect',
+            4 => 'AB',
         ];
         $kat = $kategori[(int) $bagian] ?? '-';
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');

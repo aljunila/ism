@@ -254,6 +254,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::put('kelbarang/{id}', [KelBarangController::class, 'update'])->name('kelbarang.update');
         Route::delete('kelbarang/{id}', [KelBarangController::class, 'destroy'])->name('kelbarang.destroy');
         Route::post('kelbarang/get', [KelBarangController::class, 'getKelompok']);
+        Route::post('kelbarang/storeAjax', [KelBarangController::class, 'storeAjax'])->name('kelompok.storeAjax');
 
         Route::get('barang', [BarangController::class, 'index']);
         Route::post('barang/data', [BarangController::class, 'data'])->name('barang.data');

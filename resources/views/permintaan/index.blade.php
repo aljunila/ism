@@ -451,6 +451,23 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="fileModal" tabindex="-1" style="z-index:1080;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Buka File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center" id="previewFile">
+                <!-- isi preview -->
+            </div>
+
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scriptfooter')
@@ -598,6 +615,10 @@
                     render: function (data, type, row) {
                         const kapal = escapeHtml(row.kapal || '-');
                         const nomor = escapeHtml(row.nomor || '-');
+                        let file = '';
+                            if (row.file) {
+                                file = `Image: <a href="#" class="btn-file"data-file="${row.file}">Klik disini untuk lihat`;
+                            }
                         return `${kapal} <button type="button"
                             class="btn btn-icon btn-xs btn-flat-primary detail-perm-btn"
                             data-id="${row.id}"
@@ -605,7 +626,7 @@
                             data-nomor="${nomor}"
                             data-tanggal="${escapeHtml(row.tanggal || '-')}"
                             data-bagian="${escapeHtml(row.bagian || '-')}"
-                            title="Detail Barang">Detail Permintaan</button><br>No : ${nomor}`;
+                            title="Detail Barang">Detail Permintaan</button><br>No : ${nomor}<br>${file}`;
                     }
                 },
                 { data: 'bagian', 
@@ -613,7 +634,8 @@
                     render: function (data, type, row) {
                         if (data == 1) return '<a class="badge badge-light-primary">Deck</a>';
                         if (data == 2) return '<a class="badge badge-light-success">Mesin</a>';
-                        if (data == 3) return '<a class="badge badge-light-warning">Electrict</a>';
+                        if (data == 3) return '<a class="badge badge-light-warning">Kelistrikan</a>';
+                        if (data == 4) return '<a class="badge badge-light-danger">Alat Kebersihan</a>';
                         return '-';
                     }
                 },
@@ -1125,15 +1147,11 @@
         el.innerHTML = html;
     }
 
-    $(document).on('click', '.btn-preview', function () {
-        
+    $(document).on('click', '.btn-preview', function () {       
         let file = $(this).data('file');
         let url = "{{ asset('file_permintaan_log') }}/" + file;
-
-        let ext = file.split('.').pop().toLowerCase();
-        
+        let ext = file.split('.').pop().toLowerCase();        
         let html = '';
-
         // gambar
         if (['jpg','jpeg','png','gif'].includes(ext)) {
             html = `<img src="${url}" class="img-fluid">`;
@@ -1141,6 +1159,22 @@
 
         $('#previewContent').html(html);
         $('#filePreviewModal').modal('show');
+    });
+
+    $(document).on('click', '.btn-file', function () {       
+        let file = $(this).data('file');
+        let url = "{{ asset('file_permintaan_log') }}/" + file;
+        let ext = file.split('.').pop().toLowerCase();        
+        let html = '';
+
+        if (['jpg','jpeg','png','gif'].includes(ext)) {
+            html = `<img src="${url}" class="img-fluid">`;
+        } else {
+            preview = `📄`;
+        }
+
+        $('#previewFile').html(html);
+        $('#fileModal').modal('show');
     });
 
     $(document).on('click', '.proses-btn', function () {

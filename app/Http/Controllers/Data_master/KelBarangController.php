@@ -87,4 +87,19 @@ class KelBarangController extends Controller
         }
         return response()->json($get);
     }
+
+    public function storeAjax(Request $request)
+    {
+        $request->validate([
+            'nama' => 'required|string|max:255'
+        ]);
+        $kelompok = KelBarang::create([
+            'nama' => $request->nama
+        ]);
+        return response()->json([
+            'success' => true,
+            'id' => $kelompok->id,
+            'nama' => $kelompok->nama
+        ]);
+    }
 }

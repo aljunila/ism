@@ -240,7 +240,14 @@ class PenurunanController extends Controller
         }
 
         $bagian = $request->input('bagian');
-        $kat = ((int) $bagian === 1) ? 'Deck' : 'Mesin';
+        $kategori = [
+            1 => 'Deck',
+            2 => 'Mesin',
+            3 => 'Listrik',
+            4 => 'AB',
+        ];
+
+        $kat = $kategori[(int) $bagian] ?? '-';
         $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
         $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
 

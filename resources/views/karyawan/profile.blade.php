@@ -36,6 +36,7 @@
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/app-user-view-account.js')}}"></script>
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/app-user-view.js')}}"></script>
     <script>
+        $('#cabang').show();
         $('#form_karyawan').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
             let id = $('#id').val();
@@ -308,6 +309,15 @@
                 }
             });
         });
+
+        $(document).on('change', '#ke_kapal', function() {
+            let ke_kapal = $(this).val();
+            if(ke_kapal==0){
+                $('#cabang').show();
+            } else {
+                $('#cabang').hide();
+            }
+        });
     </script>
 @endsection
 @section('content')
@@ -508,6 +518,11 @@
                                             <td> Ditempatkan di</td>
                                             <td>:</td>
                                             <td>{!! ($show->kapal) ? $show->kapal : 'Office' !!}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cabang</td>
+                                            <td>:</td>
+                                            <td>{!! ($show->cabang) ? $show->cabang : '-' !!}</td>
                                         </tr>
                                         <tr>
                                             <td> Divisi</td>
@@ -812,6 +827,19 @@
                                             @endif
                                         @endforeach
                                     </select>
+                            </div>
+                        </div>
+                        <div class="mb-1 row" id="cabang">
+                            <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Cabang</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <select name="id_cabang" id="id_cabang" class="form-control">
+                                    <option value="">Pilih</option>
+                                    @foreach($cabang as $c)
+                                        <option value="{{$c->id}}">{{$c->cabang}}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="mb-1 row">

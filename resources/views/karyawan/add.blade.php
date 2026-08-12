@@ -22,6 +22,7 @@
     <!-- END: Page JS-->
 
    <script>
+        $('#cabang').show();
         $('#form_karyawan').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
 
@@ -70,6 +71,15 @@
                 });
             } else {
                 $('#id_kapal').empty().append('<option value="">Tidak ada data</option>');
+            }
+        });
+
+        $(document).on('change', '#id_kapal', function() {
+            let id_kapal = $(this).val();
+            if(id_kapal==0){
+                $('#cabang').show();
+            } else {
+                $('#cabang').hide();
             }
         });
     </script>
@@ -364,9 +374,22 @@
                                 </div>
                                 <div class="col-sm-9">
                                     <select name="id_kapal" id="id_kapal" class="form-control">
-                                        <option value="">Office</option>
+                                        <option value="0">Office</option>
                                         @foreach($kapal as $kp)
                                             <option value="{{$kp->id}}">{{$kp->nama}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row" id="cabang">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Cabang</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <select name="id_cabang" id="id_cabang" class="form-control">
+                                        <option value="">Pilih</option>
+                                        @foreach($cabang as $c)
+                                            <option value="{{$c->id}}">{{$c->cabang}}</option>
                                         @endforeach
                                     </select>
                                 </div>

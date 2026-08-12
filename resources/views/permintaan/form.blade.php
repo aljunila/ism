@@ -33,41 +33,26 @@
             placeholder: 'Pilih Barang',
 
             load: function(query, callback) {
-
-                // hapus option tambah sebelumnya
                 this.removeOption('__new__');
-
                 if (query.length >= 2) {
-
                     this.addOption({
                         value: '__new__',
                         text: '➕ Tambah Barang "' + query + '"'
                     });
-
                     namaBarangBaru = query;
                 }
-
                 callback();
             },
-
             onChange: function(value) {
-
                 if (value === '__new__') {
-
                     currentTomSelect = this;
-
                     $('#barang-kelompok-select').val('');
                     $('#barang-kode-baru').val('');
-
                     $('#modalBarang').modal('show');
-
                     this.clear();
                 }
-
             }
-
         });
-
     }
 
     const resetForm = () => {
@@ -172,7 +157,7 @@
             success: function (res) {
                 let options = `<option value="">Pilih Barang</option>`;
                 res.forEach(function (b) {
-                    options += `<option value="${b.id}">
+                    options += `<option value="${b.id}" data-des="${b.deskripsi}">
                                     ${b.nama} (${b.kode})
                                 </option>`;
                 });
@@ -188,6 +173,10 @@
 
                     <div class="col-sm-2">
                         <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]">
+                    </div>
+
+                    <div class="col-sm-1">
+                        <input type="text" class="form-control paket" name="paket[]" readonly>
                     </div>
 
                     <div class="col-sm-2">
@@ -215,6 +204,15 @@
         
     $(document).on("click", ".hapus", function () {
         $(this).closest(".field-item").remove();
+    });
+
+    $(document).on('change', '.barang', function () {
+        let kode = $(this).find(':selected').data('des');
+
+        $(this)
+            .closest('.field-item')
+            .find('input[name="paket[]"]')
+            .val(kode || '');
     });
 
     function toggleDetailKeterangan(input) {
@@ -263,6 +261,10 @@
         }
 
         let formData = new FormData(this);
+        let file = $('#file')[0].files[0];
+            if (file) {
+                formData.append('file', file);
+            }
         let url = form.data('update-url')
             ? form.data('update-url')   // EDIT
             : form.data('store-url'); //ADD
@@ -400,11 +402,20 @@
                                     <select name="bagian" id="bagian" class="form-control" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>
-                                        <option value="3" @selected (isset($data) && $data->bagian==3)>ELECTRICAL</option>
+                                        <option value="3" @selected (isset($data) && $data->bagian==3)>KELISTRIKAN</option>
+                                        <option value="4" @selected (isset($data) && $data->bagian==4)>ALAT KEBERSIHAN</option>
                                     </select>
                                 </div>
                             </div>
-                             <div class="mb-1 row" id="form-wrapper">
+                            <div class="mb-1 row">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Upload File</label>
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="file" class="form-control" name="file" id="file">
+                                </div>
+                            </div>
+                            <div class="mb-1 row" id="form-wrapper">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Daftar Barang Permintaan</label>
                                 </div>

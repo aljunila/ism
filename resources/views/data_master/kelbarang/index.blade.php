@@ -42,7 +42,8 @@
                     <select id="kel-kategori" class="form-control">
                         <option value="1">Deck</option>
                         <option value="2">Mesin</option>
-                        <option value="3">Electrical</option>
+                        <option value="3">KElistrikan</option>
+                        <option value="4">Alat Kebersihan</option>
                     </select>
                 </div>
             </div>

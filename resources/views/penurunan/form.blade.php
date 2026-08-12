@@ -188,10 +188,7 @@
                     </div>
 
                     <div class="col-sm-2">
-                        <select name="ket[]" class="form-control">
-                            <option value="Rusak">Rusak</option>
-                            <option value="Rekondisi">Rekondisi</option>
-                        </select>
+                        <input type="text" class="form-control" placeholder="Keterangan" name="ket[]">
                     </div>
 
                     <div class="col-sm-1">
@@ -407,7 +404,6 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Form Penurunan Barang</h4>
-                    <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Barang</button>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -453,7 +449,8 @@
                                     <select name="bagian" id="bagian" class="js-search-select w-100" {{ isset($data) ? 'disabled' : '' }}>
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>
-                                        <option value="3" @selected (isset($data) && $data->bagian==3)>ELECTRICAL</option>
+                                        <option value="3" @selected (isset($data) && $data->bagian==3)>KELISTRIKAN</option>
+                                        <option value="4" @selected (isset($data) && $data->bagian==4)>ALAT KEBERSIHAN</option>
                                     </select>
                                 </div>
                             </div>
@@ -518,7 +515,7 @@
                             <div id="field-container"></div>
                         </div>
                         <div class="col-sm-9 offset-sm-3">
-                            <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>
+                            <button type="submit" class="btn btn-primary me-1" id="simpan_data">Buat Penurunan Barang</button>
                         </div>
                     </div>
                     </form>

@@ -603,14 +603,17 @@ class PermintaanController extends Controller
         $barangs = (array) $request->input('item', []);
         $jumlah = (array) $request->input('jumlah', []);
         $kets = (array) $request->input('ket', []);
+        $satuan = (array) $request->input('satuan', []);
         $validItems = [];
         foreach ($barangs as $item => $value) {
             $jum = $jumlah[$item] ?? null;
             $itemKet = $kets[$item] ?? null;
+            $sat = $satuan[$item] ?? null;
             if ($value && $jum !== null && $jum !== '') {
                 $validItems[] = [
                     'barang' => $value,
                     'jumlah' => $jum,
+                    'satuan' => $sat,
                     'ket' => $itemKet,
                 ];
             }
@@ -622,15 +625,35 @@ class PermintaanController extends Controller
 
         $bagian = $request->input('bagian');
         $kategori = [
-            1 => 'Deck',
-            2 => 'Mesin',
-            3 => 'Listrik',
+            1 => 'DECK',
+            2 => 'MESIN',
+            3 => 'LISTRIK',
             4 => 'AB',
         ];
-
         $kat = $kategori[(int) $bagian] ?? '-';
-        $tanggal = Carbon::parse($request->input('tanggal'))->format('dmY');
-        $nomor = $kapal->call_sign.'/'.$kat.'/'.$tanggal;
+
+        $bulan = Carbon::parse($request->input('tanggal'))->format('m');
+        $bulanRomawi = [
+            '01' => 'I',
+            '02' => 'II',
+            '03' => 'III',
+            '04' => 'IV',
+            '05' => 'V',
+            '06' => 'VI',
+            '07' => 'VII',
+            '08' => 'VIII',
+            '09' => 'IX',
+            '10' => 'X',
+            '11' => 'XI',
+            '12' => 'XII',
+        ];
+        $bln = $bulanRomawi[$bulan] ?? '-';
+        $perusahaan = Perusahaan::findorFail($kapal->pemilik);
+        $thn = Carbon::parse($request->input('tanggal'))->format('Y');
+        $cek = Permintaan::where('id_kapal', $request->id_kapal)->whereYear('tanggal', $thn)->where('is_delete', 0)->orderBy('id', 'DESC')->first();
+        $nom = explode('/',$cek->nomor);
+        $num = str_pad($nom[0]+1, 3, '0', STR_PAD_LEFT);
+        $nomor = $num.'/'.$kat.'/'.$perusahaan->kode.'/'.$kapal->nama.'/'.$bln.'/'.$thn;
 
         $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
         $kepala = Karyawan::where('id_cabang', $id_cabang)->where('id_jabatan', 3)->where('status', 'A')->where('resign','N')->first();
@@ -678,6 +701,7 @@ class PermintaanController extends Controller
                     'id_barang' => $payload['barang'],
                     'jumlah' => $payload['jumlah'],
                     'ket' => $payload['ket'],
+                    'satuan' => $payload['satuan'],
                     'status' => $statusId,
                     'id_cabang' => $id_cabang,
                     'flow_stage' => 'logistik',
@@ -829,6 +853,7 @@ class PermintaanController extends Controller
 
         $barangs = (array) $request->input('item', []);
         $jumlah = (array) $request->input('jumlah', []);
+        $satuan = (array) $request->input('satuan', []);
         $ket = (array) $request->input('ket', []);
         $detailJumlah = (array) $request->input('detail_jumlah', []);
         $detailKeterangan = (array) $request->input('detail_keterangan', []);
@@ -965,7 +990,7 @@ class PermintaanController extends Controller
         $result = DB::table('t_detail_permintaan as a')
                 ->leftjoin('m_barang as b', 'b.id', '=', 'a.id_barang')
                 ->leftjoin('m_status_barang as c', 'c.id', '=', 'a.status')
-                ->select('a.*', 'a.status as status_id', 'b.nama as barang', 'b.deskripsi as satuan', 'c.nama as status', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung')
+                ->select('a.*', 'a.status as status_id', 'b.nama as barang', 'c.nama as status', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung')
                 ->where('id_permintaan', $permintaan->id)->where('a.is_delete', 0)->get();
 
         $result = $result->map(function ($item) {
@@ -1035,10 +1060,6 @@ class PermintaanController extends Controller
             ->addColumn('barang', function ($row) {
                 $barang = Barang::find($row->id_barang);
                 return $barang ? $barang->nama : '-';
-            })
-            ->addColumn('satuan', function ($row) {
-                $barang = Barang::find($row->id_barang);
-                return $barang ? $barang->deskripsi : '-';
             })
             ->addColumn('cabang', function ($row) {
                 $cabang = Cabang::find($row->id_cabang);
@@ -1447,7 +1468,7 @@ class PermintaanController extends Controller
             ]);
 
         $otpCode = sprintf('%06d', random_int(0, 999999));
-        $expiresAt = Carbon::now()->addMinutes(10);
+        $expiresAt = Carbon::now()->addMinutes(60);
         KirimOtp::create([
             'uid' => Str::uuid()->toString(),
             'id_penerima' => $receiverId,

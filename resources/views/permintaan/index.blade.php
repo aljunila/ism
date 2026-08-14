@@ -856,7 +856,12 @@
                         data: null,
                         name: null,
                         render: function (data, type, row) {
-                            return `${row.jumlah} ${row.satuan}`;
+                            let satuan = '';
+                            let file = '';
+                            if (row.satuan) {
+                                satuan = `${row.satuan}`;
+                            }
+                            return `${row.jumlah} ${satuan}`;
                         }
                     },    
                     { data: 'tanggal', name: 'tanggal' },
@@ -1126,7 +1131,7 @@
             if (row.img) {
                 imageHtml = `
                     <div class="small">
-                        Image: <a href="#"
+                        File: <a href="#"
                                     class="btn-preview"
                                     data-file="${row.img}">Klik disini untuk lihat
                                 </a>

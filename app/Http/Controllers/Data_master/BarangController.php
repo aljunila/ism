@@ -132,6 +132,7 @@ class BarangController extends Controller
         $request->validate([
             'nama' => 'required',
             'id_kelompok' => 'required',
+            'kode' => 'nullable',
         ]);
 
         $barang = Barang::create([

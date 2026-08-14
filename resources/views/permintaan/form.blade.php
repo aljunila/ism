@@ -176,14 +176,11 @@
                     </div>
 
                     <div class="col-sm-1">
-                        <input type="text" class="form-control paket" name="paket[]" readonly>
+                        <input type="text" class="form-control paket" name="satuan[]" placeholder="Satuan">
                     </div>
 
                     <div class="col-sm-2">
-                        <select name="ket[]" class="form-control">
-                            <option value="Umum">Umum</option>
-                            <option value="Segera">Segera</option>
-                        </select>
+                        <input type="text" class="form-control" name="ket[]" placeholder="Keterangan">
                     </div>
 
                     <div class="col-sm-1">

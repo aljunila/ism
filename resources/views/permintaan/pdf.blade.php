@@ -56,7 +56,7 @@
             <table class="table-bordered" width="100%">
             <tr>
                 <td width="25%" style="text-align: center;" rowspan="3"><img src="{{ public_path('img/'.$perusahaan->logo) }}" alt="" width="50%"></td>
-                <td style="text-transform: uppercase;" width="50%" rowspan="3"><h3>{{$form->nama}}</h3></td>
+                <td style="text-transform: uppercase;" width="50%" rowspan="3"><h3>{{$form->nama}}</h3><br>NOMOR : {{$show->nomor}}</td>
                 <td width="25%" style="text-align: center;" colspan="3"><b>{{$form->judul}}</b></td>
             </tr>
             <tr>
@@ -69,7 +69,7 @@
         <table class="table-bordered" width="100%">
             <tr style="text-align: left;">
                 <td colspan="2">Nama Kapal : {{$show->get_kapal()->nama}}</td>
-                <td colspan="2">Bagian : {!! ($show->bagian==1) ? 'Deck' : 'Mesin' !!} </td>
+                <td colspan="2">Bagian : @if($show->bagian==1) DECK @elseif($show->bagian==2) MESIN @elseif($show->bagian==3) KELISTRIKAN @else ALAT KEBERSIHAN @endif</td>
                 <td>Tanggal : {{ \Carbon\Carbon::parse($show->date)->format('d-m-Y') }}</td>
             </tr>
             <tr>
@@ -83,7 +83,7 @@
             <tr>
                 <td>{{$loop->iteration}}</td>
                 <td>{{$row->get_barang()->nama}} @if($row->get_barang()->kode) ({{ $row->get_barang()->kode }}) @endif</td>
-                <td>{{$row->get_barang()->deskripsi}}</td>
+                <td>{{$row->satuan}}</td>
                 <td>{{$row->jumlah}}</td>
                 <td>{{$row->ket}}</td>
             </tr>

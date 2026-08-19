@@ -504,9 +504,10 @@ class PermintaanController extends Controller
         $tanggal = date('Y-m-d');
         $nomorTanggal = Carbon::parse($tanggal)->format('dmY');
         $kategori = [
-            1 => 'Deck',
-            2 => 'Mesin',
-            3 => 'Elect',
+            1 => 'DECK',
+            2 => 'MESIN',
+            3 => 'LISTRIK',
+            3 => 'AB',
         ];
 
         $kat = $kategori[(int) $source->bagian] ?? '-';
@@ -650,7 +651,7 @@ class PermintaanController extends Controller
         $bln = $bulanRomawi[$bulan] ?? '-';
         $perusahaan = Perusahaan::findorFail($kapal->pemilik);
         $thn = Carbon::parse($request->input('tanggal'))->format('Y');
-        $cek = Permintaan::where('id_kapal', $request->id_kapal)->whereYear('tanggal', $thn)->where('is_delete', 0)->orderBy('id', 'DESC')->first();
+        $cek = Permintaan::where('id_kapal', $request->id_kapal)->whereYear('tanggal', $thn)->where('bagian', $bagian)->where('is_delete', 0)->orderBy('id', 'DESC')->first();
         $nom = explode('/',$cek->nomor);
         $num = str_pad($nom[0]+1, 3, '0', STR_PAD_LEFT);
         $nomor = $num.'/'.$kat.'/'.$perusahaan->kode.'/'.$kapal->nama.'/'.$bln.'/'.$thn;

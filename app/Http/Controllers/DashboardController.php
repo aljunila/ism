@@ -329,7 +329,7 @@ class DashboardController extends Controller
                 'a.jumlah',
                 'a.flow_stage',
                 'b.nama as barang',
-                'b.deskripsi as satuan',
+                'a.satuan',
                 'c.nama as status',
                 DB::raw('COALESCE(c.flag_permintaan, 0) as flag_permintaan'),
                 DB::raw('COALESCE(c.flag_proses, 0) as flag_proses'),

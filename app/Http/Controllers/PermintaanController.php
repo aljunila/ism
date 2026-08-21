@@ -364,6 +364,7 @@ class PermintaanController extends Controller
         $data['active'] = "permintaan";
         $roleJenis = Session::get('previllage');
         $id_perusahaan = Session::get('id_perusahaan');
+        $cabang = Session::get('id_cabang');
         if($roleJenis==2) {
             $data['kapal'] = Kapal::where('status','A')->where('pemilik', $id_perusahaan)->get();
         } else if($roleJenis==3) {
@@ -374,7 +375,10 @@ class PermintaanController extends Controller
             $data['kapal'] = Kapal::where('status','A')->get();
         }
         $data['statusbarang'] = StatusBarang::where('is_delete',0)->get();
-        $data['vendor'] = Vendor::where('id_cabang', Session::get('id_cabang'))->get();
+        $data['vendor'] = Vendor::where('is_delete',0)
+                        ->when($cabang, function($query, $cabang) {
+                            return $query->where('id_cabang', $cabang);
+                        })->get();
         $data['currencies'] = Currency::where('is_delete', 0)->orderBy('is_base', 'DESC')->orderBy('code')->get();
         $data['cabang'] = Cabang::where('is_delete', 0)->get();
         return view('permintaan.index', $data);
@@ -523,9 +527,7 @@ class PermintaanController extends Controller
             ]);
             $file = $request->file('file');
             $nama_file = 'permintaan-' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        
-            // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = 'file_permintaan_log';
+            $tujuan_upload = public_path('file_permintaan_log');
             $file->move($tujuan_upload,$nama_file); 
         }
 
@@ -673,9 +675,7 @@ class PermintaanController extends Controller
             ]);
             $file = $request->file('file');
             $nama_file = 'permintaan-' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        
-            // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = 'file_permintaan_log';
+            $tujuan_upload = public_path('file_permintaan_log');
             $file->move($tujuan_upload,$nama_file); 
         }
 
@@ -1125,7 +1125,7 @@ class PermintaanController extends Controller
         $shippingMode = $request->input('shipping_mode');
         $shippingPoint = $request->input('shipping_point');
         $vendor = $request->input('vendor');
-        $jumlah = $request->input('jumlah');
+        $jumlah = (float) $request->input('jumlah', 0);
         $kodePo = $request->input('kode_po');
         $ketPurchas = $request->input('ket');
         $id_cabang = $up->id_cabang;
@@ -1284,7 +1284,6 @@ class PermintaanController extends Controller
                     'jumlah' => $jumlah,
                     'status_purchasing' => ((string) $target === '4') ? 'bought' : 'on_buy',
                     'amount' => $amount,
-                    'jumlah' => $jumlah,
                     'id_currency' => $currencyId ?: null,
                     'tanggal_beli' => $tanggalLog,
                     'shipping_mode' => $shippingMode,
@@ -1762,7 +1761,7 @@ class PermintaanController extends Controller
         return $pdf->stream($form->ket.' '.$nama.'.pdf');
     }
 
-    private function createGudang(int $id_cabang, int $id_barang, int $jumlah): void
+    private function createGudang(int $id_cabang, int $id_barang, float $jumlah): void
     {
         $cek = Gudang::where('id_cabang', $id_cabang)
                     ->where('id_barang', $id_barang)
@@ -1771,7 +1770,7 @@ class PermintaanController extends Controller
         if ($cek) {
             $idgudang = $cek->id;
             $total= $cek->jumlah + $jumlah;
-            Gudang::whereIn('id', $idgudang)->update([
+            Gudang::where('id', $idgudang)->update([
                 'jumlah' => $total,
                 'changed_date' => date('Y-m-d H:i:s')
             ]);

@@ -276,6 +276,23 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="filePreviewModal" tabindex="-1" style="z-index:1080;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Preview File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center" id="previewContent">
+                <!-- isi preview -->
+            </div>
+
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scriptfooter')
@@ -337,8 +354,8 @@
                     }
                 },
                 {
-                    data: 'procurement_channel',
-                    name: 'procurement_channel',
+                    data: 'flow_stage',
+                    name: 'flow_stage',
                     render: function(data, type, row) {
                         return data ?? 'logistik';
                     }
@@ -412,6 +429,17 @@
             const status = escapeHtml(row.status || '-');
             const created = escapeHtml(row.created || '-');
             const activeClass = html === '' ? 'is-active' : '';
+            let imageHtml = '';
+            if (row.img) {
+                imageHtml = `
+                    <div class="small">
+                        File: <a href="#"
+                                    class="btn-preview"
+                                    data-file="${row.img}">Klik disini untuk lihat
+                                </a>
+                    </div>
+                `;
+            }
 
             html += `
                 <div class="timeline-item ${activeClass}">
@@ -419,8 +447,8 @@
                     <div class="timeline-dot"></div>
                     <div class="timeline-content">
                         <div><strong>${title}</strong></div>
-                        <div class="small">Status: ${status}</div>
                         <div class="small">Diproses oleh: ${created}</div>
+                        ${imageHtml}
                     </div>
                 </div>
             `;
@@ -476,6 +504,20 @@
                 link.click();
             }
         })
+    });
+
+    $(document).on('click', '.btn-preview', function () {       
+        let file = $(this).data('file');
+        let url = "{{ asset('file_permintaan_log') }}/" + file;
+        let ext = file.split('.').pop().toLowerCase();        
+        let html = '';
+        // gambar
+        if (['jpg','jpeg','png','gif'].includes(ext)) {
+            html = `<img src="${url}" class="img-fluid">`;
+        }
+
+        $('#previewContent').html(html);
+        $('#filePreviewModal').modal('show');
     });
 </script>
 @endsection

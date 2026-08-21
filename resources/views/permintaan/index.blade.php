@@ -363,7 +363,7 @@
                                 <label class="col-form-label">Jumlah</label>
                             </div>
                             <div class="col-sm-9">
-                                <input type="number" class="form-control" name="jumlah" id="jumlah" >
+                                <input type="number" class="form-control" name="jumlah" id="jumlah" step="0.01">
                             </div>
                         </div>
                         <div class="mb-1 row">
@@ -496,7 +496,9 @@
 
     function maskRupiah(value) {
         const numberString = (value || '').replace(/\D/g, '');
+
         if (!numberString) return '';
+
         return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
@@ -1204,7 +1206,7 @@
                      console.log(data);
                     if (vendorSelect) vendorSelect.setValue(data.vendor || '');
                     $('#jumlah').val(data.jumlah);
-                    $('#amount').val(data.amount);
+                    $('#amount').val(maskRupiah(String(data.amount).split('.')[0]));
                 },
             });
         }

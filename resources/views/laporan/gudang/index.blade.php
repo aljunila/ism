@@ -130,7 +130,8 @@
                                 <option value="0">Semua</option>
                                 <option value="1">DECK</option>
                                 <option value="2">MESIN</option>
-                                <option value="3">ELECTRICAL</option>
+                                <option value="3">KELISTRIKAN</option>
+                                <option value="4">ALAT KEBERSIHAN</option>
                             </select>
                         </div>
                         <div class="col-sm-2">

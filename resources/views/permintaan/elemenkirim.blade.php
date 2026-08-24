@@ -115,9 +115,24 @@
                         No : ${row.nomor}`;
                     }
                 },    
-                { data: 'bagian', name: 'bagian' },
+                { data: 'bagian', 
+                    name : 'bagian',
+                    render: function (data, type, row) {
+                        if (data == 1) return '<a class="badge badge-light-primary">Deck</a>';
+                        if (data == 2) return '<a class="badge badge-light-success">Mesin</a>';
+                        if (data == 3) return '<a class="badge badge-light-warning">Kelistrikan</a>';
+                        if (data == 4) return '<a class="badge badge-light-danger">Alat Kebersihan</a>';
+                        return '-';
+                    }
+                },
                 { data: 'created', name: 'created' },
-                { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
+                { 
+                    data: null,
+                    render: function(data, type, row){
+                        return `<a type="button" href="/permintaan/pdfkirim/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success"
+                        >Cetak PDF</a>`;
+                    }
+                },
             ]
             
         });

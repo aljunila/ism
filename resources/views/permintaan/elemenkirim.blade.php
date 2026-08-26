@@ -115,16 +115,7 @@
                         No : ${row.nomor}`;
                     }
                 },    
-                { data: 'bagian', 
-                    name : 'bagian',
-                    render: function (data, type, row) {
-                        if (data == 1) return '<a class="badge badge-light-primary">Deck</a>';
-                        if (data == 2) return '<a class="badge badge-light-success">Mesin</a>';
-                        if (data == 3) return '<a class="badge badge-light-warning">Kelistrikan</a>';
-                        if (data == 4) return '<a class="badge badge-light-danger">Alat Kebersihan</a>';
-                        return '-';
-                    }
-                },
+                { data: 'bagian', name : 'bagian'},
                 { data: 'created', name: 'created' },
                 { 
                     data: null,

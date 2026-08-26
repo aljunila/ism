@@ -654,8 +654,13 @@ class PermintaanController extends Controller
         $perusahaan = Perusahaan::findorFail($kapal->pemilik);
         $thn = Carbon::parse($request->input('tanggal'))->format('Y');
         $cek = Permintaan::where('id_kapal', $request->id_kapal)->whereYear('tanggal', $thn)->where('bagian', $bagian)->where('is_delete', 0)->orderBy('id', 'DESC')->first();
-        $nom = explode('/',$cek->nomor);
-        $num = str_pad($nom[0]+1, 3, '0', STR_PAD_LEFT);
+        if($cek) {
+            $exp = explode('/',$cek->nomor);
+            $next = $exp[0];
+        } else {
+            $next=0;
+        }
+        $num = str_pad($next+1, 3, '0', STR_PAD_LEFT);
         $nomor = $num.'/'.$kat.'/'.$perusahaan->kode.'/'.$kapal->nama.'/'.$bln.'/'.$thn;
 
         $get_nahkoda = Karyawan::where('id_kapal', $request->input('id_kapal'))->where('id_jabatan', 5)->where('status', 'A')->where('resign','N')->first();
@@ -1012,6 +1017,7 @@ class PermintaanController extends Controller
         $query = DB::table('t_detail_permintaan as a')
                 ->leftjoin('t_permintaan_barang as b', 'b.id', '=', 'a.id_permintaan')
                 ->leftjoin('m_status_barang as c', 'c.id', '=', 'a.status')
+                ->leftjoin('m_barang as d', 'd.id', '=', 'a.id_barang')
                 ->leftJoin(DB::raw("
                     (
                         SELECT l.id_detail_permintaan, l.keterangan
@@ -1024,7 +1030,7 @@ class PermintaanController extends Controller
                         ) lm ON lm.max_id = l.id
                     ) lg
                 "), 'lg.id_detail_permintaan', '=', 'a.id')
-                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'c.nama as status_nama', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung', 'lg.keterangan as log_keterangan')
+                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'c.nama as status_nama', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung', 'lg.keterangan as log_keterangan', 'd.nama as as barang')
                 ->where('a.is_delete', 0)
                 ->when($id_kapal, function($query, $id_kapal) {
                     return $query->where('b.id_kapal', $id_kapal);
@@ -1054,6 +1060,9 @@ class PermintaanController extends Controller
 
         return DataTables::of($query)
             ->addIndexColumn()
+            ->filterColumn('barang', function ($query, $keyword) {
+                $query->where('d.nama', 'LIKE', '%' . $keyword . '%');
+            })
             ->addColumn('kapal', function ($row) {
                 $kapal = Kapal::find($row->id_kapal);
                 return $kapal ? $kapal->nama : '-';
@@ -1543,7 +1552,7 @@ class PermintaanController extends Controller
         $kategori = [
             1 => 'Deck',
             2 => 'Mesin',
-            3 => 'Elect',
+            3 => 'Listrik',
             4 => 'AB',
         ];
         $kat = $kategori[(int) $bagian] ?? '-';
@@ -1748,7 +1757,7 @@ class PermintaanController extends Controller
         $data['item'] =  DB::table('t_detail_kirim as a')
                         ->leftjoin('t_detail_permintaan as b', 'b.id', '=', 'a.id_detail_permintaan')
                         ->leftjoin('m_barang as c', 'c.id', '=', 'b.id_barang')
-                        ->select('a.*', 'c.nama as barang', 'c.deskripsi as satuan', 'b.jumlah as jml_minta')
+                        ->select('a.*', 'c.nama as barang', 'b.satuan', 'b.jumlah as jml_minta')
                         ->where('id_kirim', $show->id)->where('a.is_delete', 0)->get();
         $ttd = $show->ttd;
         $data['mengetahui'] = Karyawan::find($ttd['mengetahui']);

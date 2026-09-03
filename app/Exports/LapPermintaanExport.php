@@ -30,7 +30,9 @@ class LapPermintaanExport implements FromView
                         ->leftJoin('t_permintaan_barang as b', 'a.id_permintaan', '=', 'b.id')
                         ->leftJoin('m_barang as c', 'a.id_barang', '=', 'c.id')
                         ->leftJoin('kapal as d', 'b.id_kapal', '=', 'd.id')
-                        ->select('a.*', 'b.bagian', 'b.nomor', 'b.tanggal', 'c.nama as barang', 'c.kode', 'd.nama as kapal')
+                        ->leftJoin('t_detail_kirim as e', 'e.id_detail_permintaan', '=', 'a.id')
+                        ->leftJoin('t_kirim_barang as f', 'f.id', '=', 'e.id_kirim')
+                        ->select('a.*', 'b.bagian', 'b.nomor', 'b.tanggal', 'c.nama as barang', 'c.kode', 'd.nama as kapal', 'e.jumlah as jml_kirim', 'f.tanggal as tgl_kirim')
                         ->where('a.is_delete', 0)
                         ->when($this->start, function ($query, $start) {
                             return $query->whereDate('b.tanggal', '>=', $start);

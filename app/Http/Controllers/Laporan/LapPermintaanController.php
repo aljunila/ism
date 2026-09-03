@@ -34,7 +34,7 @@ class LapPermintaanController extends Controller
     public function datalaporan(Request $request)
     {
         $roleJenis = Session::get('previllage');
-        $status = $request->input('status');
+        $flow_stage = $request->input('flow_stage');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
         $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
@@ -43,8 +43,12 @@ class LapPermintaanController extends Controller
                 ->leftjoin('user as u', 'u.id', '=', 'b.created_by')
                 ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'b.bagian', 'u.nama as peminta')
                 ->where('a.is_delete', 0)
+                ->where('b.id_cabang', null)
                 ->when($id_kapal, function($query, $id_kapal) {
                     return $query->where('b.id_kapal', $id_kapal);
+                })
+                ->when($flow_stage, function($query, $flow_stage) {
+                    return $query->where('a.flow_stage', $flow_stage);
                 })
                 ->when($start_date, function($query, $start_date) {
                     return $query->where('b.tanggal', '>=', $start_date);
@@ -79,9 +83,6 @@ class LapPermintaanController extends Controller
             ->addColumn('satuan', function ($row) {
                 $barang = Barang::find($row->id_barang);
                 return $barang ? $barang->deskripsi : '-';
-            })
-            ->addColumn('status', function ($row) {
-                return $this->normalizedStatusName($row->status);
             })
             ->make(true);
     }

@@ -91,10 +91,12 @@ class KelBarangController extends Controller
     public function storeAjax(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255'
+            'nama' => 'required|string|max:255',
+            'kategori' => 'required|integer|max:10'
         ]);
         $kelompok = KelBarang::create([
-            'nama' => $request->nama
+            'nama' => $request->nama,
+            'kategori' => $request->kategori,
         ]);
         return response()->json([
             'success' => true,

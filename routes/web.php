@@ -53,6 +53,7 @@ use App\Http\Controllers\Data_crew\EvaluasiController;
 use App\Http\Controllers\Data_crew\KonditeController;
 use App\Http\Controllers\Data_crew\KriteriaController;
 use App\Http\Controllers\PermintaanController;
+use App\Http\Controllers\PermintaanKantorController;
 use App\Http\Controllers\PenurunanController;
 use App\Http\Controllers\Ck_kapal\BerlayarController;
 use App\Http\Controllers\Ck_kapal\LatihanController;
@@ -457,12 +458,28 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('/pdfkirim/{uid}', [PermintaanController::class, 'pdfkirim'])->name('permintaan.pdfkirim');
         Route::post('baranggudang', [PermintaanController::class, 'baranggudang'])->name('permintaan.baranggudang');
         Route::get('pengiriman', [PermintaanController::class, 'pengiriman'])->name('permintaan.pengiriman');
-        Route::get('/{id}', [PermintaanController::class, 'elemen'])->name('permintaan.elemen');
         Route::post('dataByIdp', [PermintaanController::class, 'dataByIdp'])->name('permintaan.dataByIdp');
         Route::get('pengiriman/{id}', [PermintaanController::class, 'elemenkirim'])->name('permintaan.elemenkirim');
         Route::post('kirimByIdp', [PermintaanController::class, 'kirimByIdp'])->name('permintaan.kirimByIdp');
         Route::post('dataPurchas/{id}', [PermintaanController::class, 'dataPurchas'])->name('permintaan.dataPurchas');
         Route::post('userkapal', [PermintaanController::class, 'userkapal'])->name('permintaan.userkapal');
+        
+        Route::get('kantor', [PermintaanKantorController::class, 'index'])->name('kantor.index');
+        Route::post('kantor/data', [PermintaanKantorController::class, 'data'])->name('kantor.data');
+        Route::post('kantor/history', [PermintaanKantorController::class, 'history'])->name('kantor.history');
+        Route::post('kantor/proses', [PermintaanKantorController::class, 'proses'])->name('kantor.proses');
+        Route::get('kantor/form', [PermintaanKantorController::class, 'form'])->name('kantor.form');
+        Route::get('kantor/form/{uid}', [PermintaanKantorController::class, 'form'])->name('kantor.edit');
+        Route::post('kantor/store', [PermintaanKantorController::class, 'store'])->name('kantor.store');
+        Route::get('kantor/get/{id}', [PermintaanKantorController::class, 'get'])->name('kantor.get');
+        Route::get('kantor/getlog/{id}', [PermintaanKantorController::class, 'getlog'])->name('kantor.getlog');
+        Route::post('kantor/update/{id}', [PermintaanKantorController::class, 'update'])->name('kantor.update');
+        Route::delete('kantor/destroy/{id}', [PermintaanKantorController::class, 'destroy'])->name('kantor.destroy');
+        Route::delete('kantor/deldetail/{id}', [PermintaanKantorController::class, 'deldetail'])->name('kantor.deldetail');
+        Route::post('kantor/datalog', [PermintaanKantorController::class, 'datalog'])->name('kantor.datalog');
+        Route::get('/kantor/pdf/{uid}', [PermintaanKantorController::class, 'pdf'])->name('kantor.pdf');
+
+        Route::get('/{id}', [PermintaanController::class, 'elemen'])->name('permintaan.elemen');
     });
 
     Route::prefix('penurunan')->group(function () {

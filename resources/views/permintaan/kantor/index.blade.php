@@ -46,14 +46,11 @@
                     </li>
                     @elseif(Session::get('role_id')==4)
                     <li class="nav-item">
-                        <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Kapal</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" aria-controls="history" role="tab" aria-selected="true"><i data-feather="clock"></i>History</a>
                     </li>
                     @else
                     <li class="nav-item">
-                        <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="logistik"><i data-feather="permintaan"></i>Logistik</a>
+                        <a class="nav-link" id="logistik-tab" data-bs-toggle="tab" href="#logistik" aria-controls="logistik" role="tab" aria-selected="true" data-status="logistik"><i data-feather="permintaan"></i>GA</a>
                    </li>
                     <li class="nav-item">
                         <a class="nav-link" id="purchas-tab" data-bs-toggle="tab" href="#purchas" aria-controls="purchas" role="tab" aria-selected="true" data-status="purchasing"><i data-feather="file"></i>Purchasing</a>
@@ -62,19 +59,19 @@
                         <a class="nav-link" id="po-tab" data-bs-toggle="tab" href="#po" aria-controls="po" role="tab" aria-selected="true" data-status="po"><i data-feather="log-out"></i>P.O.</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="workshop-tab" data-bs-toggle="tab" href="#workshop" aria-controls="workshop" role="tab" aria-selected="true" data-status="workshop"><i data-feather="permintaan"></i>Workshop</a>
+                        <a class="nav-link" id="selesai-tab" data-bs-toggle="tab" href="#selesai" aria-controls="selesai" role="tab" aria-selected="true" data-status="selesai"><i data-feather="permintaan"></i>Selesai</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Kapal</a>
+                        <a class="nav-link" id="tolak-tab" data-bs-toggle="tab" href="#tolak" aria-controls="tolak" role="tab" aria-selected="true" data-status="tolak"><i data-feather="permintaan"></i>Ditolak</a>
                     </li>
                     @endif
                 </ul>
                 <div class="card-header border-bottom">
                     <div class="col-sm-3">
-                        <select name="id_kapal" id="id_kapal" class="form-control">
-                            <option value="">Pilih Kapal</option>
-                        @foreach($kapal as $kp)
-                            <option value="{{$kp->id}}" @selected (isset($trip) && $kp->id==$trip->id_kapal)>{{$kp->nama}}</option>
+                        <select name="id_cabang" id="id_cabang" class="form-control">
+                            <option value="">Pilih cabang</option>
+                        @foreach($cabang as $kp)
+                            <option value="{{$kp->id}}" @selected (isset($trip) && $kp->id==$trip->id_cabang)>{{$kp->cabang}}</option>
                         @endforeach
                         </select>
                     </div>  
@@ -87,14 +84,14 @@
                     <div class="tab-pane active" id="permintaan" aria-labelledby="permintaan-tab" role="tabpanel">
                         <div class="card-body">
                         @if((Session::get('previllage')==1) or (Session::get('previllage')==3))
-                        <a href="/permintaan/form" class="btn btn-primary btn-sm pull-right">Tambah Data</a>
+                        <a href="/permintaan/kantor/form" class="btn btn-primary btn-sm pull-right">Tambah Data</a>
                         @endif
                             <table id="table-permintaan" class="table table-striped w-100">
                                 <thead>
                                     <tr>
                                         <th>No</th>
                                         <th>Tanggal</th>
-                                        <th>Kapal</th>
+                                        <th>Nomor</th>
                                         <th>Bagian</th>
                                         <th>Pembuat Permintaan</th>
                                         <th>Aksi</th>
@@ -113,28 +110,13 @@
                     <div class="tab-pane" id="po" aria-labelledby="po-tab" role="tabpanel" data-status="po">
                             @include('permintaan/logistik', ['tableId' => 'table-po'])
                     </div>
-                    <div class="tab-pane" id="workshop" aria-labelledby="workshop-tab" role="tabpanel" data-status="workshop">
-                            <br><a href="/permintaan/kirim" class="btn btn-primary btn-sm pull-right">Kirim Barang</a>
-                            @include('permintaan/logistik', ['tableId' => 'table-workshop'])
+                    <div class="tab-pane" id="selesai" aria-labelledby="selesai-tab" role="tabpanel" data-status="selesai">
+                            @include('permintaan/logistik', ['tableId' => 'table-selesai'])
                     </div>
-                    <div class="tab-pane" id="kapal" aria-labelledby="kapal-tab" role="tabpanel">
-                        <div class="card-body">
-                            <table id="table-kirim" class="table table-striped w-100">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Kapal</th>
-                                        <th>Bagian</th>
-                                        <th>Pengirim</th>
-                                        <th>Penerima</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                    <div class="tab-pane" id="tolak" aria-labelledby="tolak-tab" role="tabpanel" data-status="tolak">
+                            @include('permintaan/logistik', ['tableId' => 'table-tolak'])
                     </div>
+
                     <div class="tab-pane" id="history" aria-labelledby="history-tab" role="tabpanel">
                         <div class="card-body">
                             <table id="table-history" class="table table-striped w-100">
@@ -142,7 +124,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Tanggal</th>
-                                        <th>Kapal</th>
+                                        <th>cabang</th>
                                         <th>Bagian</th>
                                         <th>Jumlah Item</th>
                                         <th>Pembuat Permintaan</th>
@@ -169,10 +151,10 @@
                 <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
                     <i data-feather="hash" style="width:12px;height:12px;"></i><span id="meta-nomor">-</span>
                 </span>
-                <span style="color:#d0cfe8;font-size:.75rem;">|</span>
+                <!-- <span style="color:#d0cfe8;font-size:.75rem;">|</span>
                 <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
                     <i data-feather="anchor" style="width:12px;height:12px;"></i><span id="meta-kapal">-</span>
-                </span>
+                </span> -->
                 <span style="color:#d0cfe8;font-size:.75rem;">|</span>
                 <span class="d-flex align-items-center gap-25" style="font-size:.78rem;color:#6e6b7b;">
                     <i data-feather="calendar" style="width:12px;height:12px;"></i><span id="meta-tanggal">-</span>
@@ -248,32 +230,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="DetailKirimModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Pengiriman</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <table class="table table-bordered table-striped" id="tableDetailKirim" width="100%">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Barang</th>
-                            <th>Jml Permintaan</th>
-                            <th>Jml Kirim</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade" id="vendorCabangModal" tabindex="-1" aria-hidden="true" style="z-index:1080;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -314,8 +270,8 @@
                         </div>
                         <div class="col-sm-9">
                             <select name="sedia" id="sedia" class="form-control">
-                                <option value="4">Ada (Workshop)</option>
-                                <option value="0">Tidak ada</option>
+                                <option value="0">Disetujui</option>
+                                <option value="1">Ditolak</option>
                             </select>
                         </div>
                     </div>
@@ -385,26 +341,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mb-1 row" id="shipping_mode_row" style="display:none;">
-                        <div class="col-sm-3">
-                            <label class="col-form-label">Mode Kirim</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <select name="shipping_mode" id="shipping_mode" class="form-control">
-                                <option value="">-Pilih-</option>
-                                <option value="transit">Transit</option>
-                                <option value="direct_workshop">Direct ke workshop</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-1 row" id="shipping_point_row" style="display:none;">
-                        <div class="col-sm-3">
-                            <label class="col-form-label">Transit Pada</label>
-                        </div>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="shipping_point" id="shipping_point" placeholder="Nama lokasi transit">
-                        </div>
-                    </div>
                     <div class="alert alert-light-primary mb-1 py-50 px-75" id="process_hint" style="display:none;"></div>
                     <div class="mb-1 row">
                         <div class="col-sm-3">
@@ -426,7 +362,7 @@
                 <div class="modal-footer">
                     <input type="hidden" name="current_status" id="current_status">
                     <input type="hidden" id="current_flow_stage">
-                    <input type="hidden" id="id_kapal_proses">
+                    <input type="hidden" id="id_cabang_proses">
                     <input type="hidden" name="id" id="proses_id">
                     <button type="submit" class="btn btn-primary" id="simpan_cuti">Simpan</button>
                 </div>
@@ -527,20 +463,10 @@
 
             if (flowStage === 'gudang') {
                 hint = 'Barang sudah di gudang. Langkah berikutnya hanya naik kapal.';
-            } else if (target === '4') {
-                hint = 'Log akan disimpan sebagai "Barang tersedia di workshop".';
-            } else if (target === '5') {
-                hint = 'Barang akan dipindahkan ke antrean gudang logistik.';
-            } else if (target === '6') {
-                hint = 'Barang akan diselesaikan dan dinyatakan naik kapal.';
-            } else if (target === '7') {
-                hint = 'Barang dikirim ke Cabang';
             } else if (target === '0') {
-                if ((routeValue || '').startsWith('2|')) {
-                    hint = 'Barang akan dipindahkan ke antrean purchasing.';
-                } else if ((routeValue || '').startsWith('3|')) {
-                    hint = 'Barang akan dipindahkan ke antrean PO.';
-                }
+                hint = 'Permintaan disetujui';
+            } else if (target === '1') {
+                hint = 'Permintaan ditolak';
             }
         }
 
@@ -558,12 +484,8 @@
                 $('#shipping_point').val('');
                 $('#shipping_point_row').hide();
                 hint = 'Log akan disimpan sebagai "Barang sedang dibeli".';
-            } else if (shippingMode === 'transit') {
-                hint = 'Log akan disimpan sebagai "Transit pada ...".';
-            } else if (shippingMode === 'direct_workshop') {
-                hint = 'Log akan disimpan sebagai "Direct langsung ke workshop".';
-            } else {
-                hint = 'Saat selesai, pilih mode kirim untuk melanjutkan ke workshop.';
+            }  else {
+                hint = 'Saat selesai, barang akan diberikan ke divisi peminta';
             }
         }
 
@@ -600,10 +522,10 @@
             processing: true,
             serverSide: true,
             ajax:{
-                url: "/permintaan/data",
+                url: "/permintaan/kantor/data",
                 type: "POST",
                 data: function(d){
-                    d.id_kapal= $('#id_kapal').val(),
+                    d.id_cabang= $('#id_cabang').val(),
                     d.tanggal= $('#tanggal').val(),
                     d._token= "{{ csrf_token() }}"
                 },
@@ -615,64 +537,23 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        const kapal = escapeHtml(row.kapal || '-');
+                        const cabang = escapeHtml(row.cabang || '-');
                         const nomor = escapeHtml(row.nomor || '-');
                         let file = '';
                             if (row.file) {
                                 file = `Image: <a href="#" class="btn-file"data-file="${row.file}">Klik disini untuk lihat`;
                             }
-                        return `${kapal} <button type="button"
+                        return `${nomor}<button type="button"
                             class="btn btn-icon btn-xs btn-flat-primary detail-perm-btn"
                             data-id="${row.id}"
-                            data-kapal="${kapal}"
                             data-nomor="${nomor}"
                             data-tanggal="${escapeHtml(row.tanggal || '-')}"
                             data-bagian="${escapeHtml(row.bagian || '-')}"
-                            title="Detail Barang">Detail Permintaan</button><br>No : ${nomor}<br>${file}`;
+                            title="Detail Barang">Detail Permintaan</button><br>${file}`;
                     }
                 },
-                { data: 'bagian', 
-                    name : 'bagian',
-                    render: function (data, type, row) {
-                        if (data == 1) return '<a class="badge badge-light-primary">Deck</a>';
-                        if (data == 2) return '<a class="badge badge-light-success">Mesin</a>';
-                        if (data == 3) return '<a class="badge badge-light-warning">Kelistrikan</a>';
-                        if (data == 4) return '<a class="badge badge-light-danger">Alat Kebersihan</a>';
-                        return '-';
-                    }
-                },
+                { data: 'divisi', name : 'divisi'},
                 { data: 'created', name: 'created' },
-                { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
-            ]
-        });
-
-        const table2 = $('#table-kirim').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax:{
-                url: "/permintaan/datakirim",
-                type: "POST",
-                data: function(d){
-                    d.id_kapal= $('#id_kapal').val(),
-                    d.tanggal= $('#tanggal').val(),
-                    d._token= "{{ csrf_token() }}"
-                },
-            },
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'tanggal', name: 'tanggal' },
-                {
-                    data: null,
-                    name: null,
-                    render: function (data, type, row) {
-                        return `${row.kapal} <button type="button"  onclick="openDetailKirim(${row.id})" class="btn btn-icon btn-xs btn-flat-primary" title="Detail Barang">
-                        Detail Pengiriman</button><br>
-                        No : ${row.nomor}`;
-                    }
-                },    
-                { data: 'bagian', name: 'bagian' },
-                { data: 'created', name: 'created' },
-                { data: 'penerima', name: 'penerima' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -681,10 +562,10 @@
             processing: true,
             serverSide: true,
             ajax:{
-                url: "/permintaan/history",
+                url: "/permintaan/kantor/history",
                 type: "POST",
                 data: function(d){
-                    d.id_kapal= $('#id_kapal').val(),
+                    d.id_cabang= $('#id_cabang').val(),
                     d.tanggal= $('#tanggal').val(),
                     d._token= "{{ csrf_token() }}"
                 },
@@ -696,12 +577,12 @@
                     data: null,
                     name: null,
                     render: function (data, type, row) {
-                        const kapal = escapeHtml(row.kapal || '-');
+                        const cabang = escapeHtml(row.cabang || '-');
                         const nomor = escapeHtml(row.nomor || '-');
-                        return `${kapal} <button type="button"
+                        return `${cabang} <button type="button"
                             class="btn btn-icon btn-xs btn-flat-primary detail-perm-btn"
                             data-id="${row.id}"
-                            data-kapal="${kapal}"
+                            data-cabang="${cabang}"
                             data-nomor="${nomor}"
                             data-tanggal="${escapeHtml(row.tanggal || '-')}"
                             data-bagian="${escapeHtml(row.bagian || '-')}"
@@ -839,15 +720,16 @@
             }
 
             logTables[tableId] = $('#' + tableId).DataTable({
+                
                 processing: true,
                 serverSide: true,
                 ajax:{
-                    url: "/permintaan/datalog",
+                    url: "/permintaan/kantor/datalog",
                     type: "POST",
                     data: function(d){
                         let activePane = document.querySelector('.tab-pane.active');
                         d.status   = activePane?.getAttribute('data-status');
-                        d.id_kapal = $('#id_kapal').val();
+                        d.id_cabang = $('#id_cabang').val();
                         d.tanggal  = $('#tanggal').val();
                     },
                 },
@@ -878,7 +760,7 @@
                         data: null,
                         name: null,
                         render: function (data, type, row) {
-                            let html = `${row.kapal} <br>No : ${row.nomor}`;
+                            let html = `No : ${row.nomor}`;
                             if (row.flow_view) {
                                 html += `<br>Flow : ${row.flow_view}`;
                             }
@@ -893,11 +775,11 @@
                         orderable: false, 
                         searchable: false,
                         render: function (data, type, row) {
-                            if (tableId === 'table-workshop') {
+                            if ((tableId === 'table-selesai') || (tableId === 'table-tolak')) {
                                 return '';
                             }
                             return `
-                                <button type="button" class="btn btn-sm btn-outline-primary proses-btn" data-id="${row.id}" data-id_kapal="${row.id_kapal}" data-kode_po="${row.kode_po}" data-flow-stage="${row.flow_stage || ''}">
+                                <button type="button" class="btn btn-sm btn-outline-primary proses-btn" data-id="${row.id}" data-id_cabang="${row.id_cabang}" data-kode_po="${row.kode_po}" data-flow-stage="${row.flow_stage || ''}">
                                     Proses
                                 </button>
                             `;
@@ -927,7 +809,7 @@
             });
         });
 
-        $('#id_kapal').on('change', function () {
+        $('#id_cabang').on('change', function () {
             table.ajax.reload();
             table2.ajax.reload();
             tableHistory.ajax.reload();
@@ -956,7 +838,7 @@
             }).then((result) => {
                 if (!result.isConfirmed) return;
                 $.ajax({
-                    url: '{{ url('permintaan/destroy') }}/' + id,
+                    url: '{{ url('permintaan/kantor/destroy') }}/' + id,
                     type: 'DELETE',
                     data: {
                         _token: '{{ csrf_token() }}'
@@ -996,7 +878,7 @@
                 if (!result.isConfirmed) return;
 
                 $.ajax({
-                    url: `/permintaan/repeat/${id}`,
+                    url: `/permintaan/kantor/repeat/${id}`,
                     type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}'
@@ -1037,7 +919,7 @@
     $(document).on('click', '.detail-perm-btn', function () {
         const btn = $(this);
         openDetail(btn.data('id'), {
-            kapal:    btn.data('kapal'),
+            cabang:    btn.data('cabang'),
             nomor:    btn.data('nomor'),
             tanggal:  btn.data('tanggal'),
             bagian:   btn.data('bagian')
@@ -1048,14 +930,14 @@
         currentId = id;
         meta = meta || {};
         $('#meta-nomor').text(meta.nomor   || '-');
-        $('#meta-kapal').text(meta.kapal   || '-');
+        $('#meta-cabang').text(meta.cabang   || '-');
         $('#meta-tanggal').text(formatTgl(meta.tanggal) || '-');
         $('#meta-bagian').text(meta.bagian || '-');
         feather.replace();
         $('#DetailModal').modal('show');
 
         if ($.fn.DataTable.isDataTable('#tableDetail')) {
-            DetailTable.ajax.url(`permintaan/get/${id}`).load();
+            DetailTable.ajax.url(`/permintaan/kantor/get/${id}`).load();
             return;
         }
 
@@ -1066,7 +948,7 @@
             ordering: false,
             info: false,
             ajax: {
-                url: `permintaan/get/${id}`,
+                url: `/permintaan/kantor/get/${id}`,
                 dataSrc: function (json) {
                     return json;
                 }
@@ -1193,7 +1075,7 @@
 
     $(document).on('click', '.proses-btn', function () {
         let id = $(this).data('id');
-        let idkapal = $(this).data('id_kapal');
+        let idcabang = $(this).data('id_cabang');
         let flowStage = $(this).data('flow-stage') || '';
         let pane = $(this).closest('.tab-pane');
         let stage = pane.data('status');
@@ -1222,46 +1104,14 @@
         $('#current_status').val(stage);
         $('#form_proses #kode_po').val(kode_po);
         $('#current_flow_stage').val(flowStage);
-        $('#id_kapal_proses').val(idkapal || '');
-        configureProcessForm(stage, idkapal, flowStage);
+        $('#id_cabang_proses').val(idcabang || '');
+        configureProcessForm(stage, idcabang, flowStage);
         $('#tanggal_proses').val(new Date().toISOString().slice(0, 10));
         $('#prosesModal').modal('show');
     });
 
-    function openDetailKirim(id) {
-        currentId = id;
-        $('#DetailKirimModal').modal('show');
 
-        if ($.fn.DataTable.isDataTable('#tableDetailKirim')) {
-            DetailTable.ajax.url(`permintaan/getkirim/${id}`).load();
-            return;
-        }
-
-        DetailTable = $('#tableDetailKirim').DataTable({
-            processing: true,
-            paging: false,
-            searching: false,
-            ordering: false,
-            info: false,
-            ajax: {
-                url: `permintaan/getkirim/${id}`,
-                dataSrc: function (json) {
-                    return json;
-                }
-            },
-            columns: [
-                {
-                    data: null,
-                    render: (data, type, row, meta) => meta.row + 1
-                },
-                { data: 'barang', },
-                { data: 'jml_minta', },
-                { data: 'jumlah', },
-            ]
-        });
-    }
-
-    function loadStatusBarang(idkapal) {
+    function loadStatusBarang(idcabang) {
             let html = '';
             html += `<option value="2">Purchasing</option>`;
             html += `<option value="3">Purchasing Order</option>`;
@@ -1269,7 +1119,7 @@
             updateProcessFormUi();
     }
 
-    function configureProcessForm(stage, idkapal, flowStage) {
+    function configureProcessForm(stage, idcabang, flowStage) {
         const titleMap = {
             logistik: 'Proses Logistik',
             purchasing: 'Proses Purchasing',
@@ -1296,26 +1146,23 @@
         if (stage === 'logistik') {
             if (flowStage === 'gudang') {
                 $('#sedia').html(`
-                    <option value="6">Naik kapal (Selesai)</option>
+                    <option value="6">Naik cabang (Selesai)</option>
                 `);
                 updateProcessFormUi();
                 return;
             }
 
             $('#sedia').html(`
-                <option value="4">Ada (Workshop)</option>
-                <option value="0">Tidak ada</option>
-                <option value="5">Barang masuk gudang</option>
-                <option value="6">Naik kapal (Selesai)</option>
+                <option value="0">Disetujui</option>
+                <option value="1">Ditolak</option>
             `);
-            loadStatusBarang(idkapal);
+            loadStatusBarang(idcabang);
             updateProcessFormUi();
             return;
         }
 
         $('#sedia').html(`
             <option value="1">Sedang Proses</option>
-            <option value="7">Kirim ke Cabang</option>
             <option value="4">Selesai</option>
         `);
 
@@ -1339,7 +1186,7 @@
         }
         let formData = new FormData(this);
         $.ajax({
-            url: "/permintaan/proses",
+            url: "/permintaan/kantor/proses",
             type: "POST",
             data: formData,
             processData: false,

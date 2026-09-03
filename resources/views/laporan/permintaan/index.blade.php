@@ -185,7 +185,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Laporan - Permintaan</h4>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <select name="id_kapal" id="id_kapal" class="form-control">
                 <option value="">Pilih Kapal</option>
             @foreach($kapal as $kp)
@@ -194,12 +194,22 @@
             </select>
         </div>  
         <div class="col-sm-2">
+            <select name="flow_stage" id="flow_stage" class="form-control">
+                <option value="">Pilih Status</option>
+                <option value="logistik">Logistik</option>
+                <option value="purchasing">Purchasing</option>
+                <option value="po">PO</option>
+                <option value="workshop">Workshop</option>
+                <option value="selesai">Selesai</option>
+            </select>
+        </div>  
+        <div class="col-sm-2">
             <input type="date" name="start_date" id="start_date" class="form-control" placeholder="start date">
         </div>
         <div class="col-sm-2">
             <input type="date" name="end_date" id="end_date" class="form-control" placeholder="end date">
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
             <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
         </div>
     </div>
@@ -323,6 +333,7 @@
                     d.id_kapal= $('#id_kapal').val(),
                     d.start_date= $('#start_date').val(),
                     d.end_date= $('#end_date').val(),
+                    d.flow_stage= $('#flow_stage').val(),
                     d._token= "{{ csrf_token() }}"
                 },
             },
@@ -404,6 +415,10 @@
     });
 
     $('#end_date').on('change', function () {
+        table.ajax.reload();
+    });
+
+    $('#flow_stage').on('change', function () {
         table.ajax.reload();
     });
 

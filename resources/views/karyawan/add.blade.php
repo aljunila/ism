@@ -351,7 +351,7 @@
                                 </div>
                             </div>
                             <hr>
-                             @if(Session::get('previllage')==1)
+                             @if(Session::get('previllage')!=3)
                             <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Perusahaan</label>

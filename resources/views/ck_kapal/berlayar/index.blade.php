@@ -1,36 +1,60 @@
 @extends('main')
 
-@section('content')
 @section('scriptheader')
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/dataTables.bootstrap5.min.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/responsive.bootstrap5.min.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/vendors/css/tables/datatable/buttons.bootstrap5.min.css')}}">
   <link rel="stylesheet" type="text/css" href="{{ url('/app-assets/vendors/css/forms/select/tom-select.css')}}">
 @endsection
-
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Kapal - Berlayar</h4>
-        <!-- <a type="button" href="/data_crew/familiarisasi/form" class="btn btn-primary btn-sm">Tambah Data</a> -->
-         <button class="btn btn-primary btn-sm" id="btn-add-berlayar">Tambah Data</button>
+@section('content')
+<section id="complex-header-datatable">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <div class="col-12"><h4 class="card-title">Kapal - Laporan Berlayar</h4></div>
+                    <div class="col-sm-3">
+                        <select name="kapal" id="kapal" class="form-control">
+                            <option value="">Semua Kapal</option>
+                            @foreach($kapal as $kp)
+                                <option value="{{$kp->id}}">{{$kp->nama}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                        <select name="form" id="form" class="form-control">
+                            <option value="">Semua Form</option>
+                            @foreach($form as $f)
+                                <option value="{{$f->id}}">{{$f->ket}} ({{$f->nama}})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-2"><input type="date" name="tanggal" id="tanggal" class="form-control"></div>
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-primary btn-sm pull-right" id="btn-add-berlayar">Tambah Data</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table id="table-berlayar" class="table table-striped w-100">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Form/Laporan</th>
+                                <th>Tanggal</th>
+                                <th>Kapal</th>
+                                <th>Dari Pelabuhan</th>
+                                <th>PDF</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <table id="table-berlayar" class="table table-striped w-100">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Form/Laporan</th>
-                    <th>Tanggal</th>
-                    <th>Kapal</th>
-                    <th>Dari Pelabuhan</th>
-                    <th>PDF</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-</div>
+</section>
 
 <div class="modal fade" id="modal-berlayar" tabindex="-1" aria-labelledby="modal-berlayar-label" aria-hidden="true">
     <div class="modal-dialog">
@@ -95,6 +119,7 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 <script src="{{ url('/app-assets/vendors/js/tom-select.min.js') }}"></script>
 <script>
+    let table;
     $(function () {
         $.ajaxSetup({
             headers: {
@@ -102,10 +127,19 @@
             }
         });
 
-        const table = $('#table-berlayar').DataTable({
+        table = $('#table-berlayar').DataTable({
             processing: true,
             serverSide: true,
-            ajax: '{{ route('berlayar.data') }}',
+             ajax:{
+                url: "/ck_kapal/berlayar/data",
+                type: "POST",
+                data: function(d){
+                    d.form= $('#form').val(),
+                    d.id_kapal= $('#kapal').val(),
+                    d.tanggal= $('#tanggal').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+            },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'kode', name: 'kode' },
@@ -251,6 +285,18 @@
                 });
             });
         });
+    });
+
+    $('#form').on('change', function () {
+         table.ajax.reload();
+    });
+
+    $('#tanggal').on('change', function () {
+         table.ajax.reload();
+    });
+
+    $('#kapal').on('change', function () {
+         table.ajax.reload();
     });
 </script>
 @endsection

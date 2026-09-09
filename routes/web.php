@@ -463,6 +463,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('kirimByIdp', [PermintaanController::class, 'kirimByIdp'])->name('permintaan.kirimByIdp');
         Route::post('dataPurchas/{id}', [PermintaanController::class, 'dataPurchas'])->name('permintaan.dataPurchas');
         Route::post('userkapal', [PermintaanController::class, 'userkapal'])->name('permintaan.userkapal');
+        Route::delete('delitem/{id}', [PermintaanController::class, 'delitem'])->name('permintaan.delitem');
         
         Route::get('kantor', [PermintaanKantorController::class, 'index'])->name('kantor.index');
         Route::post('kantor/data', [PermintaanKantorController::class, 'data'])->name('kantor.data');
@@ -507,7 +508,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
 
     Route::prefix('ck_kapal')->group(function(){
         Route::get('berlayar', [BerlayarController::class, 'index']);
-        Route::get('berlayar/data', [BerlayarController::class, 'data'])->name('berlayar.data');
+        Route::post('berlayar/data', [BerlayarController::class, 'data'])->name('berlayar.data');
         Route::post('berlayar', [BerlayarController::class, 'store'])->name('berlayar.store');
         Route::put('berlayar/{id}', [BerlayarController::class, 'update'])->name('berlayar.update');
         Route::delete('berlayar/{id}', [BerlayarController::class, 'destroy'])->name('berlayar.destroy');
@@ -516,7 +517,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('berlayar/databyIdp', [BerlayarController::class, 'databyIdp'])->name('berlayar.databyIdp');
 
         Route::get('latihan', [LatihanController::class, 'index']);
-        Route::get('latihan/data', [LatihanController::class, 'data'])->name('latihan.data');
+        Route::post('latihan/data', [LatihanController::class, 'data'])->name('latihan.data');
         Route::post('latihan', [LatihanController::class, 'store'])->name('latihan.store');
         Route::put('latihan/{id}', [LatihanController::class, 'update'])->name('latihan.update');
         Route::delete('latihan/{id}', [LatihanController::class, 'destroy'])->name('latihan.destroy');

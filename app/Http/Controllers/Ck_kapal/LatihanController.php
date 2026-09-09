@@ -41,7 +41,9 @@ class LatihanController extends Controller
     public function data(Request $request)
     {
         $roleJenis = Session::get('previllage');
-        $id_perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
+        $form = $request->input('form');
+        $tanggal = $request->input('tanggal');
+        $id_perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : null;
         $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $id_cabang = ($roleJenis == 6) ? Session::get('id_cabang') : null;
         
@@ -54,11 +56,17 @@ class LatihanController extends Controller
                 ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
                     return $q->where('a.id_perusahaan', $id_perusahaan);
                 })
-                ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
+                ->when($id_kapal, function ($q) use ($id_kapal) {
                     return $q->where('a.id_kapal', $id_kapal);
                 })
                 ->when($roleJenis == 6 && $id_cabang, function ($q) use ($id_cabang) {
                     return $q->where('c.id_cabang', $id_cabang);
+                })
+                ->when($form, function($query, $form) {
+                    return $query->where('a.id_form', $form);
+                })
+                ->when($tanggal, function($query, $tanggal) {
+                    return $query->where('a.date', $tanggal);
                 })
                 ->orderBy('a.id', 'DESC');
 

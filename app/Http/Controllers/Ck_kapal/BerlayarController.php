@@ -38,11 +38,14 @@ class BerlayarController extends Controller
         return view('ck_kapal.berlayar.index', $data);
     }
 
-    public function data()
+    public function data(Request $request)
     {
-        $id_perusahaan = Session::get('id_perusahaan');
-        $id_kapal = Session::get('id_kapal');
         $roleJenis = Session::get('previllage');
+        $form = $request->input('form');
+        $tanggal = $request->input('tanggal');
+        $id_perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : null;
+        $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
+        $id_cabang = ($roleJenis == 6) ? Session::get('id_cabang') : null;
         
         $query = DB::table('checklist_data as a')
                 ->leftjoin('kode_form as b', 'a.id_form', '=', 'b.id') 
@@ -53,8 +56,14 @@ class BerlayarController extends Controller
                 ->when($roleJenis == 2 && $id_perusahaan, function ($q) use ($id_perusahaan) {
                     return $q->where('a.id_perusahaan', $id_perusahaan);
                 })
-                ->when($roleJenis == 3 && $id_kapal, function ($q) use ($id_kapal) {
+                ->when($id_kapal, function ($q) use ($id_kapal) {
                     return $q->where('a.id_kapal', $id_kapal);
+                })
+                ->when($form, function($query, $form) {
+                    return $query->where('a.id_form', $form);
+                })
+                ->when($tanggal, function($query, $tanggal) {
+                    return $query->where('a.date', $tanggal);
                 })
                 ->orderBy('a.id', 'DESC');
 
@@ -122,7 +131,7 @@ class BerlayarController extends Controller
             $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
         
             // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = 'checklist';
+            $tujuan_upload = public_path('checklist');
             $file->move($tujuan_upload,$nama_file);
             $save = ChecklistData::find($save->id)->update(['file' => $nama_file]); 
         }

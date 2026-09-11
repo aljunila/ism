@@ -464,6 +464,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('dataPurchas/{id}', [PermintaanController::class, 'dataPurchas'])->name('permintaan.dataPurchas');
         Route::post('userkapal', [PermintaanController::class, 'userkapal'])->name('permintaan.userkapal');
         Route::delete('delitem/{id}', [PermintaanController::class, 'delitem'])->name('permintaan.delitem');
+        Route::post('datadel', [PermintaanController::class, 'datadel'])->name('permintaan.datadel');
+        Route::delete('restore/{id}', [PermintaanController::class, 'restore'])->name('permintaan.restore');
         
         Route::get('kantor', [PermintaanKantorController::class, 'index'])->name('kantor.index');
         Route::post('kantor/data', [PermintaanKantorController::class, 'data'])->name('kantor.data');

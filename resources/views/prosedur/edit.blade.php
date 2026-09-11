@@ -197,6 +197,15 @@
                                     <textarea class="form-control tinymce" id="isi" name="isi">{!! $show->isi !!}</textarea>
                                 </div>
                             </div>
+                             <hr>
+                            <div class="mb-1 row">
+                                <div class="col-sm-2">
+                                    <label class="col-form-label" for="first-name">Upload Prosedur</label>
+                                </div>
+                                <div class="col-sm-10">
+                                    <input type="file" name="file" id="file" class="form-control">
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-9 offset-sm-3">
                             <button type="submit" class="btn btn-primary me-1" id="simpan_data">Simpan</button>

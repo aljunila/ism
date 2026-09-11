@@ -109,7 +109,19 @@ class ProsedurController extends Controller
 
     public function update(Request $request, $id)
     {
-      $post = Prosedur::find($id)->update($request->all());     
+      $post = Prosedur::find($id)->update($request->all());    
+      if($request->hasFile('file')) {
+            $request->validate([
+            'file' => 'required|file|mimes:pdf|max:20480',
+            ]);
+            $file = $request->file('file');
+            $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
+        
+            // isi dengan nama folder tempat kemana file diupload
+            $tujuan_upload = 'file_prosedur';
+            $file->move($tujuan_upload,$nama_file);
+            $save = Prosedur::find($id)->update(['file' => $nama_file]); 
+        } 
     }
 
     public function delete($id)
@@ -245,8 +257,8 @@ class ProsedurController extends Controller
         $id_karyawan = Session::get('id_karyawan');
         $year = date('Y');
         
-        $show = Prosedur::where('uid', $uid)->first();
-        if(Session::get('id_kapal')!=0){
+        $show = Prosedur::where('uid', $uid)->firstOrFail();
+        if(Session::get('id_kapal')>=1){
             $id_user = Session::get('userid');
             $id_prosedur = $show->id;
 
@@ -282,7 +294,7 @@ class ProsedurController extends Controller
                 ]);
             }
         }
-        $filename = $show->file;
+        $filename = $show->file;        
         $path = public_path('file_prosedur/' . $filename);
         if (!file_exists($path)) {
             abort(404);

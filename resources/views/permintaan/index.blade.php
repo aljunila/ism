@@ -68,6 +68,9 @@
                         <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true"><i data-feather="permintaan"></i>Kapal</a>
                     </li>
                     @endif
+                    <li class="nav-item">
+                        <a class="nav-link" id="delete-tab" data-bs-toggle="tab" href="#delete" aria-controls="delete" role="tab" aria-selected="true"><i data-feather="delete"></i>Permintaan Dibatalkan</a>
+                    </li>
                 </ul>
                 <div class="card-header border-bottom">
                     <div class="col-sm-3">
@@ -153,6 +156,24 @@
                             </table>
                         </div>
                     </div>
+                    <div class="tab-pane" id="delete" aria-labelledby="delete-tab" role="tabpanel">
+                        <div class="card-body">
+                            <table id="table-delete" class="table table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama Barang</th>
+                                        <th>Tgl Permintaan</th>
+                                        <th>Keterangan</th>
+                                        <th>Alasan Dibatalkan</th>
+                                        <th>Diproses Oleh</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -227,10 +248,10 @@
                                 <div class="track-label">Keterangan</div>
                                 <div class="track-value" id="lacakKet">-</div>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <div class="track-label">Status Saat Ini</div>
                                 <div class="track-value" id="lacakStatus">-</div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <div class="track-right">
@@ -728,6 +749,54 @@
             ]
         });
 
+        const tabledel = $('#table-delete').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax:{
+                url: "/permintaan/datadel",
+                type: "POST",
+                data: function(d){
+                    d.id_kapal= $('#id_kapal').val(),
+                    d.tanggal= $('#tanggal').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+            },
+            columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    {
+                        data: 'barang',
+                        name: 'barang',
+                        searchable: true,
+                        render: function(data, type, row) {
+                            return data || '-';
+                        }
+                    },  
+                    { data: 'tanggal', name: 'tanggal' },
+                    {
+                        data: null,
+                        name: null,
+                        render: function (data, type, row) {
+                            let html = `${row.kapal} <br> No : ${row.nomor}`;
+                            return html;
+                        }
+                    }, 
+                    { data: 'del_reason', name: 'del_reason' },
+                    { data: 'user', name: 'user' },
+                    { 
+                        data: null, 
+                        orderable: false, 
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <button type="button" class="btn btn-sm btn-outline-primary restore-btn" data-id="${row.id}" data-id_kapal="${row.id_kapal}" data-kode_po="${row.kode_po}" data-flow-stage="${row.flow_stage || ''}">
+                                    Kembalikan
+                                </button>
+                            `;
+                        }
+                    }
+                ]
+        });
+
         $('#pembelian').hide();
         $('#zahir').hide();
 
@@ -878,12 +947,15 @@
                         data: null,
                         name: null,
                         render: function (data, type, row) {
-                            let html = `${row.kapal} <br>No : ${row.nomor}`;
+                            let html = `${row.kapal} (${row.nomor})`;
                             if (row.flow_view) {
                                 html += `<br>Flow : ${row.flow_view}`;
                             }
                             if (row.kode_po) {
                                 html += `<br>Kode PO : ${row.kode_po}`;
+                            }
+                            if (row.flow_stage==='purchasing') {
+                                html += `<br> Ket : ${row.log_keterangan}`;
                             }
                             return html;
                         }
@@ -899,6 +971,9 @@
                             return `
                                 <button type="button" class="btn btn-sm btn-outline-primary proses-btn" data-id="${row.id}" data-id_kapal="${row.id_kapal}" data-kode_po="${row.kode_po}" data-flow-stage="${row.flow_stage || ''}">
                                     Proses
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger del-btn" data-id="${row.id}">
+                                    Hapus
                                 </button>
                             `;
                         }
@@ -931,6 +1006,7 @@
             table.ajax.reload();
             table2.ajax.reload();
             tableHistory.ajax.reload();
+            tabledel.ajax.reload();
             Object.keys(logTables).forEach(function (key) {
                 logTables[key].ajax.reload();
             });
@@ -943,6 +1019,7 @@
             table.ajax.reload();
             table2.ajax.reload();
             tableHistory.ajax.reload();
+            tabledel.ajax.reload();
         });
 
         $(document).on('click', '.btn-delete-permintaan', function () {
@@ -1021,6 +1098,43 @@
                     Swal.fire(
                         'Gagal',
                         xhr.responseJSON?.message || 'Repeat order gagal dibuat',
+                        'error'
+                    );
+                });
+            });
+        });
+
+        $(document).on('click', '.restore-btn', function () {
+            const id = $(this).data('id');
+            Swal.fire({
+                title: 'Proses kembali data yang dibatalkan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                $.ajax({
+                    url: '{{ url('permintaan/restore') }}/' + id,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    }
+                })
+                .done(res => {
+                    Swal.fire(res.status, res.message, res.status)
+                        .then(() => {
+                            if (res.status === 'success') {
+                                $('#modal-cuti').modal('hide');
+                                console.log('Reload table...');
+                                tabledel.ajax.reload();
+                            }
+                        });
+                })
+                .fail(xhr => {
+                    Swal.fire(
+                        'Gagal',
+                        xhr.responseJSON?.message || 'Error',
                         'error'
                     );
                 });
@@ -1362,6 +1476,57 @@
                     text: xhr.responseJSON?.message ?? 'Terjadi kesalahan'
                 });
             }
+        });
+    });
+
+    $(document).on('click', '.del-btn', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Hapus data ini?',
+            text: 'Silakan masukkan alasan penghapusan.',
+            icon: 'warning',
+            input: 'textarea',
+            inputPlaceholder: 'Tulis alasan hapus...',
+            inputAttributes: {
+                'aria-label': 'Alasan penghapusan'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+            inputValidator: (value) => {
+                if (!value || !value.trim()) {
+                    return 'Alasan penghapusan wajib diisi!';
+                }
+            }
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+            const alasan = result.value.trim();
+            $.ajax({
+                url: '{{ url('permintaan/delitem') }}/' + id,
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    alasan: alasan
+                }
+            })
+            .done(res => {
+                $('#prosesModal').modal('hide');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: res.message
+                });
+                const dt = window.initLogTable();
+                if (dt) dt.ajax.reload();
+            })
+            .fail(xhr => {
+                Swal.fire(
+                    'Gagal',
+                    xhr.responseJSON?.message || 'Error',
+                    'error'
+                );
+            });
         });
     });
 </script>

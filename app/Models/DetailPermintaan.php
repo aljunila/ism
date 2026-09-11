@@ -11,7 +11,7 @@ class DetailPermintaan extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 't_detail_permintaan';
-    protected $fillable = ['id', 'uid', 'id_permintaan', 'id_barang', 'jumlah', 'satuan', 'ket', 'status', 'id_cabang', 'kode_po', 'procurement_channel', 'flow_stage', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'id_permintaan', 'id_barang', 'jumlah', 'satuan', 'ket', 'status', 'id_cabang', 'kode_po', 'procurement_channel', 'flow_stage', 'is_delete', 'del_reason', 'created_by', 'created_date', 'changed_by', 'changed_date', 'delete_by'];
 
     public function get_permintaan()
     {

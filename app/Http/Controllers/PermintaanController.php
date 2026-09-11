@@ -390,6 +390,7 @@ class PermintaanController extends Controller
         $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $tanggal = $request->input('tanggal');
         $query = Permintaan::where('is_delete', 0)
+                ->where('id_cabang', null)
                 ->when($id_kapal, function($query, $id_kapal) {
                     return $query->where('id_kapal', $id_kapal);
                 })
@@ -1032,6 +1033,7 @@ class PermintaanController extends Controller
                 "), 'lg.id_detail_permintaan', '=', 'a.id')
                 ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'c.nama as status_nama', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung', 'lg.keterangan as log_keterangan', 'd.nama as as barang')
                 ->where('a.is_delete', 0)
+                ->where('b.id_cabang', null)
                 ->when($id_kapal, function($query, $id_kapal) {
                     return $query->where('b.id_kapal', $id_kapal);
                 })
@@ -1961,5 +1963,100 @@ class PermintaanController extends Controller
         $id_kapal = $request->input('id_kapal');
         $user = User::where('id_kapal', $id_kapal)->select('id','nama')->where('is_delete', 0)->get();
          return response()->json($user);
+    }
+
+    public function delitem(Request $request,$id)
+    {
+        $alasan = $request->input('alasan');
+        DetailPermintaan::where('id', $id)->update([
+            'is_delete' => 1,
+            'del_reason' => $alasan,
+            'delete_by' => Session::get('userid'),
+            'changed_by' => Session::get('userid'),
+            'changed_date' => date('Y-m-d H:i:s')
+        ]);
+
+        LogBarang::where('id_detail_permintaan', $id)->update([
+            'is_delete' => 1,
+        ]);
+        PurchasingBarang::where('id_detail_permintaan', $id)->update([
+            'is_delete' => 1,
+            'changed_by' => Session::get('userid'),
+            'changed_date' => date('Y-m-d H:i:s')
+        ]);
+        PoBarang::where('id_detail_permintaan', $id)->update([
+            'is_delete' => 1,
+            'changed_by' => Session::get('userid'),
+            'changed_date' => date('Y-m-d H:i:s')
+        ]);
+        return response()->json(['status' => 'success', 'message' => 'Permintaan berhasil dibatalkan'],200);
+    }
+
+     public function datadel(Request $request)
+    {
+        $status = $request->input('status');
+        $roleJenis = Session::get('previllage');
+        $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
+        $tanggal = $request->input('tanggal');
+
+        $query = DB::table('t_detail_permintaan as a')
+                ->leftjoin('t_permintaan_barang as b', 'b.id', '=', 'a.id_permintaan')
+                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal')
+                ->where('a.is_delete', 1)
+                ->where('a.flow_stage', '!=', 'logistik')
+                ->where('b.id_cabang', null)
+                ->when($id_kapal, function($query, $id_kapal) {
+                    return $query->where('b.id_kapal', $id_kapal);
+                })
+                ->when($tanggal, function($query, $tanggal) {
+                    return $query->where('b.tanggal', $tanggal);
+                });
+                if ((int) $roleJenis === 6) {
+                    $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
+                }
+                $query->orderBy('b.id', 'DESC');
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->filterColumn('barang', function ($query, $keyword) {
+                $query->where('d.nama', 'LIKE', '%' . $keyword . '%');
+            })
+            ->addColumn('kapal', function ($row) {
+                $kapal = Kapal::find($row->id_kapal);
+                return $kapal ? $kapal->nama : '-';
+            })
+            ->addColumn('barang', function ($row) {
+                $barang = Barang::find($row->id_barang);
+                return $barang ? $barang->nama : '-';
+            })
+             ->addColumn('user', function ($row) {
+                $user = User::find($row->delete_by);
+                return $user ? $user->nama : '-';
+            })
+            ->make(true);
+    }
+
+     public function restore(Request $request,$id)
+    {
+        DetailPermintaan::where('id', $id)->update([
+            'is_delete' => 0,
+            'delete_by' => Session::get('userid'),
+            'changed_by' => Session::get('userid'),
+            'changed_date' => date('Y-m-d H:i:s')
+        ]);
+
+        LogBarang::where('id_detail_permintaan', $id)->update([
+            'is_delete' => 0,
+        ]);
+        PurchasingBarang::where('id_detail_permintaan', $id)->update([
+            'is_delete' => 0,
+            'changed_by' => Session::get('userid'),
+            'changed_date' => date('Y-m-d H:i:s')
+        ]);
+        PoBarang::where('id_detail_permintaan', $id)->update([
+            'is_delete' => 0,
+            'changed_by' => Session::get('userid'),
+            'changed_date' => date('Y-m-d H:i:s')
+        ]);
+        return response()->json(['status' => 'success', 'message' => 'Permintaan berhasil dikembalikan'],200);
     }
 }

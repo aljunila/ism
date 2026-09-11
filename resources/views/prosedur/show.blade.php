@@ -71,7 +71,7 @@
                     } else if(row.file) {
                         let link = "{{ asset('file_prosedur') }}";
                         return `
-                        <a href="/view-file/${row.uid}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
+                        <a href="/prosedur/view-file/${row.uid}" target="_blank" type="button" class="btn btn-icon btn-xs btn-flat-success" title="Buka File">
                                 <i data-feather='file'></i>
                             </a>
                         `;

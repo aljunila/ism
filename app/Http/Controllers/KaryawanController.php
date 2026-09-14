@@ -23,6 +23,7 @@ use App\Models\KodeForm;
 use App\Models\FormISM;
 use App\Models\Cabang;
 use App\Models\Divisi;
+use App\Models\Pendidikan;
 use Alert;
 use Session;
 Use Carbon\Carbon;
@@ -126,6 +127,7 @@ class KaryawanController extends Controller
         $data['roles'] = Role::orderBy('nama')->get();
         $data['ptkp'] = StatusPTKP::get();
         $data['cabang'] = Cabang::where('is_delete', 0)->get();
+        $data['pend'] = Pendidikan::where('is_delete', 0)->get();
         return view('karyawan.add', $data);
     }
   
@@ -133,7 +135,7 @@ class KaryawanController extends Controller
     {
         $tglmulai = Carbon::parse($request->input('tgl_mulai'))->format('dmY');
         $get = Karyawan::where('status', 'A')->where('id_perusahaan', $request->input('id_perusahaan'))  
-                ->orderBy('tgl_mulai', 'DESC')->limit(1)->first();
+                ->orderBy('id', 'DESC')->limit(1)->first();
         $getnip = explode('-',$get->nip);
         $kode = $getnip[0];
         $num = str_pad($getnip[2]+1, 5, '0', STR_PAD_LEFT);
@@ -234,6 +236,7 @@ class KaryawanController extends Controller
         }
         $data['roles'] = Role::orderBy('nama')->get();
         $data['ptkp'] = StatusPTKP::get();
+        $data['pend'] = Pendidikan::where('is_delete', 0)->get();
         return view('karyawan.edit',$data);
     }
 

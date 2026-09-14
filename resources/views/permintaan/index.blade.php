@@ -1187,7 +1187,26 @@
             },
             columns: [
                 { data: null, orderable: false, render: (d, t, r, m) => m.row + 1 },
-                { data: 'barang' },
+                {
+                    data: null,
+                    render: function (d, t, row) {
+                        let barang = escapeHtml(row.barang || '-');
+
+                        if (row.file) {
+                            barang += `
+                                <br>
+                                <a href="/file_permintaan_log/${encodeURIComponent(row.file)}"
+                                target="_blank">
+                                    <img src="/file_permintaan_log/${encodeURIComponent(row.file)}"
+                                        style="width:50px;height:50px;object-fit:cover;border-radius:4px;"
+                                        alt="Foto barang">
+                                </a>
+                            `;
+                        }
+
+                        return barang;
+                    }
+                },
                 {
                     data: null,
                     render: (d, t, row) => `${escapeHtml(row.jumlah || '-')} ${escapeHtml(row.satuan || '')}`

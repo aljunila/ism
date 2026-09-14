@@ -608,17 +608,20 @@ class PermintaanController extends Controller
         $jumlah = (array) $request->input('jumlah', []);
         $kets = (array) $request->input('ket', []);
         $satuan = (array) $request->input('satuan', []);
+        $fotos = $request->file('foto', []);
         $validItems = [];
         foreach ($barangs as $item => $value) {
             $jum = $jumlah[$item] ?? null;
             $itemKet = $kets[$item] ?? null;
             $sat = $satuan[$item] ?? null;
+            $foto = $fotos[$item] ?? null;
             if ($value && $jum !== null && $jum !== '') {
                 $validItems[] = [
                     'barang' => $value,
                     'jumlah' => $jum,
                     'satuan' => $sat,
                     'ket' => $itemKet,
+                    'foto' => $foto,
                 ];
             }
         }
@@ -702,6 +705,17 @@ class PermintaanController extends Controller
 
             foreach ($validItems as $payload) {
                 $statusId = $this->statusPermintaanId();
+
+                $fotoName = null;
+                if ($payload['foto'] && $payload['foto']->isValid()) {
+                    $file = $payload['foto'];
+                    $fotoName = 'barang-' . Str::uuid() . '.' .
+                                $file->getClientOriginalExtension();
+                    $file->move(
+                        public_path('file_permintaan_log'),
+                        $fotoName
+                    );
+                }
                 $savedetail = DetailPermintaan::create([
                     'uid' => Str::uuid()->toString(),
                     'id_permintaan' => $save->id,
@@ -709,6 +723,7 @@ class PermintaanController extends Controller
                     'jumlah' => $payload['jumlah'],
                     'ket' => $payload['ket'],
                     'satuan' => $payload['satuan'],
+                    'file' => $fotoName,
                     'status' => $statusId,
                     'id_cabang' => $id_cabang,
                     'flow_stage' => 'logistik',

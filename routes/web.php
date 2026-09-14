@@ -35,6 +35,7 @@ use App\Http\Controllers\Data_master\KelBarangController;
 use App\Http\Controllers\Data_master\BarangController;
 use App\Http\Controllers\Data_master\DivisiController;
 use App\Http\Controllers\Data_master\VendorController;
+use App\Http\Controllers\Data_master\PendidikanController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
@@ -271,6 +272,12 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('divisi', [DivisiController::class, 'store'])->name('divisi.store');
         Route::put('divisi/{id}', [DivisiController::class, 'update'])->name('divisi.update');
         Route::delete('divisi/{id}', [DivisiController::class, 'destroy'])->name('divisi.destroy');
+
+        Route::get('pendidikan', [PendidikanController::class, 'index']);
+        Route::get('pendidikan/data', [PendidikanController::class, 'data'])->name('pendidikan.data');
+        Route::post('pendidikan', [PendidikanController::class, 'store'])->name('pendidikan.store');
+        Route::put('pendidikan/{id}', [PendidikanController::class, 'update'])->name('pendidikan.update');
+        Route::delete('pendidikan/{id}', [PendidikanController::class, 'destroy'])->name('pendidikan.destroy');
 
         Route::get('vendor', [VendorController::class, 'index']);
         Route::get('vendor/data', [VendorController::class, 'data'])->name('vendor.data');

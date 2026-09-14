@@ -55,20 +55,6 @@
         });
     }
 
-    const resetForm = () => {
-        $('#modal-barang-label').text('Tambah Data');
-        $('#barang-nama').val('');
-        $('#barang-kode').val('');
-        $('#barang-deskripsi').val('');
-        $('#barang-id_kel_barang').val('');
-        $('#btn-save-barang').data('mode', 'create').data('id', '');
-    };
-
-    $('#btn-add-barang').on('click', function () {     
-        resetForm();
-        $('#modal-barang').modal('show');
-    });
-
     $('#btn-save-barang').on('click', function () {
         const mode = $(this).data('mode') || 'create';
         const id = $(this).data('id');
@@ -163,7 +149,7 @@
                 });
                 let field = `
                 <div class="mb-1 row field-item">
-                    <div class="col-sm-3"></div>
+                    <div class="col-sm-1"></div>
 
                     <div class="col-sm-3">
                         <select name="item[]" class="form-control barang">
@@ -171,16 +157,20 @@
                         </select>
                     </div>
 
-                    <div class="col-sm-2">
-                        <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]">
+                    <div class="col-sm-1">
+                        <input type="number" class="form-control" placeholder="Jumlah" name="jumlah[]" min="1">
                     </div>
 
                     <div class="col-sm-1">
-                        <input type="text" class="form-control paket" name="satuan[]" placeholder="Satuan">
+                        <input type="text" class="form-control satuan" name="satuan[]" placeholder="Satuan">
                     </div>
 
                     <div class="col-sm-2">
                         <input type="text" class="form-control" name="ket[]" placeholder="Keterangan">
+                    </div>
+
+                    <div class="col-sm-3">
+                        <input type="file" name="foto[]" class="form-control foto-barang" accept="image/jpeg,image/png">
                     </div>
 
                     <div class="col-sm-1">
@@ -204,12 +194,12 @@
     });
 
     $(document).on('change', '.barang', function () {
-        let kode = $(this).find(':selected').data('des');
+        let deskripsi = $(this).find(':selected').data('des');
 
         $(this)
             .closest('.field-item')
-            .find('input[name="paket[]"]')
-            .val(kode || '');
+            .find('.satuan')
+            .val(deskripsi || '');
     });
 
     function toggleDetailKeterangan(input) {
@@ -258,10 +248,6 @@
         }
 
         let formData = new FormData(this);
-        let file = $('#file')[0].files[0];
-            if (file) {
-                formData.append('file', file);
-            }
         let url = form.data('update-url')
             ? form.data('update-url')   // EDIT
             : form.data('store-url'); //ADD
@@ -312,6 +298,8 @@
                 });
 
                 currentTomSelect.setValue(res.id);
+                namaBarangBaru = '';
+                currentTomSelect = null;
 
                 $('#modalBarang').modal('hide');
 
@@ -353,7 +341,6 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Form Permintaan Barang</h4>
-                    <!-- <button class="btn btn-primary btn-sm" id="btn-add-barang">Tambah Data</button> -->
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -397,6 +384,7 @@
                                 </div>
                                 <div class="col-sm-3">
                                     <select name="bagian" id="bagian" class="form-control" {{ isset($data) ? 'disabled' : '' }}>
+                                        <option value="">Pilih</option>
                                         <option value="1" @selected (isset($data) && $data->bagian==1)>DECK</option>
                                         <option value="2" @selected (isset($data) && $data->bagian==2)>MESIN</option>
                                         <option value="3" @selected (isset($data) && $data->bagian==3)>KELISTRIKAN</option>
@@ -404,14 +392,14 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-1 row">
+                            <!-- <div class="mb-1 row">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Upload File</label>
                                 </div>
                                 <div class="col-sm-3">
                                     <input type="file" class="form-control" name="file" id="file">
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="mb-1 row" id="form-wrapper">
                                 <div class="col-sm-3">
                                     <label class="col-form-label" for="first-name">Daftar Barang Permintaan</label>

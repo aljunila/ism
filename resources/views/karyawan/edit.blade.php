@@ -190,13 +190,9 @@
                                 <div class="col-sm-9">
                                     <select name="pend" id="pend"  class="form-control">
                                         <option value="">Pilih</option>
-                                        <option value="SMA" @selected ($show->pend=='SMA')>SMA/Sederajat</option>
-                                        <option value="D1" @selected ($show->pend=='D1')>D1</option>
-                                        <option value="D2" @selected ($show->pend=='D2')>D2</option>
-                                        <option value="D3" @selected ($show->pend=='D3')>D3</option>
-                                        <option value="S1" @selected ($show->pend=='S1')>S1</option>
-                                        <option value="S2" @selected ($show->pend=='S2')>S2</option>
-                                        <option value="S3" @selected ($show->pend=='S3')>S3</option>
+                                        @foreach($pend as $pd)
+                                            <option value="{{$pd->nama}}" @selected ($show->pend==$pd->nama)>{{$pd->nama}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

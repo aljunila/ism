@@ -84,7 +84,7 @@ class ProsedurController extends Controller
             $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
         
             // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = 'file_prosedur';
+            $tujuan_upload =  public_path('file_prosedur');
             $file->move($tujuan_upload,$nama_file);
             $save = Prosedur::find($save->id)->update(['file' => $nama_file]); 
         }
@@ -118,7 +118,7 @@ class ProsedurController extends Controller
             $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
         
             // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = 'file_prosedur';
+            $tujuan_upload =  public_path('file_prosedur');
             $file->move($tujuan_upload,$nama_file);
             $save = Prosedur::find($id)->update(['file' => $nama_file]); 
         } 

@@ -1815,6 +1815,7 @@ class PermintaanController extends Controller
     {
         $roleJenis = Session::get('previllage');
         $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
+        $bagian = $request->input('bagian');
 
         $data = DB::table('t_detail_permintaan as a')
         ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
@@ -1824,6 +1825,7 @@ class PermintaanController extends Controller
             $join->on('c.id_barang', '=', 'a.id_barang')
                 ->on('c.id_cabang', '=', 'e.id_cabang');
         })
+        ->leftJoin('m_kel_barang as f', 'f.id', '=', 'b.id_kel_barang')
         ->select(
             'a.id',
             'b.id as id_barang',
@@ -1837,6 +1839,9 @@ class PermintaanController extends Controller
         ->where('d.id_kapal', $kapal)
         ->where('a.is_delete', 0)
         ->where('a.flow_stage', 'workshop')
+        ->when($bagian, function($query, $bagian) {
+            return $query->where('f.kategori', $bagian);
+        })
         ->get();
         return DataTables::of($data)->make(true);
     }

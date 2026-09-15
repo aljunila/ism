@@ -78,7 +78,7 @@ class PenurunanController extends Controller
 
     private function turunReceiverQuery()
     {
-        $query = User::query()->select('user.id', 'user.nama', 'user.username', 'user.id_perusahaan', 'user.id_kapal');
+        $query = User::query()->select('user.id', 'user.nama', 'user.username', 'user.id_perusahaan');
 
         if (Schema::hasColumn('user', 'is_delete')) {
             $query->where('user.is_delete', 0);
@@ -93,8 +93,8 @@ class PenurunanController extends Controller
         $roleJenis = $this->currentRoleJenis();
         if ($roleJenis === 2) {
             $query->where('user.id_perusahaan', Session::get('id_perusahaan'));
-        } elseif ($roleJenis === 3) {
-            $query->where('user.id_kapal', Session::get('id_kapal'));
+        } elseif ($roleJenis === 6) {
+            $query->where('user.id_cabang', Session::get('id_cabang'));
         } elseif ($roleJenis === 4) {
             $query->where('user.id', Session::get('userid'));
         }
@@ -121,6 +121,7 @@ class PenurunanController extends Controller
         $receiverId = (int) $request->input('id_penerima');
         $receiver = $this->turunReceiverQuery()
             ->where('user.id', $receiverId)
+            ->where ('user.id_kapal', null)
             ->first();
 
         if (!$receiver) {

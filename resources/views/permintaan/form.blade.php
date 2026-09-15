@@ -424,7 +424,7 @@
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
                                                 <td>{{$d->get_barang()->nama}}</td>
-                                                <td>{{$d->get_barang()->deskripsi}}</td>
+                                                <td>{{$d->satuan}}</td>
                                                 <td class="jumlah-cell">
                                                     <input
                                                         type="number"

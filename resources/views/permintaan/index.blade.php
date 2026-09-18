@@ -942,7 +942,7 @@
                             return `${row.jumlah} ${satuan}`;
                         }
                     },    
-                    { data: 'tanggal', name: 'tanggal' },
+                    { data: 'tanggal', name: 'b.tanggal' },
                     {
                         data: null,
                         name: null,

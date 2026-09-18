@@ -308,6 +308,8 @@
     });
 
     $(document).on('change', '#bagian', function() {
+        $('#tambah').prop('disabled', $(this).val() === '');
+        
         var idbagian = $(this).val();
         var id_kapal = $('#id_kapal').val();
         if (idbagian) {
@@ -454,7 +456,7 @@
                                         </tbody>
                                     </table><br>
                                     @endif
-                                    <button type="button" class="btn btn-success btn-sm" id="tambah">Tambah</button>
+                                    <button type="button" class="btn btn-success btn-sm" id="tambah" disabled>Tambah</button>
                                 </div>
                             </div>
                             <div id="field-container"></div>
@@ -481,9 +483,6 @@
                 <p class="mb-75">Barang akan ditambahkan ke kelompok:</p>
                 <select id="barang-kelompok-select" class="form-control">
                     <option value="">-- Pilih Kelompok --</option>
-                    @foreach($kelompok as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama }}</option>
-                    @endforeach
                 </select>
                 <div class="mb-1">
                     <label class="form-label">Part Number</label>

@@ -1046,9 +1046,9 @@ class PermintaanController extends Controller
                         ) lm ON lm.max_id = l.id
                     ) lg
                 "), 'lg.id_detail_permintaan', '=', 'a.id')
-                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'c.nama as status_nama', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung', 'lg.keterangan as log_keterangan', 'd.nama as as barang')
+                ->select('a.*', 'b.tanggal', 'b.nomor', 'b.id_kapal', 'c.nama as status_nama', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung', 'lg.keterangan as log_keterangan', 'd.nama as barang')
                 ->where('a.is_delete', 0)
-                ->where('b.id_cabang', null)
+                ->whereNull('b.id_cabang')
                 ->when($id_kapal, function($query, $id_kapal) {
                     return $query->where('b.id_kapal', $id_kapal);
                 })
@@ -1083,10 +1083,6 @@ class PermintaanController extends Controller
             ->addColumn('kapal', function ($row) {
                 $kapal = Kapal::find($row->id_kapal);
                 return $kapal ? $kapal->nama : '-';
-            })
-            ->addColumn('barang', function ($row) {
-                $barang = Barang::find($row->id_barang);
-                return $barang ? $barang->nama : '-';
             })
             ->addColumn('cabang', function ($row) {
                 $cabang = Cabang::find($row->id_cabang);

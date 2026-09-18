@@ -72,7 +72,8 @@
         initSearchSelect('.js-search-select');
         resetOtpState();
 
-        table = $('#table').DataTable({  
+        table = $('#table').DataTable({ 
+            paging: false, 
             processing: true,
             searchable: true,
             serverSide: true,

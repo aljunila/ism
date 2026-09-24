@@ -36,6 +36,9 @@ use App\Http\Controllers\Data_master\BarangController;
 use App\Http\Controllers\Data_master\DivisiController;
 use App\Http\Controllers\Data_master\VendorController;
 use App\Http\Controllers\Data_master\PendidikanController;
+use App\Http\Controllers\Data_master\JobDockController;
+use App\Http\Controllers\Data_master\SubJobController;
+use App\Http\Controllers\Data_teknik\DockingController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
@@ -285,6 +288,26 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('vendor/quick-store', [VendorController::class, 'quickStore'])->name('vendor.quick-store');
         Route::put('vendor/{id}', [VendorController::class, 'update'])->name('vendor.update');
         Route::delete('vendor/{id}', [VendorController::class, 'destroy'])->name('vendor.destroy');
+
+        Route::get('jobdock', [JobDockController::class, 'index']);
+        Route::get('jobdock/data', [JobDockController::class, 'data'])->name('jobdock.data');
+        Route::post('jobdock', [JobDockController::class, 'store'])->name('jobdock.store');
+        Route::put('jobdock/{id}', [JobDockController::class, 'update'])->name('jobdock.update');
+        Route::delete('jobdock/{id}', [JobDockController::class, 'destroy'])->name('jobdock.destroy');
+
+        Route::get('subjob', [SubJobController::class, 'index']);
+        Route::get('subjob/data', [SubJobController::class, 'data'])->name('subjob.data');
+        Route::post('subjob', [SubJobController::class, 'store'])->name('subjob.store');
+        Route::put('subjob/{id}', [SubJobController::class, 'update'])->name('subjob.update');
+        Route::delete('subjob/{id}', [SubJobController::class, 'destroy'])->name('subjob.destroy');
+    });
+
+    Route::prefix('data_teknik')->group(function() {
+        Route::get('docking', [DockingController::class, 'index']);
+        Route::post('docking/data', [DockingController::class, 'data'])->name('docking.data');
+        Route::post('docking', [DockingController::class, 'store'])->name('docking.store');
+        Route::put('docking/{id}', [DockingController::class, 'update'])->name('docking.update');
+        Route::delete('docking/{id}', [DockingController::class, 'destroy'])->name('keldocking.destroy');
     });
     
     Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');
@@ -564,6 +587,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
     Route::prefix('gudang')->group(function () {
         Route::get('/', [GudangController::class, 'show'])->name('gudang');
         Route::post('data', [GudangController::class, 'getData'])->name('gudang.data');
+        Route::post('store', [GudangController::class, 'store'])->name('gudang.store');
         Route::put('{id}', [GudangController::class, 'update'])->name('gudang.update');
         Route::get('{id}/pemakaian', [GudangController::class, 'getPemakaian'])->name('gudang.pemakaian.index');
         Route::post('{id}/pemakaian', [GudangController::class, 'storePemakaian'])->name('gudang.pemakaian.store');

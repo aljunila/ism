@@ -10,7 +10,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title">Gudang</h4>
-        <!-- <button class="btn btn-primary btn-sm" id="btn-add-gudang">Tambah Data</button> -->
+        <button class="btn btn-primary btn-sm" id="btn-add-gudang">Tambah Data</button>
     </div>
     <div class="card-body">
         <div class="card-header border-bottom">
@@ -81,7 +81,12 @@
                             <label class="form-label">Barang</label>
                         </div>
                         <div class="col-9">
-                            <input type="text" id="gudang-barang" disabled class="form-control">
+                            <select id="gudang-barang" class="form-control">
+                                <option value="">-Pilih-</option>
+                                @foreach($barang as $b)
+                                    <option value="{{$b->id}}">{{$b->nama}} ({{$b->kode}})</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -295,10 +300,50 @@
             ]
         });
 
+        new TomSelect('#gudang-barang', {
+            placeholder: 'Barang...',
+            allowEmptyOption: true,
+            maxItems: 1,
+            searchField: ['text'],   // bisa diketik
+            create: false            // tidak boleh input baru
+        });
+
+        const resetForm = () => {
+            $('#modal-gudang-label').text('Tambah Data');
+            $('#gudang-kode').val('');
+            $('#gudang-jumlah').val('');
+            $('#gudang-baik').val('');
+            $('#gudang-habis').val('');
+            $('#gudang-keterangan').val('');
+            $('#btn-save-gudang').data('mode', 'create').data('id', '');
+        };
+
+        $('#btn-add-gudang').on('click', function () {    
+            const barang = document.querySelector('#gudang-barang');
+            if (barang.tomselect) {
+                barang.tomselect.clear();
+                barang.tomselect.enable();
+            } else {
+                $('#gudang-barang').val('').prop('disabled', false);
+            } 
+            resetForm();
+            $('#modal-gudang').modal('show');
+        });
+
         $(document).on('click', '.btn-edit-gudang', function () {
             const btn = $(this);
+            const idBarang = String(btn.attr('data-barang') ?? '');
+
+            const select = document.querySelector('#gudang-barang');
+
+            if (select.tomselect) {
+                select.tomselect.setValue(idBarang, true);
+                select.tomselect.disable();
+            } else {
+                $('#gudang-barang').val(idBarang).trigger('change').prop('disabled', true);
+            }
             $('#modal-gudang-label').text('Edit Data');
-            $('#gudang-barang').val(btn.data('barang'));
+            // $('#gudang-barang').val(btn.data('barang')).trigger('change');
             $('#gudang-kode').val(btn.data('kode'));
             $('#gudang-jumlah').val(btn.data('jumlah'));
             $('#gudang-baik').val(btn.data('baik'));
@@ -312,14 +357,16 @@
             const mode = $(this).data('mode') || 'create';
             const id = $(this).data('id');
             const payload = {
+                barang: $('#gudang-barang').val(),
                 jumlah: $('#gudang-jumlah').val(),
                 baik: $('#gudang-baik').val(),
                 habis: $('#gudang-habis').val(),
                 keterangan: $('#gudang-keterangan').val(),
             };
+            
             const ajaxOpts = {
-                url: '{{ url('gudang') }}/' + id,
-                type: 'PUT',
+                url: mode === 'edit' ? '{{ url('gudang') }}/' + id : '{{ route('gudang.store') }}',
+                type: mode === 'edit' ? 'PUT' : 'POST',
                 data: payload
             };
             $.ajax(ajaxOpts)

@@ -29,6 +29,7 @@ class GudangController extends Controller
         $data['kapal'] = Kapal::where('status', 'A')->get();
         $data['cabang'] = Cabang::where('is_delete', 0)->get();
         $data['kelompok'] = KelBarang::where('is_delete', 0)->get();
+        $data['barang'] = Barang::where('is_delete', 0)->get();
         return view('gudang.index', $data);
     }
 
@@ -42,7 +43,7 @@ class GudangController extends Controller
         $data = DB::table('t_gudang as a')
                 ->leftJoin('m_barang as b', 'a.id_barang', '=', 'b.id')
                 ->leftJoin('m_kel_barang as c', 'b.id_kel_barang', '=', 'c.id')
-                ->select('a.id', 'b.nama as barang', 'b.kode', 'c.nama as kelompok','c.kode as part', 'a.jumlah', 'a.baik', 'a.habis', 'a.keterangan')
+                ->select('a.id', 'a.id_barang', 'b.nama as barang', 'b.kode', 'c.nama as kelompok','c.kode as part', 'a.jumlah', 'a.baik', 'a.habis', 'a.keterangan')
                 ->where('a.is_delete',0)
                 ->when($kel, function($query, $kel) {
                     return $query->where('b.id_kel_barang', $kel);
@@ -68,6 +69,31 @@ class GudangController extends Controller
         })
         ->rawColumns(['aksi'])
         ->make(true);
+    }
+
+    public function store(Request $request)
+    {
+        $roleJenis = Session::get('previllage');
+        if($roleJenis==3) {
+            $id_cabang = null;
+            $id_kapal = Session::get('id_kapal');
+        } else {
+            $id_cabang = Session::get('id_cabang');
+            $id_kapal = null;
+        }
+        $validated = ([
+            'uid' => Str::uuid()->toString(),
+            'id_kapal' => $id_kapal,
+            'id_cabang' => $id_cabang,
+            'id_barang' => $request->post('barang'),
+            'jumlah' => $request->post('jumlah'),
+            'baik' => $request->post('baik'),
+            'habis' => $request->post('habis'),
+            'keterangan' => $request->post('keterangan'),
+            'changed_date' => date('Y-m-d H:i:s'),
+        ]);
+        $save = Gudang::create($validated);
+        return response()->json(['message' => 'Data diperbarui']);
     }
 
     public function update(Request $request, $id)

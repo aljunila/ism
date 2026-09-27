@@ -65,6 +65,8 @@ use App\Http\Controllers\Laporan\LapPermintaanController;
 use App\Http\Controllers\Laporan\LapGudangController;
 use App\Http\Controllers\Laporan\LapCrewController;
 use App\Http\Controllers\Laporan\LapKapalController;
+use App\Http\Controllers\Laporan\LapDockingController;
+use App\Http\Controllers\Laporan\LapProduksiController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -300,6 +302,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('subjob', [SubJobController::class, 'store'])->name('subjob.store');
         Route::put('subjob/{id}', [SubJobController::class, 'update'])->name('subjob.update');
         Route::delete('subjob/{id}', [SubJobController::class, 'destroy'])->name('subjob.destroy');
+        Route::get('subjob/dataByJob/{id}', [SubJobController::class, 'dataByJob'])->name('subjob.dataByJob');
     });
 
     Route::prefix('data_teknik')->group(function() {
@@ -307,7 +310,13 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('docking/data', [DockingController::class, 'data'])->name('docking.data');
         Route::post('docking', [DockingController::class, 'store'])->name('docking.store');
         Route::put('docking/{id}', [DockingController::class, 'update'])->name('docking.update');
-        Route::delete('docking/{id}', [DockingController::class, 'destroy'])->name('keldocking.destroy');
+        Route::put('docking/file/{id}', [DockingController::class, 'updatefile'])->name('docking.updatefile');
+        Route::delete('docking/{id}', [DockingController::class, 'destroy'])->name('docking.destroy');
+        Route::get('docking/biaya/{id}', [DockingController::class, 'biaya'])->name('docking.biaya');
+        Route::post('docking/databiaya', [DockingController::class, 'databiaya'])->name('docking.databiaya');
+        Route::post('docking/biaya', [DockingController::class, 'storebiaya'])->name('docking.storebiaya');
+        Route::put('docking/biaya/{id}', [DockingController::class, 'updatebiaya'])->name('docking.updatebiaya');
+        Route::delete('docking/biaya/{id}', [DockingController::class, 'destroybiaya'])->name('docking.destroybiaya');
     });
     
     Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');
@@ -582,6 +591,18 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('kapal/data', [LapKapalController::class, 'data'])->name('lapkapal.data');
         Route::get('/kapal/{id}/merge-pdf', [LapKapalController::class, 'mergePdf']);
         Route::get('/kapal/{id}/download-zip', [LapKapalController::class, 'downloadZip']);
+
+        Route::get('docking', [LapDockingController::class, 'laporan']);
+        Route::post('docking/data', [LapDockingController::class, 'datalaporan'])->name('lapdocking.data');
+        Route::post('docking', [LapDockingController::class, 'store'])->name('lapdocking.store');
+        Route::get('docking/getlog/{id}', [LapDockingController::class, 'getlog'])->name('lapdocking.getlog');
+        Route::post('docking/export', [LapDockingController::class, 'export'])->name('lapdocking.export');
+
+        Route::get('produksi', [LapProduksiController::class, 'laporan']);
+        Route::post('produksi/data', [LapProduksiController::class, 'datalaporan'])->name('lapproduksi.data');
+        Route::post('produksi', [LapProduksiController::class, 'store'])->name('lapproduksi.store');
+        Route::get('produksi/getlog/{id}', [LapProduksiController::class, 'getlog'])->name('lapproduksi.getlog');
+        Route::post('produksi/export', [LapProduksiController::class, 'export'])->name('lapproduksi.export');
     });
 
     Route::prefix('gudang')->group(function () {

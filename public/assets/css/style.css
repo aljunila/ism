@@ -83,3 +83,7 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
     background-color: #0d6efd !important;
     border-color: #0d6efd !important;
 }
+
+* {
+    font-family: 'Poppins', sans-serif !important;
+}

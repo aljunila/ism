@@ -10,7 +10,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header border-bottom">
-                <div class="col-sm-12"><h4 class="card-title">Daftar Trip Kapal</h4></div>
+                <div class="col-sm-12"><h4 class="card-title">Data Produksi Kapal</h4></div>
                 <div class="col-sm-3">
                     <select name="id_kapal" id="id_kapal" class="form-control">
                         <option value="">Pilih Kapal</option>

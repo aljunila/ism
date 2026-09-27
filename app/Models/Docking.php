@@ -11,7 +11,7 @@ class Docking extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 't_docking';
-    protected $fillable = ['id', 'uid', 'id_kapal', 'tgl_mulai', 'tgl_selesai', 'file', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'id_kapal', 'bulan', 'tahun', 'tempat', 'tgl_mulai', 'tgl_selesai', 'durasi', 'file', 'is_delete', 'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     public function get_kapal()
     {

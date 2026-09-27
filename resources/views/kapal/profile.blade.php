@@ -113,6 +113,12 @@
             });
         });
 
+        $(document).on('click', '.upload-docking', function(){
+            let id = $(this).attr('data-id');
+            $('#id_dock').val(id);
+            $('#UpDocking').modal('show');
+        });
+
         $(document).on('click', '.upload-btn', function(){
             let id = $(this).attr('data-id');
             let file = $(this).attr('data-file');
@@ -143,6 +149,39 @@
                             showConfirmButton: false
                         }).then(() => {
                             $('#FormUpload').modal('hide');
+                            window.location.reload();
+                        });
+                },
+                error: function(xhr){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal menyimpan file'
+                    });
+                }
+            });
+        });
+
+        $('#file_dock').on('submit', function(e){
+            e.preventDefault(); // cegah submit biasa
+            let id = $('#id_dock').val();
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "/data_teknik/docking/file/" + id,
+                method: "PUT",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message ?? 'File berhasil disimpan',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#UpDocking').modal('hide');
                             window.location.reload();
                         });
                 },
@@ -311,10 +350,17 @@
                                     <tr>
                                         <td>{{$d->tgl_mulai}}</td>
                                         <td>{{$d->tgl_selesai}}</td>
-                                        <td><a type="button" href="{{ asset('file_docking/'.$d->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
-                                                title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">
-                                                <i data-feather='file'></i>
-                                            </a></td>
+                                        <td>@if($d->file)
+                                                <a type="button" href="{{ asset('file_docking/'.$d->file) }}" target="_blank" class="btn btn-icon rounded-circle btn-xs btn-flat-success" 
+                                                    title="Buka File" data-id="{{$d->id}}" data-file="{{$d->nama}}">
+                                                    <i data-feather='file'></i>
+                                                </a>
+                                            @else
+                                                 <button type="button" class="btn btn-icon rounded-circle btn-xs btn-flat-warning upload-docking" data-id="{{$d->id}}">
+                                                    <i data-feather="upload"></i>
+                                                </button>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -548,6 +594,30 @@
                     <input type="hidden" name="id_file" id="id_file">
                     <input type="hidden" name="id_kapal" id="id_kapal">
                     <button type="submit" class="btn btn-primary" id="save_file">Simpan</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-start" id="UpDocking" tabindex="-1" aria-labelledby="myModalLabel33" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <form id="file_dock" enctype="multipart/form-data">
+                    @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title">Upload Document Docking</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label>Format file: PDF</label>
+                    <div class="mb-1">
+                        <input type="file" class="form-control" name="docking" id="docking"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="id_dock" id="id_dock">
+                    <button type="submit" class="btn btn-primary" id="save_docking">Simpan</button>
                 </div>
             </form>
             </div>

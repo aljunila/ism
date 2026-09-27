@@ -179,8 +179,7 @@ class DashboardController extends Controller
                 )
                 ->where('a.status', 'A')
                 ->where('a.id_perusahaan', $id_perusahaan)
-                ->orderBy('a.id')
-                ->get();
+                ->orderBy('a.id');
         }
         $permintaanQuery = DB::table('t_permintaan_barang as a')
             ->leftJoin('kapal as b', 'b.id', '=', 'a.id_kapal')
@@ -203,7 +202,7 @@ class DashboardController extends Controller
         $data['permintaan_dashboard'] = $permintaanQuery
             ->orderBy('a.tanggal', 'DESC')
             ->orderBy('a.id', 'DESC')
-            ->paginate(10, ['*'], 'permintaan_page');
+            ->paginate(12, ['*'], 'permintaan_page');
 
         if (Schema::hasTable('user')) {
             $notificationUsers = User::query()

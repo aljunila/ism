@@ -40,7 +40,7 @@ class LapProduksiExport implements FromView
                 ->when($this->id, function ($query, $id) {
                     return $query->where('a.id_kapal', $id);
                 })
-                ->orderBy('a.tanggal', 'DESC')
+                ->orderBy('a.tanggal', 'ASC')
                 ->get();
         $kend = Kendaraan::where('is_delete',0)->get();
 

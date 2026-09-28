@@ -163,6 +163,8 @@ class DashboardController extends Controller
                                 ->leftJoin('kapal as c', 'b.id_kapal', '=', 'c.id')
                                 ->leftJoin('master_file as d', 'a.id_file', '=', 'd.id')
                                 ->where('a.status', 'A')
+                                ->where('b.status', 'A')
+                                ->where('b.resign', 'N')
                                 ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('c.id_cabang', $id_cabang)
                                 ->whereNotNull('a.id_karyawan')

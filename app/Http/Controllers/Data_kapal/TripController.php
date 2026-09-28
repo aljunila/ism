@@ -55,7 +55,8 @@ class TripController extends Controller
                 })
                 ->when($tanggal, function($query, $tanggal) {
                     return $query->where('a.tanggal', $tanggal);
-                });
+                })
+                ->orderBy('a.tanggal', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()

@@ -12,12 +12,10 @@
         <th rowspan="2">Trip</th>
         <th rowspan="2">Jam</th>
         <th colspan="{{$col}}">Jumlah</th>
-        <th colspan="{{$col}}">Total</th>
+        <th rowspan="2">Total Tiket</th>
+        <th rowspan="2">Gross (Rp)</th>
     </tr>
     <tr>
-        @foreach($kend as $k)
-        <th>{{$k->kode}}</th>
-        @endforeach
         @foreach($kend as $k)
         <th>{{$k->kode}}</th>
         @endforeach
@@ -32,12 +30,16 @@
         <td>{{ $show->pelabuhan }}</td>
         <td>{{ $show->trip }}</td>
         <td>{{ $show->jam }}</td>
+        @php $jml =0; $total=0; @endphp
         @foreach($kend as $k)
+        @php 
+            $jml = $jml+$json[$k->id]['jumlah'];
+            $total= $total+$json[$k->id]['total']; 
+        @endphp
         <td>{{ $json[$k->id]['jumlah'] ?? 0 }}</td>
         @endforeach
-        @foreach($kend as $k)
-        <td style="text-align: right;">{{ number_format($json[$k->id]['total'] ?? 0, 0, ',', '.') }}</td>
-        @endforeach
+        <td>{{ $jml }}</td>
+        <td>{{ number_format($total ?? 0, 0, ',', '.') }}</td>
     </tr>
     @endforeach
 </table>

@@ -68,6 +68,12 @@
             </thead>
             <tbody></tbody>
         </table>
+        <div class="text-end mt-2">
+            <strong>
+                Grand Total:
+                <span id="grand-total">Rp 0</span>
+            </strong>
+        </div>
     </div>
 </div>
 
@@ -200,7 +206,15 @@
                     d.id_docking= "{{$show->id}}",
                     d._token= "{{ csrf_token() }}"
                 },
-                dataSrc: "data"
+                dataSrc: function(json) {
+                    $('#grand-total').html(
+                        'Rp ' + Number(json.grand_total || 0).toLocaleString('id-ID', {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2
+                        })
+                    );
+                    return json.data;
+                }
             },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },

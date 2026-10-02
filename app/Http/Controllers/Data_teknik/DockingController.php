@@ -143,12 +143,15 @@ class DockingController extends Controller
                 ->select('a.*', 'b.nama as subjob', 'c.nama as job', 'c.id as id_job')
                 ->where('id_docking', $id)->where('a.is_delete', 0);
 
+        $grandTotal = (clone $query)->sum('a.total');
+
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('aksi', function ($row) {
                 return view('data_teknik.docking.partials.actions_biaya', compact('row'))->render();
             })
             ->rawColumns(['aksi'])
+            ->with('grand_total', $grandTotal)
             ->make(true);
     }
 

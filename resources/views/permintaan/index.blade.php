@@ -248,10 +248,16 @@
                                 <div class="track-label">Keterangan</div>
                                 <div class="track-value" id="lacakKet">-</div>
                             </div>
-                            <!-- <div>
+                            <div>
                                 <div class="track-label">Status Saat Ini</div>
                                 <div class="track-value" id="lacakStatus">-</div>
-                            </div> -->
+                            </div>
+                            <div>
+                                <div class="track-label">No Pengiriman</div>
+                                <a type="button" id="btnPdfKirim" target="_blank">
+                                    <div class="track-value" id="lacakNomor"></div>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="track-right">
@@ -571,6 +577,11 @@
             $('#zahir').hide();
             $('#ket').hide();
             $('#finance_block').show();
+            if (target === '2') {
+                $('#finance_block').hide();
+            } else {
+                $('#finance_block').show();
+            }
             $('#shipping_mode_row').toggle(isDone);
             $('#shipping_point_row').toggle(isDone && shippingMode === 'transit');
 
@@ -591,6 +602,7 @@
         if (stage === 'po') {
             $('#pembelian').hide();
             $('#zahir').show();
+            $('#ket').hide();
             $('#finance_block').show();
             $('#shipping_mode_row').hide();
             $('#shipping_point_row').hide();
@@ -599,6 +611,12 @@
             hint = target === '4'
                 ? 'Log akan disimpan sebagai "PO sudah selesai, dikembalikan ke logistik".'
                 : 'Log akan disimpan sebagai "Barang sedang di PO".';
+            
+            if (target === '2') {
+                $('#finance_block').hide();
+            } else {
+                $('#finance_block').show();
+            }
         }
 
         if (hint) {
@@ -1222,8 +1240,10 @@
                             data-barang="${escapeHtml(row.barang || '-')}"
                             data-jumlah="${escapeHtml(row.jumlah || '-')}"
                             data-satuan="${escapeHtml(row.satuan || '')}"
-                            data-ket="${escapeHtml(row.keterangan || '-')}"
-                            data-status="${escapeHtml(row.status || '-')}">
+                            data-ket="${escapeHtml(row.ket || '-')}"
+                            data-status="${escapeHtml(row.flow_stage || '-')}"
+                            data-nomor="${escapeHtml(row.nomor || '-')}"
+                            data-uid="${escapeHtml(row.uid_kirim || '-')}">
                             <i data-feather="map-pin" style="width:12px;height:12px;"></i> Lacak
                         </button>`;
                     }
@@ -1241,15 +1261,20 @@
             btn.data('jumlah'),
             btn.data('satuan'),
             btn.data('ket'),
-            btn.data('status')
+            btn.data('status'),
+            btn.data('nomor'),
+            btn.data('uid')
         );
     });
 
-    function openLacak(id, barang, jumlah, satuan, ket, status) {
+    function openLacak(id, barang, jumlah, satuan, ket, status, nomor, uid) {
         $('#lacakBarang').text(barang || '-');
         $('#lacakJumlah').text((`${jumlah} ${satuan}`).trim() || '-');
         $('#lacakKet').text(ket || '-');
         $('#lacakStatus').text(status || '-');
+        $('#lacakNomor').text(nomor || '');
+        $('#lacakUid').text(uid || '-');
+        $('#btnPdfKirim').attr('href', '/permintaan/pdfkirim/' + uid);
         $('#lacakTimeline').html('<div class="timeline-empty">Memuat riwayat...</div>');
         $('#LacakModal').modal('show');
 
@@ -1439,7 +1464,6 @@
                 <option value="4">Ada (Workshop)</option>
                 <option value="0">Tidak ada</option>
                 <option value="5">Barang masuk gudang</option>
-                <option value="6">Naik kapal (Selesai)</option>
             `);
             loadStatusBarang(idkapal);
             updateProcessFormUi();
@@ -1450,6 +1474,7 @@
             <option value="1">Sedang Proses</option>
             <option value="7">Kirim ke Cabang</option>
             <option value="4">Selesai</option>
+            <option value="2">Kembali ke Logistik</option>
         `);
 
         if (stage === 'purchasing') {

@@ -5,22 +5,6 @@
 <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/pages/dashboard-ecommerce.css')}}">
 <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/charts/chart-apex.css')}}">
 <link rel="stylesheet" type="text/css" href="{{ url('/vuexy/app-assets/css/plugins/extensions/ext-component-toastr.css')}}">
-<style>
-   td.expired-danger {
-    background-color: #dc3545 !important;
-    color: #fff !important;
-}
-
-td.expired-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-}
-
-td.expired-success {
-    background-color: #198754 !important;
-    color: #fff !important;
-}
-</style>  
 @endsection
 
 @section('scriptfooter')
@@ -833,6 +817,18 @@ td.expired-success {
         .dash-hero-right { display:none; }
         .dash-expiry-count { display:none; }
     }
+
+    .expired-danger {
+        color: #dc3545 !important;
+    }
+
+    .expired-warning {
+        color: #ffc107 !important;
+    }
+
+    .expired-success {
+        color: #198754 !important;
+    }
 </style>
 
 <section id="dashboard-ecommerce">
@@ -1342,10 +1338,11 @@ td.expired-success {
                                     <td>{{ $pemilik->nama ?? '-' }}<br>{{ $kapal->nama ?? '-' }}</td>
                                     <td><a href="{{ asset('file_upload/'.$d->file) }}" target="_blank"
                                             title="Buka File">{{ $file->nama ?? ($d->nama ?? 'File') }}</a></td>
-                                    <td>{{ $expired_date }}</td> 
+                                    <td class="{{ $style }}">{{ $expired_date }}</td> 
                             @endforeach
                         </tbody>
                     </table>
+                    &nbsp;&nbsp;<span class="permintaan-meta-label">Merah <=15 hari, Kuning <=30 hari, Hijau <=45 hari</span>
                     <div id="no-result-kapal" class="text-center text-muted py-3" style="display:none;">Tidak ada data yang cocok.</div>
                 </div>
             </div>
@@ -1381,15 +1378,36 @@ td.expired-success {
                         </thead>
                         <tbody>
                             @foreach($doc_kru as $kru)
+                                @php
+                                    if ($kru->tgl_expired) {
+                                        $expired = \Carbon\Carbon::parse($kru->tgl_expired)->startOfDay();
+                                        $Sisa = now()->startOfDay()->diffInDays($expired, false);
+                                        $expired_date = $expired->format('d-m-Y');
+                                        $style = '';
+
+                                        if ($Sisa <= 15) {
+                                            $style = 'expired-danger';
+                                        } elseif ($Sisa <= 30) {
+                                            $style = 'expired-warning';
+                                        } elseif ($Sisa <= 45) {
+                                            $style = 'expired-success';
+                                        }
+                                    } else {
+                                        $expired_date = '-';
+                                        $style= '';
+                                    }
+                                    
+                                @endphp
                                 <tr>
                                     <td><b>{{ $kru->kapal ?? '-' }}</b><br>{{ $kru->karyawan ?? '-' }}</td>
                                     <td><a href="{{ asset('file_upload/'.$kru->file) }}" target="_blank"
                                             title="Buka File">{{ $kru->filename ?? 'File' }}</a></td>
-                                    <td>{{ \Carbon\Carbon::parse($kru->tgl_expired)->format('d-m-Y') }}</td>
+                                    <td class="{{$style}}">{{ $expired_date }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    &nbsp;&nbsp;<span class="permintaan-meta-label">Merah <=15 hari, Kuning <=30 hari, Hijau <=45 hari</span>
                     <div id="no-result-kru" class="text-center text-muted py-3" style="display:none;">Tidak ada data yang cocok.</div>
                 </div>
             </div>

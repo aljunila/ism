@@ -1012,7 +1012,9 @@ class PermintaanController extends Controller
         $result = DB::table('t_detail_permintaan as a')
                 ->leftjoin('m_barang as b', 'b.id', '=', 'a.id_barang')
                 ->leftjoin('m_status_barang as c', 'c.id', '=', 'a.status')
-                ->select('a.*', 'a.status as status_id', 'b.nama as barang', 'c.nama as status', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung')
+                ->leftjoin ('t_detail_kirim as d', 'a.id', '=', 'd.id_detail_permintaan')
+                ->leftjoin ('t_kirim_barang as e', 'd.id_kirim', '=', 'e.id')
+                ->select('a.*', 'a.status as status_id', 'b.nama as barang', 'c.nama as status', 'c.flag_permintaan', 'c.flag_proses', 'c.flag_berlangsung', 'e.uid as uid_kirim', 'e.nomor')
                 ->where('id_permintaan', $permintaan->id)->where('a.is_delete', 0)->get();
 
         $result = $result->map(function ($item) {
@@ -1184,16 +1186,18 @@ class PermintaanController extends Controller
                 $flowStage = 'po';
                 $procurementChannel = 'po';
                 $id_cabang = null;
-                $keterangan = 'Barang sedang di PO';
+                $keterangan = 'Barang sedang di PO'. ($kodePo ? ' (Kode PO : ' . $kodePo . ')' : '');
             } else {
                 return response()->json(['message' => 'Transisi logistik tidak valid'], 422);
             }
         } elseif ($effectiveStage === 'purchasing') {
-            if (!in_array((string) $target, ['1', '4', '7'], true)) {
+            if (!in_array((string) $target, ['2', '1', '4', '7'], true)) {
                 return response()->json(['message' => 'Transisi purchasing tidak valid'], 422);
             }
-            if ($amount <= 0 || !$currencyId || !$vendor || !$jumlah) {
-                return response()->json(['message' => 'Vendor, jumlah, nominal, dan mata uang wajib diisi untuk purchasing'], 422);
+            if($target!=2) {
+                if ($amount <= 0 || !$currencyId || !$vendor || !$jumlah) {
+                    return response()->json(['message' => 'Vendor, jumlah, nominal, dan mata uang wajib diisi untuk purchasing'], 422);
+                }
             }
             $flowStage = 'purchasing';
             $procurementChannel = 'purchasing';
@@ -1217,21 +1221,27 @@ class PermintaanController extends Controller
                     return response()->json(['message' => 'Mode kirim wajib dipilih saat purchasing selesai'], 422);
                 }
             } elseif ((string) $target === '7') {   
-                    $cek_kapal = Kapal::findorFail($id_kapal);
-                    $id_cabang  = $cek_kapal->id_cabang;            
-                    $shippingMode = null;
-                    $keterangan = 'Barang dikirim ke Cabang';
+                $cek_kapal = Kapal::findorFail($id_kapal);
+                $id_cabang  = $cek_kapal->id_cabang;            
+                $shippingMode = null;
+                $keterangan = 'Barang dikirim ke Cabang';
+            } elseif ((string) $target === '2') {      
+                $keterangan = 'Barang kembali ke logistik';
+                $flowStage = 'logistik';        
+                $shippingMode = null;
             } else {
                 $shippingMode = null;
                 $shippingPoint = null;
                 $keterangan = 'Barang sedang dibeli';
             }
         } elseif ($effectiveStage === 'po') {
-            if (!in_array((string) $target, ['1', '4', '7'], true)) {
+            if (!in_array((string) $target, ['1', '4', '7', '2'], true)) {
                 return response()->json(['message' => 'Transisi PO tidak valid'], 422);
             }
-            if ($amount <= 0 || !$currencyId || !$kodePo) {
-                return response()->json(['message' => 'Nomor PO, nominal, dan mata uang wajib diisi untuk proses PO'], 422);
+            if($target!=2) {
+                if ($amount <= 0 || !$currencyId || !$kodePo) {
+                    return response()->json(['message' => 'Nomor PO, nominal, dan mata uang wajib diisi untuk proses PO'], 422);
+                }    
             }
             $flowStage = 'po';
             $procurementChannel = 'po';
@@ -1244,6 +1254,10 @@ class PermintaanController extends Controller
                     $id_cabang  = $cek_kapal->id_cabang;            
                     $shippingMode = null;
                     $keterangan = 'Barang dikirim ke Cabang';
+            }  elseif ((string) $target === '2') {      
+                $keterangan = 'Barang kembali ke logistik';
+                $flowStage = 'logistik';        
+                $shippingMode = null;
             } else {
                 $keterangan = 'Barang sedang di PO';
             }

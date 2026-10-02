@@ -66,7 +66,7 @@ class DashboardController extends Controller
                             ->leftjoin('karyawan', 'karyawan.id', 'user.id_karyawan')
                             ->where('karyawan.status','A')->where('karyawan.resign','N')
                             ->count();
-            $data['document'] = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal)->whereNotNull('id_kapal')->get();
+            $data['document'] = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal)->whereNotNull('id_kapal')->orderBy('tgl_expired','ASC')->get();
             $data['count_doc'] = count($data['document']);
             $data['doc_kru'] =  DB::table('file_upload as a')
                                 ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
@@ -78,6 +78,7 @@ class DashboardController extends Controller
                                 ->where('b.resign', 'N')
                                 ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->whereNotNull('a.id_karyawan')
+                                ->orderBy('tgl_expired','ASC')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==2) { // admin perusahaan
@@ -90,7 +91,7 @@ class DashboardController extends Controller
                             ->count();
             $query = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal);
             $query->whereIn('id_kapal', Kapal::where('pemilik', Session::get('id_perusahaan'))->pluck('id'));
-            $data['document'] = $query->get();
+            $data['document'] = $query->orderBy('tgl_expired','ASC')->get();
             $data['count_doc'] = count($data['document']);
             $data['doc_kru'] = DB::table('file_upload as a')
                                 ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
@@ -103,6 +104,7 @@ class DashboardController extends Controller
                                 ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('b.id_perusahaan', $id_perusahaan)
                                 ->whereNotNull('a.id_karyawan')
+                                ->orderBy('tgl_expired','ASC')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==3) { // user kapal
@@ -120,6 +122,7 @@ class DashboardController extends Controller
             $data['document'] = FileUpload::where('status', 'A')
                                 ->where('tgl_expired', '<=', $tanggal)
                                 ->where('id_kapal', $id_kapal)
+                                ->orderBy('tgl_expired','ASC')
                                 ->get();
             $data['count_doc'] = count($data['document']);
             $data['doc_kru'] =  DB::table('file_upload as a')
@@ -133,6 +136,7 @@ class DashboardController extends Controller
                                 ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('b.id_kapal', $id_kapal)
                                 ->whereNotNull('a.id_karyawan')
+                                ->orderBy('tgl_expired','ASC')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } elseif($roleJenis==6) { // user kapal
@@ -155,7 +159,7 @@ class DashboardController extends Controller
                             ->count();
             $query = FileUpload::where('status', 'A')->where('tgl_expired', '<=', $tanggal);
                     $query->whereIn('id_kapal', Kapal::where('id_cabang', Session::get('id_cabang'))->pluck('id'));
-            $data['document'] = $query->get();
+            $data['document'] = $query->orderBy('tgl_expired','ASC')->get();
             $data['count_doc'] = $query->count();
             $data['doc_kru'] =  DB::table('file_upload as a')
                                 ->select('a.*', 'b.nama as karyawan', 'c.nama as kapal', 'd.nama as filename')
@@ -168,6 +172,7 @@ class DashboardController extends Controller
                                 ->whereDate('a.tgl_expired', '<=', $tanggal)
                                 ->where('c.id_cabang', $id_cabang)
                                 ->whereNotNull('a.id_karyawan')
+                                ->orderBy('tgl_expired','ASC')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
         } else {

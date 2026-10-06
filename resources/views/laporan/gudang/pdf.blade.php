@@ -78,7 +78,7 @@
                 <td>Periode : </td>
             </tr>
             <tr style="text-align: left;">
-                <td>Bagian : {{ ($show->kategori=='1') ? 'DECK' : 'MESIN' }}</td>
+                <td>Bagian : @if($k->kategori==1) DECK @elseif($k->kategori==2) MESIN @elseif($k->kategori==3) KELISTRIKAN @else ALAT KEBERSIHAN @endif</td>
                 <td></td>
             </tr>
         </table>

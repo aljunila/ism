@@ -70,7 +70,7 @@
             <tr style="text-align: left;">
                 <td colspan="2">Nama Kapal : {{$show->get_kapal()->nama}}</td>
                 <td colspan="2">Bagian : @if($show->bagian==1) DECK @elseif($show->bagian==2) MESIN @elseif($show->bagian==3) KELISTRIKAN @else ALAT KEBERSIHAN @endif</td>
-                <td>Tanggal : {{ \Carbon\Carbon::parse($show->date)->format('d-m-Y') }}</td>
+                <td>Tanggal : {{ \Carbon\Carbon::parse($show->tanggal)->format('d-m-Y') }}</td>
             </tr>
             <tr>
                 <td width="5">No</td>

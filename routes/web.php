@@ -556,6 +556,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('/berlayar/pdf/{id}', [BerlayarController::class, 'pdf'])->name('berlayar.pdf');
         Route::get('berlayar/{id}', [BerlayarController::class, 'elemen'])->name('berlayar.elemen');
         Route::post('berlayar/databyIdp', [BerlayarController::class, 'databyIdp'])->name('berlayar.databyIdp');
+        Route::get('berlayar/form', [BerlayarController::class, 'form'])->name('berlayar.form');
+        Route::get('/berlayar/form/{id}', [BerlayarController::class, 'form'])->name('berlayar.form');
 
         Route::get('latihan', [LatihanController::class, 'index']);
         Route::post('latihan/data', [LatihanController::class, 'data'])->name('latihan.data');
@@ -581,6 +583,7 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::get('gudang/{uid}', [LapGudangController::class, 'elemen'])->name('lapgudang.elemen');
         Route::get('gudang/getlog/{id}', [LapGudangController::class, 'getlog'])->name('lapgudang.getlog');
         Route::post('gudang/export', [LapGudangController::class, 'export'])->name('lapgudang.export');
+        Route::post('gudang/exportstok', [LapGudangController::class, 'exportstok'])->name('lapgudang.exportstok');
 
         Route::get('crew', [LapCrewController::class, 'index']);
         Route::post('crew/data', [LapCrewController::class, 'data'])->name('lapcrew.data');
@@ -597,6 +600,8 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('docking', [LapDockingController::class, 'store'])->name('lapdocking.store');
         Route::get('docking/getlog/{id}', [LapDockingController::class, 'getlog'])->name('lapdocking.getlog');
         Route::post('docking/export', [LapDockingController::class, 'export'])->name('lapdocking.export');
+        Route::post('docking/dockkapal', [LapDockingController::class, 'dockkapal'])->name('lapdocking.dockkapal');
+        Route::post('docking/export2', [LapDockingController::class, 'export2'])->name('lapdocking.export2');
 
         Route::get('produksi', [LapProduksiController::class, 'laporan']);
         Route::post('produksi/data', [LapProduksiController::class, 'datalaporan'])->name('lapproduksi.data');

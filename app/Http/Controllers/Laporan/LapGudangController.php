@@ -20,6 +20,7 @@ use DB;
 use App\Support\RoleContext;
 use Carbon\Carbon;
 use App\Exports\LapGudangExport;
+use App\Exports\LapGudangStokExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LapGudangController extends Controller
@@ -113,5 +114,15 @@ class LapGudangController extends Controller
         $bagian = $request->input('bagian');
 
         return Excel::download(new LapGudangExport($id, $start, $end, $bagian), 'lap_gudang.xlsx');
+    }
+
+     public function exportstok(Request $request)
+    {
+        $id = $request->input('id');
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
+        $bagian = $request->input('bagian');
+
+        return Excel::download(new LapGudangStokExport($id, $start, $end, $bagian), 'lap_stok_gudang.xlsx');
     }
 }

@@ -30,7 +30,8 @@ class DockingController extends Controller
         $query = Docking::where('is_delete', 0)
                 ->when($id_kapal, function($query, $id_kapal) {
                     return $query->where('id_kapal', $id_kapal);
-                });
+                })
+                ->orderBy('tgl_mulai', 'DESC');
 
         return DataTables::of($query)
             ->addIndexColumn()

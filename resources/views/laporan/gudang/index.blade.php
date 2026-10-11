@@ -59,9 +59,16 @@
                 data: null,
                 render: function(data, type, row){
                     return `<a href="/laporan/gudang/pdf/${row.uid}" target="_blank" class="btn btn-sm btn-outline-success">
-                            Cetak PDF</a>
-                            <a target="_blank" class="btn btn-sm btn-outline-primary" data-id="${row.id}" id="btn-pdf">
-                            Download Excel</a>`;
+                            Cetak PDF</a>`;
+                }
+            },
+             { 
+                data: null,
+                render: function(data, type, row){
+                    return `<a target="_blank" class="btn btn-sm btn-outline-primary" data-id="${row.id}" id="btn-stok">
+                            Stok</a>
+                            <a target="_blank" class="btn btn-sm btn-outline-warning" data-id="${row.id}" id="btn-riwayat">
+                            Riwayat</a>`;
                 }
             },
         ],
@@ -92,7 +99,7 @@
         }
     });
 
-    $(document).on('click', '#btn-pdf', function() {
+    $(document).on('click', '#btn-riwayat', function() {
         let id = $(this).data('id');
         console.log(id);
         
@@ -111,6 +118,30 @@
                 var link = document.createElement('a');
                 link.href = window.URL.createObjectURL(data);
                 link.download = "lap_gudang.xlsx";
+                link.click();
+            }
+        })
+    });
+
+    $(document).on('click', '#btn-stok', function() {
+        let id = $(this).data('id');
+        console.log(id);
+        
+        $.ajax({
+            url: "/laporan/gudang/exportstok",
+            method: "POST",
+            xhrFields: { responseType: 'blob' },
+            data: {
+                id: id,
+                start_date: $('#start_date').val(),
+                end_date: $('#end_date').val(),
+                bagian: $('#bagian').val(),
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(data){
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(data);
+                link.download = "lap_stok_gudang.xlsx";
                 link.click();
             }
         })
@@ -150,6 +181,7 @@
                             <th>Call Sign</th>
                             <th>Cabang</th>
                             <th>PDF</th>
+                            <th>Excel</th>
                             </tr>
                         </thead>
                         <tbody>

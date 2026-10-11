@@ -30,7 +30,7 @@
                     <th>Tempat</th>
                     <th>Tgl Mulai</th>
                     <th>Tgl Selesai</th>
-                    <th>Durasi</th>
+                    <th>Durasi (Hari)</th>
                     <th>File</th>
                     <th>Aksi</th>
                 </tr>

@@ -181,46 +181,84 @@
     }
   </style>
 @endsection
-
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="card-title">Laporan - Permintaan</h4>
-        <div class="col-sm-2">
-            <select name="id_kapal" id="id_kapal" class="form-control">
-                <option value="">Pilih Kapal</option>
-            @foreach($kapal as $kp)
-                <option value="{{$kp->id}}" @selected (isset($trip) && $kp->id==$trip->id_kapal)>{{$kp->nama}}</option>
-            @endforeach
-            </select>
-        </div>  
-        <div class="col-sm-2">
-            <input type="date" name="start_date" id="start_date" class="form-control" placeholder="start date">
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="biaya-tab" data-bs-toggle="tab" href="#biaya" aria-controls="biaya" role="tab" aria-selected="true"><i data-feather="biY"></i>Lap Biaya</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="kapal-tab" data-bs-toggle="tab" href="#kapal" aria-controls="kapal" role="tab" aria-selected="true" data-status="kapal"><i data-feather="file"></i>Lap Kapal</a>
+                    </li>
+                </ul>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="col-sm-2">
+                        <select name="id_kapal" id="id_kapal" class="form-control">
+                            <option value="">Pilih Kapal</option>
+                        @foreach($kapal as $kp)
+                            <option value="{{$kp->id}}" @selected (isset($trip) && $kp->id==$trip->id_kapal)>{{$kp->nama}}</option>
+                        @endforeach
+                        </select>
+                    </div>  
+                    <div class="col-sm-2">
+                        <input type="month" name="start_date" id="start_date" class="form-control" placeholder="start date">
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="month" name="end_date" id="end_date" class="form-control" placeholder="end date">
+                    </div>
+                    <div class="col-sm-5"></div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="biaya" aria-labelledby="biaya-tab" role="tabpanel"> 
+                        <div class="card-body">
+                                         
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
+                        </div>
+                            <table id="table-biaya" class="table table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Kapal</th>
+                                        <th>Jadwal</th>
+                                        <th>Tempat</th>
+                                        <th>Tgl Docking</th>
+                                        <th>Job/SubJob</th>
+                                        <th>Deskripsi</th>
+                                        <th>Volume</th>
+                                        <th>Harga</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="kapal" aria-labelledby="kapal-tab" role="tabpanel">
+                        <div class="card-body">
+                             <button type="button" class="btn btn-warning btn-sm" id="download2"><i data-feather='download2'></i> Unduh Data</button>
+                            <table id="table-kapal" class="table table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Kapal</th>
+                                        <th>Jadwal</th>
+                                        <th>Tempat</th>
+                                        <th>Tgl Mulai</th>
+                                        <th>Tgl Selesai</th>
+                                        <th>Durasi (Hari)</th>
+                                        <th>Biaya</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-sm-2">
-            <input type="date" name="end_date" id="end_date" class="form-control" placeholder="end date">
-        </div>
-        <div class="col-sm-2">
-            <button type="button" class="btn btn-warning btn-sm" id="download"><i data-feather='download'></i> Unduh Data</button>
-        </div>
-    </div>
-    <div class="card-body">
-        <table id="table-permintaan" class="table table-striped w-100">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Kapal</th>
-                    <th>Jadwal</th>
-                    <th>Tempat</th>
-                    <th>Tgl Docking</th>
-                    <th>Job/SubJob</th>
-                    <th>Deskripsi</th>
-                    <th>Volume</th>
-                    <th>Harga</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
     </div>
 </div>
 @endsection
@@ -243,7 +281,7 @@
             }
         });
 
-        table = $('#table-permintaan').DataTable({
+        const table = $('#table-biaya').DataTable({
             processing: true,
             serverSide: true,
             ajax:{
@@ -309,19 +347,108 @@
             
         });
 
+        const table2 = $('#table-kapal').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax:{
+                url: "/laporan/docking/dockkapal",
+                type: "POST",
+                data: function(d){
+                    d.id_kapal= $('#id_kapal').val(),
+                    d.start_date= $('#start_date').val(),
+                    d.end_date= $('#end_date').val(),
+                    d._token= "{{ csrf_token() }}"
+                },
+                dataSrc: "data"
+            },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { 
+                        data: null, 
+                        orderable: false, 
+                        searchable: false,
+                        render: function (data, type, row) {
+                            return `${row.kapal}`;
+                        }
+                },
+               {
+                    data: null,
+                    name: 'periode',
+                    render: function (data, type, row) {
+                        let bulan = row.bulan ?? '';
+                        let tahun = row.tahun ?? '';
+
+                        // Nama bulan Indonesia
+                        const namaBulan = [
+                            '', 'Januari', 'Februari', 'Maret',
+                            'April', 'Mei', 'Juni', 'Juli',
+                            'Agustus', 'September', 'Oktober',
+                            'November', 'Desember'
+                        ];
+
+                        return namaBulan[Number(bulan)] 
+                            ? namaBulan[Number(bulan)] + ' ' + tahun
+                            : bulan + ' - ' + tahun;
+                    }
+                },
+                {
+                    data: 'tempat',
+                    name: 'tempat'
+                },
+                {
+                    data: 'tgl_mulai',
+                    name: 'tgl_mulai',
+                    render: function (data) {
+                        if (!data) return '';
+
+                        let tanggal = data.split(' ')[0].split('-');
+                        return tanggal[2] + '-' + tanggal[1] + '-' + tanggal[0];
+                    }
+                },
+                {
+                    data: 'tgl_selesai',
+                    name: 'tgl_selesai',
+                    render: function (data) {
+                        if (!data) return '';
+
+                        let tanggal = data.split(' ')[0].split('-');
+                        return tanggal[2] + '-' + tanggal[1] + '-' + tanggal[0];
+                    }
+                },
+                {
+                    data: 'durasi',
+                    name: 'durasi'
+                },
+                {
+                    data: 'total_biaya',
+                    name: 'total_biaya',
+                    render: function (data, type, row) {
+                        if (data == null || data === '') return 'Rp 0';
+
+                        return 'Rp ' + Math.round(Number(data))
+                            .toLocaleString('id-ID');
+                    }
+                }
+            ]
+        });
+
+        $('#id_kapal').on('change', function () {
+            table.ajax.reload();
+            table2.ajax.reload();
+        });
+
+        $('#end_date').on('change', function () {
+            table.ajax.reload();
+            table2.ajax.reload();
+        });
+
+        $('#start_date').on('change', function () {
+            table.ajax.reload();
+            table2.ajax.reload();
+        });
+
     });
 
-    $('#id_kapal').on('change', function () {
-        table.ajax.reload();
-    });
-
-    $('#end_date').on('change', function () {
-        table.ajax.reload();
-    });
-
-    $('#start_date').on('change', function () {
-        table.ajax.reload();
-    });
 
     
     $(document).on('click', '#download', function() {
@@ -338,7 +465,27 @@
             success: function(data){
                 var link = document.createElement('a');
                 link.href = window.URL.createObjectURL(data);
-                link.download = "lap_docking.xlsx";
+                link.download = "lap_docking_biaya.xlsx";
+                link.click();
+            }
+        })
+    });
+
+    $(document).on('click', '#download2', function() {
+        $.ajax({
+            url: "/laporan/docking/export2",
+            method: "POST",
+            xhrFields: { responseType: 'blob' },
+            data: {
+                id_kapal: $('#id_kapal').val(),
+                start_date: $('#start_date').val(),
+                end_date: $('#end_date').val(),
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(data){
+                var link = document.createElement('a');
+                link.href = window.URL.createObjectURL(data);
+                link.download = "lap_docking_kapal.xlsx";
                 link.click();
             }
         })

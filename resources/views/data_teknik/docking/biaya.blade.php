@@ -26,7 +26,7 @@
             <tr>
                 <td> Tempat</td>
                 <td>:</td>
-                <td>{{ $show->tempat }}</td>
+                <td>{{ $show->get_gal()->nama }}</td>
             </tr>
             <tr>
                 <td> Tanggal Docking</td>

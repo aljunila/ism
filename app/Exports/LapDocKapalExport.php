@@ -10,12 +10,14 @@ use Carbon\Carbon;
 class LapDocKapalExport implements FromView
 {
     protected $idKapal;
+    protected $idGal;
     protected $startDate;
     protected $endDate;
 
-    public function __construct($id = null, $start = null, $end = null)
+    public function __construct($id = null, $id_gal = null, $start = null, $end = null)
     {
         $this->idKapal = $id;
+        $this->idGal = $id_gal;
         $this->startDate = $start;
         $this->endDate = $end;
     }
@@ -50,39 +52,19 @@ class LapDocKapalExport implements FromView
             ->where('a.is_delete', 0)
             ->when($this->idKapal, function ($q, $id) {
                 $q->where('a.id_kapal', $id);
+            })
+             ->when($this->idGal, function ($q) {
+                $q->where('a.tempat', $this->idGal);
+            })
+            ->when($this->startDate && !$this->endDate, function ($query) {
+                return $query->where('a.tahun', '=', $this->startDate);
+            })
+            ->when($this->startDate && $this->endDate, function ($query)  {
+                return $query->whereBetween('a.tahun', [$this->startDate, $this->endDate]);
+            })
+            ->when(!$this->startDate && $this->endDate, function ($query) {
+                return $query->where('a.tahun', '<=', $this->endDate);
             });
-
-        // Filter periode awal berdasarkan bulan dan tahun
-        if ($this->startDate) {
-            $start = Carbon::createFromFormat(
-                'Y-m',
-                $this->startDate
-            );
-
-            $query->where(function ($q) use ($start) {
-                $q->where('a.tahun', '>', $start->year)
-                    ->orWhere(function ($sub) use ($start) {
-                        $sub->where('a.tahun', $start->year)
-                            ->where('a.bulan', '>=', $start->month);
-                    });
-            });
-        }
-
-        // Filter periode akhir berdasarkan bulan dan tahun
-        if ($this->endDate) {
-            $end = Carbon::createFromFormat(
-                'Y-m',
-                $this->endDate
-            );
-
-            $query->where(function ($q) use ($end) {
-                $q->where('a.tahun', '<', $end->year)
-                    ->orWhere(function ($sub) use ($end) {
-                        $sub->where('a.tahun', $end->year)
-                            ->where('a.bulan', '<=', $end->month);
-                    });
-            });
-        }
 
         $data = $query
             ->groupBy(

@@ -14,12 +14,14 @@ use DB;
 class LapDockingExport implements FromView
 {
     protected $id;
+    protected $idgal;
     protected $start;
     protected $end;
 
-    public function __construct($id, $start, $end)
+    public function __construct($id = null, $id_gal = null, $start = null, $end = null)
     {
         $this->id = $id;
+        $this->idgal = $id_gal;
         $this->start = $start;
         $this->end = $end;
     }
@@ -32,6 +34,7 @@ class LapDockingExport implements FromView
             ->leftJoin('m_subjob_dock as c', 'a.id_subjob', '=', 'c.id')
             ->leftJoin('m_kel_dock as d', 'c.id_job', '=', 'd.id')
             ->leftJoin('kapal as e', 'b.id_kapal', '=', 'e.id')
+            ->leftJoin('m_galangan as f', 'b.tempat', '=', 'f.id')
             ->select(
                 'a.*',
                 'e.nama as kapal',
@@ -42,37 +45,27 @@ class LapDockingExport implements FromView
                 'b.tgl_selesai',
                 'b.durasi',
                 'c.nama as subjob',
-                'd.nama as job'
+                'd.nama as job',
+                'f.nama as galangan'
             )
             ->where('a.is_delete', 0)
-            ->when($this->start, function ($query, $start) {
-                $startDate = \Carbon\Carbon::createFromFormat('Y-m', $start);
-
-                return $query->where(function ($q) use ($startDate) {
-                    $q->where('b.tahun', '>', $startDate->year)
-                        ->orWhere(function ($sub) use ($startDate) {
-                            $sub->where('b.tahun', $startDate->year)
-                                ->where('b.bulan', '>=', $startDate->month);
-                        });
-                });
-            })
-            ->when($this->end, function ($query, $end) {
-                $endDate = \Carbon\Carbon::createFromFormat('Y-m', $end);
-
-                return $query->where(function ($q) use ($endDate) {
-                    $q->where('b.tahun', '<', $endDate->year)
-                        ->orWhere(function ($sub) use ($endDate) {
-                            $sub->where('b.tahun', $endDate->year)
-                                ->where('b.bulan', '<=', $endDate->month);
-                        });
-                });
-            })
             ->when($this->id, function ($query, $id) {
                 return $query->where('b.id_kapal', $id);
             })
+            ->when($this->idgal, function ($query) {
+                return $query->where('b.tempat', $this->idgal);
+            })
+            ->when($this->start && !$this->end, function ($query) {
+                return $query->where('b.tahun', '=', $this->start);
+            })
+            ->when($this->start && $this->end, function ($query)  {
+                return $query->whereBetween('b.tahun', [$this->start, $this->end]);
+            })
+            ->when(!$this->start && $this->end, function ($query) {
+                return $query->where('b.tahun', '<=', $this->end);
+            })
             ->orderBy('b.tahun', 'DESC')
-            ->orderBy('b.bulan', 'DESC')
-            ->orderBy('b.tgl_mulai', 'DESC')
+            ->orderBy('b.id', 'ASC')
             ->get();
 
 

@@ -17,4 +17,9 @@ class Docking extends Model
     {
         return  $this->hasOne(Kapal::class, 'id', 'id_kapal')->first();
     }
+
+    public function get_gal()
+    {
+        return  $this->hasOne(Galangan::class, 'id', 'tempat')->first();
+    }
 }

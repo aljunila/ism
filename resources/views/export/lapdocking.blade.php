@@ -25,7 +25,7 @@
     <tr>
         <td style="{{$styleTd}}">{{ $show->kapal }}</td>
         <td style="{{$styleTd}}">{{ $show->bulan }} - {{ $show->tahun }}</td>
-        <td style="{{$styleTd}}">{{ $show->tempat }}</td>
+        <td style="{{$styleTd}}">{{ $show->galangan }}</td>
         <td style="{{$styleTd}}">{{ $show->tgl_mulai ? \Carbon\Carbon::parse($show->tgl_mulai)->format('d-m-Y') : '' }} </td>
         <td style="{{$styleTd}}">{{ $show->tgl_selesai ? \Carbon\Carbon::parse($show->tgl_selesai)->format('d-m-Y') : '-' }}</td>
         <td style="{{$styleTd}}">{{ $show->job }}</td>

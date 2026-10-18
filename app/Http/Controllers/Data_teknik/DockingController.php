@@ -8,6 +8,7 @@ use App\Models\BiayaDocking;
 use App\Models\KelDock;
 use App\Models\SubJobDock;
 use App\Models\Kapal;
+use App\Models\Galangan;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use DB;
@@ -21,6 +22,7 @@ class DockingController extends Controller
         $data['active'] = "/data_teknik/docking";
         $data['job'] = KelDock::where('is_delete', 0)->get();
         $data['kapal'] = Kapal::where('status', 'A')->get();
+        $data['galangan'] = Galangan::where('is_delete', 0)->get();
         return view('data_teknik.docking.index', $data);
     }
 
@@ -38,6 +40,10 @@ class DockingController extends Controller
             ->addColumn('kapal', function ($row) {
                 $kapal = Kapal::find($row->id_kapal);
                 return $kapal ? $kapal->nama : '-';
+            })
+            ->addColumn('galangan', function ($row) {
+                $gal = Galangan::find($row->tempat);
+                return $gal ? $gal->nama : '-';
             })
             ->addColumn('aksi', function ($row) {
                 return view('data_teknik.docking.partials.actions', compact('row'))->render();
@@ -130,8 +136,9 @@ class DockingController extends Controller
     public function biaya($id)
     {
         $data['active'] = "/data_teknik/docking";
-        $data['show'] = Docking::where('uid', $id)->first();
-        $data['job'] = KelDock::where('is_delete', 0)->get();
+        $show = Docking::where('uid', $id)->first();
+        $data['show'] = $show;
+        $data['job'] = KelDock::where('is_delete', 0)->where('id_gal', $show->tempat)->get();
         return view('data_teknik.docking.biaya', $data);
     }
 

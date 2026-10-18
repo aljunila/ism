@@ -101,7 +101,12 @@
                             <label class="form-label">Tempat</label>
                         </div>
                         <div class="col-9">
-                            <input type="text" id="docking-tempat" class="form-control">
+                             <select id="docking-tempat" class="form-control">
+                                <option value="">-Pilih-</option>
+                                @foreach ($galangan as $g)
+                                    <option value="{{$g->id}}">{{$g->nama}}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -196,7 +201,7 @@
                             return `${row.bulan} - ${row.tahun}`;
                         }
                 },
-                { data: 'tempat', name: 'tempat' },
+                { data: 'galangan', name: 'galangan' },
                 { data: 'tgl_mulai',
                     render: function(data) {
                         if (!data) return '';

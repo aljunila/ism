@@ -32,6 +32,10 @@ class LapProduksiController extends Controller
         $roleJenis = Session::get('previllage');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
+        $start_month = $request->input('start_month');
+        $end_month = $request->input('end_month');
+        $start_year = $request->input('start_year');
+        $end_year = $request->input('end_year');
         $id_perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : null;
         $id_kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $query = DB::table('t_trip as a')
@@ -47,6 +51,24 @@ class LapProduksiController extends Controller
                 })
                 ->when($end_date, function($query, $end_date) {
                     return $query->where('a.tanggal', '<=', $end_date);
+                })
+                ->when($start_month, function ($query, $start_month) {
+                    return $query->where('a.tanggal','>=',$start_month . '-01'
+                    );
+                })
+                ->when($end_month, function ($query, $end_month) {
+                    return $query->where('a.tanggal','<',
+                        \Carbon\Carbon::createFromFormat('Y-m', $end_month)
+                            ->addMonth()
+                            ->startOfMonth()
+                            ->toDateString()
+                    );
+                })
+                ->when($start_year, function ($query, $start_year) {
+                    return $query->where('a.tanggal','>=',$start_year . '-01-01');
+                })
+                ->when($end_year, function ($query, $end_year) {
+                    return $query->where('a.tanggal','<',((int) $end_year + 1) . '-01-01');
                 })
                 ->orderBy('a.tanggal', 'DESC');
         if ((int) $roleJenis === 2) {
@@ -68,7 +90,11 @@ class LapProduksiController extends Controller
         $id= $request->input('id_kapal');
         $start = $request->input('start_date');
         $end = $request->input('end_date');
+        $smonth = $request->input('start_month');
+        $emonth = $request->input('end_month');
+        $syear = $request->input('start_year');
+        $eyear = $request->input('end_year');
 
-        return Excel::download(new LapProduksiExport($id, $start, $end), 'lap_produksi.xlsx');
+        return Excel::download(new LapProduksiExport($id, $start, $end, $smonth, $emonth, $syear, $eyear), 'lap_produksi.xlsx');
     }
 }

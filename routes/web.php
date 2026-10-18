@@ -38,6 +38,7 @@ use App\Http\Controllers\Data_master\VendorController;
 use App\Http\Controllers\Data_master\PendidikanController;
 use App\Http\Controllers\Data_master\JobDockController;
 use App\Http\Controllers\Data_master\SubJobController;
+use App\Http\Controllers\Data_master\GalanganController;
 use App\Http\Controllers\Data_teknik\DockingController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
@@ -303,6 +304,13 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::put('subjob/{id}', [SubJobController::class, 'update'])->name('subjob.update');
         Route::delete('subjob/{id}', [SubJobController::class, 'destroy'])->name('subjob.destroy');
         Route::get('subjob/dataByJob/{id}', [SubJobController::class, 'dataByJob'])->name('subjob.dataByJob');
+
+        Route::get('galangan', [GalanganController::class, 'index']);
+        Route::get('galangan/data', [GalanganController::class, 'data'])->name('galangan.data');
+        Route::post('galangan', [GalanganController::class, 'store'])->name('galangan.store');
+        Route::put('galangan/{id}', [GalanganController::class, 'update'])->name('galangan.update');
+        Route::delete('galangan/{id}', [GalanganController::class, 'destroy'])->name('galangan.destroy');
+        Route::get('galangan/dataByJob/{id}', [GalanganController::class, 'dataByJob'])->name('galangan.dataByJob');
     });
 
     Route::prefix('data_teknik')->group(function() {

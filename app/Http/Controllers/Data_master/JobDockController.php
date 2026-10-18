@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Data_master;
 
 use App\Http\Controllers\Controller;
 use App\Models\KelDock;
+use App\Models\KelDoGalanganck;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -11,7 +12,8 @@ class JobDockController extends Controller
 {
     public function index()
     {
-        $data['active'] = "/data_master/pendidikan";
+        $data['active'] = "/data_master/jobdock";
+        $data['galangan'] = Galangan::where('is_delete', 0)->get();
         return view('data_master.jobdock.index', $data);
     }
 

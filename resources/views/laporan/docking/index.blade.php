@@ -203,12 +203,30 @@
                         </select>
                     </div>  
                     <div class="col-sm-2">
-                        <input type="month" name="start_date" id="start_date" class="form-control" placeholder="start date">
+                        <select id="id_gal" class="form-control">
+                            <option value="">-Pilih Galangan-</option>
+                            @foreach ($galangan as $g)
+                                <option value="{{$g->id}}">{{$g->nama}}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-sm-2">
-                        <input type="month" name="end_date" id="end_date" class="form-control" placeholder="end date">
+                        <select id="start_date" class="form-control">
+                            <option value="">-Pilih-</option>
+                            @for($a=2020; $a<=2036; $a++)
+                                <option value="{{$a}}">{{$a}}</option>
+                            @endfor
+                        </select>
                     </div>
-                    <div class="col-sm-5"></div>
+                    <div class="col-sm-2">
+                        <select id="end_date" class="form-control">
+                            <option value="">-Pilih-</option>
+                            @for($a=2020; $a<=2036; $a++)
+                                <option value="{{$a}}">{{$a}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-sm-3"></div>
                 </div>
                 <div class="tab-content">
                     <div class="tab-pane active" id="biaya" aria-labelledby="biaya-tab" role="tabpanel"> 
@@ -238,7 +256,7 @@
                     </div>
                     <div class="tab-pane" id="kapal" aria-labelledby="kapal-tab" role="tabpanel">
                         <div class="card-body">
-                             <button type="button" class="btn btn-warning btn-sm" id="download2"><i data-feather='download2'></i> Unduh Data</button>
+                             <button type="button" class="btn btn-warning btn-sm" id="download-modal"><i data-feather='download2'></i> Unduh Data</button>
                             <table id="table-kapal" class="table table-striped w-100">
                                 <thead>
                                     <tr>
@@ -257,6 +275,37 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-download" tabindex="-1" aria-labelledby="modal-download-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-download-label">Unduh Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label">Kapal</label>
+                        </div>
+                        <div class="col-9">
+                            <select id="excel" class="form-control">
+                                <option value="">-Pilih Laporan-</option>
+                                <option value="1">Laporan Kapal</option>
+                                <option value="2">Laporan Job</option>
+                                <option value="3">Laporan SubJob</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="download2">Unduh Data</button>
             </div>
         </div>
     </div>
@@ -289,6 +338,7 @@
                 type: "POST",
                 data: function(d){
                     d.id_kapal= $('#id_kapal').val(),
+                    d.id_gal= $('#id_gal').val(),
                     d.start_date= $('#start_date').val(),
                     d.end_date= $('#end_date').val(),
                     d._token= "{{ csrf_token() }}"
@@ -303,7 +353,7 @@
                             return `${row.bulan} - ${row.tahun}`;
                         }
                 },
-                { data: 'tempat', name: 'tempat' },
+                { data: 'galangan', name: 'galangan' },
                 { data: 'tgl_mulai',
                     render: function(data) {
                         if (!data) return '';
@@ -355,6 +405,7 @@
                 type: "POST",
                 data: function(d){
                     d.id_kapal= $('#id_kapal').val(),
+                    d.id_gal= $('#id_gal').val(),
                     d.start_date= $('#start_date').val(),
                     d.end_date= $('#end_date').val(),
                     d._token= "{{ csrf_token() }}"
@@ -392,8 +443,8 @@
                     }
                 },
                 {
-                    data: 'tempat',
-                    name: 'tempat'
+                    data: 'galangan',
+                    name: 'galangan'
                 },
                 {
                     data: 'tgl_mulai',
@@ -447,6 +498,11 @@
             table2.ajax.reload();
         });
 
+         $('#id_gal').on('change', function () {
+            table.ajax.reload();
+            table2.ajax.reload();
+        });
+
     });
 
 
@@ -458,6 +514,7 @@
             xhrFields: { responseType: 'blob' },
             data: {
                 id_kapal: $('#id_kapal').val(),
+                id_gal: $('#id_gal').val(),
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
                 _token: "{{ csrf_token() }}"
@@ -478,6 +535,8 @@
             xhrFields: { responseType: 'blob' },
             data: {
                 id_kapal: $('#id_kapal').val(),
+                id_gal: $('#id_gal').val(),
+                excel: $('#excel').val(),
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
                 _token: "{{ csrf_token() }}"
@@ -490,5 +549,9 @@
             }
         })
     });
+
+     $('#download-modal').on('click', function () {     
+            $('#modal-download').modal('show');
+        });
 </script>
 @endsection

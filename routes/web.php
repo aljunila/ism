@@ -40,6 +40,7 @@ use App\Http\Controllers\Data_master\JobDockController;
 use App\Http\Controllers\Data_master\SubJobController;
 use App\Http\Controllers\Data_master\GalanganController;
 use App\Http\Controllers\Data_teknik\DockingController;
+use App\Http\Controllers\Data_teknik\BBMKapalController;
 use App\Http\Controllers\AclController;
 use App\Http\Controllers\Acl\RoleController;
 use App\Http\Controllers\Acl\UserController;
@@ -68,6 +69,7 @@ use App\Http\Controllers\Laporan\LapCrewController;
 use App\Http\Controllers\Laporan\LapKapalController;
 use App\Http\Controllers\Laporan\LapDockingController;
 use App\Http\Controllers\Laporan\LapProduksiController;
+use App\Http\Controllers\Laporan\LapBBMController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -325,6 +327,14 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('docking/biaya', [DockingController::class, 'storebiaya'])->name('docking.storebiaya');
         Route::put('docking/biaya/{id}', [DockingController::class, 'updatebiaya'])->name('docking.updatebiaya');
         Route::delete('docking/biaya/{id}', [DockingController::class, 'destroybiaya'])->name('docking.destroybiaya');
+
+
+        Route::get('bbm', [BBMKapalController::class, 'index']);
+        Route::post('bbm/data', [BBMKapalController::class, 'data'])->name('bbm.data');
+        Route::post('bbm', [BBMKapalController::class, 'store'])->name('bbm.store');
+        Route::put('bbm/{id}', [BBMKapalController::class, 'update'])->name('bbm.update');
+        Route::put('bbm/file/{id}', [BBMKapalController::class, 'updatefile'])->name('bbm.updatefile');
+        Route::delete('bbm/{id}', [BBMKapalController::class, 'destroy'])->name('bbm.destroy');
     });
     
     Route::get('get-pelabuhan/{id_kapal}', [PelabuhanController::class, 'getPelabuhan'])->name('getPelabuhan');
@@ -616,6 +626,12 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('produksi', [LapProduksiController::class, 'store'])->name('lapproduksi.store');
         Route::get('produksi/getlog/{id}', [LapProduksiController::class, 'getlog'])->name('lapproduksi.getlog');
         Route::post('produksi/export', [LapProduksiController::class, 'export'])->name('lapproduksi.export');
+
+        Route::get('bbm', [LapBBMController::class, 'laporan']);
+        Route::post('bbm/data', [LapBBMController::class, 'datalaporan'])->name('lapbbm.data');
+        Route::post('bbm', [LapBBMController::class, 'store'])->name('lapbbm.store');
+        Route::get('bbm/getlog/{id}', [LapBBMController::class, 'getlog'])->name('lapbbm.getlog');
+        Route::post('bbm/export', [LapBBMController::class, 'export'])->name('lapbbm.export');
     });
 
     Route::prefix('gudang')->group(function () {

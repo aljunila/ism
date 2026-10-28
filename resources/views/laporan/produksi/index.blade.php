@@ -46,9 +46,9 @@
                         <div class="col-sm-6">
                             <input type="month" name="start_month" id="start_month" class="form-control" placeholder="Dari Bulan">
                         </div>
-                        <div class="col-sm-6">
+                        <!-- <div class="col-sm-6">
                             <input type="month" name="end_month" id="end_month" class="form-control" placeholder="Sampai Bulan">
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -62,14 +62,14 @@
                                 @endfor
                             </select>
                         </div>
-                        <div class="col-sm-6">
+                        <!-- <div class="col-sm-6">
                             <select id="end_year" name="end_year" class="form-control">
                                 <option value="">Sampai Tahun</option>
                                 @for ($a = 2020; $a <= 2036; $a++)
                                     <option value="{{ $a }}">{{ $a }}</option>
                                 @endfor
                             </select>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="col-sm-2">
@@ -127,9 +127,7 @@
                     d.start_date= $('#start_date').val(),
                     d.end_date= $('#end_date').val(),
                     d.start_month= $('#start_month').val(),
-                    d.end_month= $('#end_month').val(),
                     d.start_year= $('#start_year').val(),
-                    d.end_year= $('#end_year').val(),
                     d._token= "{{ csrf_token() }}"
                 },
             },
@@ -159,15 +157,7 @@
             table.ajax.reload();
         });
 
-        $('#end_month').on('change', function () {
-            table.ajax.reload();
-        });
-
         $('#start_year').on('change', function () {
-            table.ajax.reload();
-        });
-
-        $('#end_year').on('change', function () {
             table.ajax.reload();
         });
 
@@ -201,9 +191,7 @@
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
                 start_month: $('#start_month').val(),
-                end_month: $('#end_month').val(),
                 start_year: $('#start_year').val(),
-                end_year: $('#end_year').val(),
                 _token: "{{ csrf_token() }}"
             },
             success: function(data){

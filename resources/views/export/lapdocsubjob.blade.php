@@ -81,7 +81,7 @@
 
                         <td style="border:1px solid #000; text-align:right;">
                             {{ $nilai != 0
-                                ? 'Rp ' . number_format($nilai, 2, ',', '.')
+                                ? $nilai
                                 : '' }}
                         </td>
                     @endforeach
@@ -92,7 +92,7 @@
 
                     <td style="border:1px solid #000; text-align:right; font-weight:bold;">
                         {{ $totalSubjob != 0
-                            ? 'Rp ' . number_format($totalSubjob, 2, ',', '.')
+                            ? $totalSubjob
                             : '' }}
                     </td>
                 </tr>
@@ -111,17 +111,12 @@
                 @endphp
 
                 <td style="border:1px solid #000; text-align:right; font-weight:bold;">
-                    {{ 'Rp ' . number_format(
-                        $grandKolom[$key],
-                        2,
-                        ',',
-                        '.'
-                    ) }}
+                    {{ $grandKolom[$key] }}
                 </td>
             @endforeach
 
             <td style="border:1px solid #000; text-align:right; font-weight:bold;">
-                {{ 'Rp ' . number_format($grandTotal, 2, ',', '.') }}
+                {{ $grandTotal }}
             </td>
         </tr>
     </tbody>

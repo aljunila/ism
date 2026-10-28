@@ -11,7 +11,7 @@ class Trip extends Model
     use HasFactory;
     public $timestamps = false;
     protected $table = 't_trip';
-    protected $fillable = ['id', 'uid', 'id_kapal', 'id_pelabuhan',  'tanggal', 'trip', 'jam', 'data', 'is_delete',  'created_by', 'created_date', 'changed_by', 'changed_date'];
+    protected $fillable = ['id', 'uid', 'id_kapal', 'id_pelabuhan',  'tanggal', 'trip', 'jam', 'dermaga', 'data', 'call', 'sandar', 'kepil', 'tiket', 'is_delete',  'created_by', 'created_date', 'changed_by', 'changed_date'];
 
     protected $casts = [
     'data' => 'array',

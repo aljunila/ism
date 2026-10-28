@@ -17,19 +17,15 @@ class LapProduksiExport implements FromView
     protected $start;
     protected $end;
     protected $smonth;
-    protected $emonth;
     protected $syear;
-    protected $eyear;
 
-    public function __construct($id, $start, $end, $smonth, $emonth, $syear, $eyear)
+    public function __construct($id, $start, $end, $smonth, $syear)
     {
         $this->id = $id;
         $this->start = $start;
         $this->end = $end;
         $this->smonth = $smonth;
-        $this->emonth = $emonth;
         $this->syear = $syear;
-        $this->eyear = $end;
     }
 
    public function view(): View
@@ -49,24 +45,14 @@ class LapProduksiExport implements FromView
                     return $query->whereDate('a.tanggal', '<=', $end);
                 })
                 ->when($this->smonth, function ($query, $smonth) {
-                    return $query->where('a.tanggal','>=',$smonth . '-01'
-                    );
-                })
-                ->when($this->emonth, function ($query, $emonth) {
-                    return $query->where('a.tanggal','<',
-                        \Carbon\Carbon::createFromFormat('Y-m', $emonth)
-                            ->addMonth()
-                            ->startOfMonth()
-                            ->toDateString()
+                    return $query->whereRaw(
+                        "DATE_FORMAT(a.tanggal, '%Y-%m') = ?",
+                        [$smonth]
                     );
                 })
                 ->when($this->syear, function ($query, $syear) {
-                    return $query->where('a.tanggal','>=',$syear . '-01-01');
+                    return $query->whereYear('a.tanggal', $syear);
                 })
-                ->when($this->eyear, function ($query, $eyear) {
-                    return $query->where('a.tanggal','<',((int) $eyear + 1) . '-01-01');
-                })
-                ->orderBy('a.tanggal', 'ASC')
                 ->get();
         $kend = Kendaraan::where('is_delete',0)->get();
 

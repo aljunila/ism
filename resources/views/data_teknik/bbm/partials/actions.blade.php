@@ -6,6 +6,8 @@
         data-jumlah="{{ $row->jumlah }}"
         data-status="{{ $row->status }}"
         data-id_jenis="{{ $row->id_jenis }}"
+        data-me="{{ $row->me }}"
+        data-ae="{{ $row->ae }}"
         data-tgl_mulai="{{ $row->tgl_mulai }}">
         Edit
     </button>

@@ -64,16 +64,18 @@ class BBMKapalController extends Controller
 
     public function store(Request $request)
     {
-        $cek = LogBBM::where('id_kapal', $request->post('id_kapal'))->where('tanggal', $request->post('tanggal'))->where('id_jenis', $request->post('id_jenis'))->where('jns_pakai', $request->post('jns_pakai'))->where('is_delete', 0)->exists();
+        $cek = LogBBM::where('id_kapal', $request->post('id_kapal'))->where('tanggal', $request->post('tanggal'))->where('id_jenis', $request->post('id_jenis'))->where('is_delete', 0)->exists();
         $rob_awal = BBMKapal::where('id_kapal', $request->post('id_kapal'))->first();
        
         if($cek){
              return response()->json(['status' => 'error', 'message' => 'Maaf, data sudah ada'],422);
         } else {
             if($request->post('id_jenis')==1) {
-                $saldo_akhir = $rob_awal->saldo - ($request->post('jumlah'));
+                $jml = $request->post('me') + $request->post('ae');
+                $saldo_akhir = $rob_awal->saldo - $jml;
             } else {
-                $saldo_akhir = $rob_awal->saldo + $request->post('jumlah');
+                $jml = $request->post('jumlah');
+                $saldo_akhir = $rob_awal->saldo + $jml;
             }
             $validated = ([
                 'uid' => Str::uuid()->toString(),
@@ -82,8 +84,10 @@ class BBMKapalController extends Controller
                 'id_jenis' => $request->post('id_jenis'),
                 'status' => $request->post('status'),
                 'tanggal' => $request->post('tanggal'),
-                'jns_pakai' => $request->post('jns_pakai'),
-                'jumlah' => $request->post('jumlah'),
+                'me' => $request->post('me'),
+                'ae' => $request->post('ae'),
+                'jam' => $request->post('jam'),
+                'jumlah' => $jml,
                 'saldo_akhir' => $saldo_akhir,
                 'is_delete' => 0,
                 'created_by' => Session::get('userid'),
@@ -97,18 +101,29 @@ class BBMKapalController extends Controller
 
     public function update(Request $request, $id)
     {
-        $cek = LogBBM::where('id_kapal', $request->post('id_kapal'))->where('tanggal', $request->post('tanggal'))->where('id_jenis', $request->post('id_jenis'))->where('jns_pakai', $request->post('jns_pakai'))->where('is_delete', 0)->exists();
+        $cek = LogBBM::where('id_kapal', $request->post('id_kapal'))->where('tanggal', $request->post('tanggal'))->where('id_jenis', $request->post('id_jenis'))->where('is_delete', 0)->exists();
         if($cek>1){
              return response()->json(['status' => 'error', 'message' => 'Maaf, data sudah ada'],422);
         } else {
-            $saldo_awal = $cek->saldo_awal;
+            $get = LogBBM::findorFail($id);
+            $saldo_awal = $get->saldo_awal;
             if($request->post('id_jenis')==1) {
-                $saldo_akhir = $saldo_awal - ($request->post('jumlah'));
+                $jml = $request->post('me') + $request->post('ae');
+                $saldo_akhir = $saldo_awal - $jml;
             } else {
-                $saldo_akhir = $saldo_awal + $request->post('jumlah');
+                $jml = $request->post('jumlah');
+                $saldo_akhir = $saldo_awal + $jml;
             }
             $validated = ([
-                'jumlah' => $request->post('jumlah'),
+                'id_kapal' => $request->post('id_kapal'),
+                'saldo_awal' => $saldo_awal,
+                'id_jenis' => $request->post('id_jenis'),
+                'status' => $request->post('status'),
+                'tanggal' => $request->post('tanggal'),
+                'me' => $request->post('me'),
+                'ae' => $request->post('ae'),
+                'jam' => $request->post('jam'),
+                'jumlah' => $jml,
                 'saldo_akhir' => $saldo_akhir,
                 'changed_by' => Session::get('userid'),
             ]);

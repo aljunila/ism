@@ -40,6 +40,7 @@
                     <th>Jenis</th>
                     <th>Jumlah</th>
                     <th>Saldo Akhir</th>
+                    <th>Jam Operasional</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -58,10 +59,10 @@
             <div class="modal-body">
                 <div class="mb-1">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-4">
                             <label class="form-label">Kapal</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-8">
                             <select id="bbm-id_kapal" class="form-control">
                                 <option value="">-Pilih-</option>
                                 @foreach($kapal as $k)
@@ -73,10 +74,10 @@
                 </div>
                  <div class="mb-1">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-4">
                             <label class="form-label">Status</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-8">
                             <select id="bbm-status" class="form-control">
                                 <option value="">Pilih</option>
                                 <option value="1">In Operation</option>
@@ -87,20 +88,20 @@
                 </div>
                 <div class="mb-1">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-4">
                             <label class="form-label">Tanggal</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-8">
                             <input type="date" id="bbm-tanggal" class="form-control">
                         </div>
                     </div>
                 </div>
                 <div class="mb-1">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-4">
                             <label class="form-label">Jenis</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-8">
                             <select id="bbm-id_jenis" class="form-control">
                                 <option value="">Pilih</option>
                                 <option value="1">Pemakaian</option>
@@ -110,26 +111,37 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-1" id="jenis_pakai">
+                <div id="jenis_pakai">
+                <div class="mb-1">
                     <div class="row">
-                        <div class="col-3">
-                            <label class="form-label">Pemakaian</label>
+                        <div class="col-4">
+                            <label class="form-label">Pemakaian (Liter)</label>
                         </div>
-                        <div class="col-9">
-                             <select id="bbm-jns_pakai" class="form-control">
-                                <option value="">Pilih</option>
-                                <option value="ME">ME</option>
-                                <option value="AE">AE</option>
-                            </select>
+                        <div class="col-4">
+                             <input type="number" id="bbm-me" class="form-control" placeholder="ME">
+                        </div>
+                        <div class="col-4">
+                             <input type="number" id="bbm-ae" class="form-control" placeholder="AE">
                         </div>
                     </div>
                 </div>
                 <div class="mb-1">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-4">
+                            <label class="form-label">Jam Operational</label>
+                        </div>
+                        <div class="col-8">
+                            <input type="number" id="bbm-jam" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                </div>
+                <div class="mb-1" id="jumlah">
+                    <div class="row">
+                        <div class="col-4">
                             <label class="form-label">Jumlah (Liter)</label>
                         </div>
-                        <div class="col-9">
+                        <div class="col-8">
                             <input type="number" id="bbm-jumlah" class="form-control">
                         </div>
                     </div>
@@ -153,7 +165,8 @@
 <script src="{{ url('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
 <script>
     $(function () {
-        $('#jenis_pakai').hide()
+        $('#jenis_pakai').hide();
+        $('#jumlah').hide();
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -216,9 +229,7 @@
                     data: 'id_jenis', 
                     name : 'id_jenis',
                     render: function (data, type, row) {
-                        if (data == 1) {
-                            return `Pemakaian (${row.jns_pakai})`;
-                        }
+                        if (data == 1) return 'Pemakaian'
                         if (data == 2) return 'Penambahan';
                         if (data == 3) return 'Penyesuaian';
                         return '-';
@@ -226,6 +237,7 @@
                 },
                 { data: 'jumlah', name: 'jumlah' },
                 { data: 'saldo_akhir', name: 'saldo_akhir' },
+                { data: 'jam', name: 'jam' },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -236,14 +248,18 @@
             $('#bbm-status').val('');
             $('#bbm-tanggal').val('');
             $('#bbm-id_jenis').val('');
-            $('#bbm-jns_pakai').val('');
+            $('#bbm-me').val('');
+            $('#bbm-ae').val('');
             $('#bbm-jumlah').val('');
+            $('#bbm-jam').val('');
             $('#btn-save-bbm').data('mode', 'create').data('id', '');
         };
 
         $('#btn-add-bbm').on('click', function () {     
             resetForm();
             $('#modal-bbm').modal('show');
+            $('#jenis_pakai').hide();
+            $('#jumlah').hide();
         });
 
         $('#btn-save-bbm').on('click', function () {
@@ -255,8 +271,10 @@
             formData.append('tanggal', $('#bbm-tanggal').val());
             formData.append('id_jenis', $('#bbm-id_jenis').val());
             formData.append('id_kapal', $('#bbm-id_kapal').val());
-            formData.append('jns_pakai', $('#bbm-jns_pakai').val());
+            formData.append('me', $('#bbm-me').val());
+            formData.append('ae', $('#bbm-ae').val());
             formData.append('jumlah', $('#bbm-jumlah').val());
+            formData.append('jam', $('#bbm-jam').val());
             const ajaxOpts = {
                 url: mode === 'edit'
                     ? '{{ url('data_teknik/bbm') }}/' + id
@@ -302,8 +320,10 @@
             $('#bbm-tanggal').val(btn.data('tanggal'));
             $('#bbm-id_jenis').val(btn.data('id_jenis'));
             $('#bbm-id_kapal').val(btn.data('id_kapal'));
-            $('#bbm-jns_pakai').val(btn.data('jns_pakai'));
+            $('#bbm-me').val(btn.data('me'));
+            $('#bbm-ae').val(btn.data('ae'));
             $('#bbm-jumlah').val(btn.data('jumlah'));
+            $('#bbm-jam').val(btn.data('jam'));
             $('#btn-save-bbm').data('mode', 'edit').data('id', btn.data('id'));
             $('#modal-bbm').modal('show');
         });
@@ -337,8 +357,10 @@
         let jenis = $(this).val();
         if(jenis==1){
             $('#jenis_pakai').show();
+            $('#jumlah').hide();
         } else {
             $('#jenis_pakai').hide();
+            $('#jumlah').show();
         }
     })
 </script>

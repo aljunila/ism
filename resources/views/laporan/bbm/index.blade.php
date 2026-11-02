@@ -155,9 +155,7 @@
                     data: 'id_jenis', 
                     name : 'id_jenis',
                     render: function (data, type, row) {
-                        if (data == 1) {
-                            return `Pemakaian (${row.jns_pakai})`;
-                        }
+                        if (data == 1) return 'Pemakaian';
                         if (data == 2) return 'Penambahan';
                         if (data == 3) return 'Penyesuaian';
                         return '-';

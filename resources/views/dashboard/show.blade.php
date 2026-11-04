@@ -8,6 +8,8 @@
 @endsection
 
 @section('scriptfooter')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     function escapeHtml(value) {
         const div = document.createElement('div');
@@ -315,6 +317,80 @@
     $('#krumodal').on('hidden.bs.modal', function () {
         $('#search-doc-kru').val('');
         filterTable('search-doc-kru', 'table-doc-kru', 'no-result-kru');
+    });
+
+    const namaKapal = @json($bbm->pluck('nama'));
+    const dataME = @json($bbm->pluck('total_me'));
+    const dataAE = @json($bbm->pluck('total_ae'));
+
+    const ctx = document
+        .getElementById('grafikBBMKapal')
+        .getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: namaKapal,
+            datasets: [
+                {
+                    label: 'Pemakaian ME',
+                    data: dataME,
+                    backgroundColor: '#3498db',
+                    borderColor: '#2980b9',
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Pemakaian AE',
+                    data: dataAE,
+                    backgroundColor: '#f39c12',
+                    borderColor: '#e67e22',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' +
+                                Number(context.raw).toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Nama Kapal'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Pemakaian BBM'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return Number(value).toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
     });
 </script>
 @endsection
@@ -1079,6 +1155,58 @@
         @endif
 
     @endif
+
+    <div class="row" style="display: flex; flex-wrap: wrap; align-items: stretch;">
+
+    {{-- Grafik BBM --}}
+    <div style="width: 75%; padding: 0 12px;">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Grafik Pemakaian BBM</h5>
+                <small class="text-muted">
+                    {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                </small>
+            </div>
+
+            <div class="card-body">
+                <div style="position: relative; height: 400px;">
+                    <canvas id="grafikBBMKapal"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Saldo BBM --}}
+    <div style="width: 25%; padding: 0 12px;">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Saldo BBM Saat Ini</h5>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-bordered table-striped" width="100%">
+                      <thead>
+                        <tr>
+                          <th>No.</th>
+                          <th>Kapal</th>
+                          <th>Saldo (Liter)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach($saldobbm as $bbm)
+                        <tr>
+                            <td>{{$loop->iteration}}</td>
+                            <td>{{$bbm->nama}}</td>
+                            <td>{{$bbm->saldo}}</td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+            </div>
+        </div>
+    </div>
+
+</div>
 
     {{-- ── Permintaan Barang ── --}}
     @if(!empty($permintaan_dashboard) && count($permintaan_dashboard))

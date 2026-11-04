@@ -139,7 +139,7 @@ class DashboardController extends Controller
                                 ->orderBy('tgl_expired','ASC')
                                 ->get();
             $data['count_dockru'] = count($data['doc_kru']);
-        } elseif($roleJenis==6) { // user kapal
+        } elseif($roleJenis==6) { // cabang
             $id_cabang = Session::get('id_cabang');
             $kapal = Kapal::where('id_cabang', $id_cabang)->get();
             $data['karyawan'] = DB::table('karyawan as a')
@@ -215,6 +215,7 @@ class DashboardController extends Controller
         $data['permintaan_dashboard'] = $permintaanQuery
             ->orderBy('a.tanggal', 'DESC')
             ->orderBy('a.id', 'DESC')
+            ->limit(36)
             ->paginate(12, ['*'], 'permintaan_page');
 
         if (Schema::hasTable('user')) {
@@ -298,6 +299,50 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get();
         }
+
+        $awalBulan = Carbon::now()->startOfMonth();
+        $akhirBulan = Carbon::now()->endOfMonth();
+
+        $bbm = DB::table('kapal as k')
+                        ->leftJoin('t_log_bbm as l', function ($join) use ($awalBulan, $akhirBulan) {
+                            $join->on('l.id_kapal', '=', 'k.id')
+                                ->where('l.is_delete', 0)
+                                ->where('l.id_jenis', 1)
+                                ->whereBetween('l.tanggal', [
+                                    $awalBulan->toDateString(),
+                                    $akhirBulan->toDateString()
+                                ]);
+                        })
+                        ->where('k.status', 'A')
+                        ->select(
+                            'k.id',
+                            'k.nama',
+                            DB::raw('COALESCE(SUM(l.me), 0) as total_me'),
+                            DB::raw('COALESCE(SUM(l.ae), 0) as total_ae')
+                        );
+
+        if ((int) $roleJenis === 2) {
+            $bbm->where('k.pemilik', Session::get('id_perusahaan'))->pluck('id');
+        } else if ((int) $roleJenis === 3) {
+            $bbm->where('k.id', Session::get('id_kapal'))->pluck('id');
+        } else if ((int) $roleJenis === 6) {
+            $bbm->where('k.id_cabang', Session::get('id_cabang'))->pluck('id');
+        }
+        $data['bbm'] = $bbm->groupBy('k.id', 'k.nama')->orderBy('k.nama')->get();
+
+        $saldobbm = DB::table('t_bbm_kapal as a')
+                    ->leftjoin('kapal as b', 'a.id_kapal', '=', 'b.id')
+                    ->select('b.nama', 'a.saldo')
+                    ->where('b.status', 'A');
+        if ((int) $roleJenis === 2) {
+            $saldobbm->where('b.pemilik', Session::get('id_perusahaan'))->pluck('id');
+        } else if ((int) $roleJenis === 3) {
+            $saldobbm->where('b.id', Session::get('id_kapal'))->pluck('id');
+        } else if ((int) $roleJenis === 6) {
+            $saldobbm->where('b.id_cabang', Session::get('id_cabang'))->pluck('id');
+        }
+        $data['saldobbm'] = $saldobbm->orderBy('b.nama')->get();
+
 
         return view('dashboard.show', $data);
     }

@@ -128,10 +128,13 @@
                 <div class="mb-1">
                     <div class="row">
                         <div class="col-4">
-                            <label class="form-label">Jam Operational</label>
+                            <label class="form-label">Jam Operasional</label>
                         </div>
-                        <div class="col-8">
-                            <input type="number" id="bbm-jam" class="form-control">
+                        <div class="col-4">
+                             <input type="number" id="bbm-jam_me" class="form-control" placeholder="ME">
+                        </div>
+                        <div class="col-4">
+                             <input type="number" id="bbm-jam_ae" class="form-control" placeholder="AE">
                         </div>
                     </div>
                 </div>
@@ -229,7 +232,7 @@
                     data: 'id_jenis', 
                     name : 'id_jenis',
                     render: function (data, type, row) {
-                        if (data == 1) return 'Pemakaian'
+                        if (data == 1) return 'Pemakaian';
                         if (data == 2) return 'Penambahan';
                         if (data == 3) return 'Penyesuaian';
                         return '-';
@@ -237,7 +240,14 @@
                 },
                 { data: 'jumlah', name: 'jumlah' },
                 { data: 'saldo_akhir', name: 'saldo_akhir' },
-                { data: 'jam', name: 'jam' },
+                { 
+                    data: 'jam_me', 
+                    name : 'jam_me',
+                    render: function (data, type, row) {
+                         let total = Number(row.jam_me || 0) + Number(row.jam_ae || 0);
+                        return total;
+                    }
+                },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });
@@ -250,8 +260,9 @@
             $('#bbm-id_jenis').val('');
             $('#bbm-me').val('');
             $('#bbm-ae').val('');
+            $('#bbm-jam_me').val('');
+            $('#bbm-jam_ae').val('');
             $('#bbm-jumlah').val('');
-            $('#bbm-jam').val('');
             $('#btn-save-bbm').data('mode', 'create').data('id', '');
         };
 
@@ -273,8 +284,9 @@
             formData.append('id_kapal', $('#bbm-id_kapal').val());
             formData.append('me', $('#bbm-me').val());
             formData.append('ae', $('#bbm-ae').val());
+            formData.append('jam_me', $('#bbm-jam_me').val());
+            formData.append('jam_ae', $('#bbm-jam_ae').val());
             formData.append('jumlah', $('#bbm-jumlah').val());
-            formData.append('jam', $('#bbm-jam').val());
             const ajaxOpts = {
                 url: mode === 'edit'
                     ? '{{ url('data_teknik/bbm') }}/' + id
@@ -322,8 +334,9 @@
             $('#bbm-id_kapal').val(btn.data('id_kapal'));
             $('#bbm-me').val(btn.data('me'));
             $('#bbm-ae').val(btn.data('ae'));
+            $('#bbm-jam_me').val(btn.data('jam_me'));
+            $('#bbm-jam_ae').val(btn.data('jam_ae'));
             $('#bbm-jumlah').val(btn.data('jumlah'));
-            $('#bbm-jam').val(btn.data('jam'));
             $('#btn-save-bbm').data('mode', 'edit').data('id', btn.data('id'));
             $('#modal-bbm').modal('show');
         });

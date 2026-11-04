@@ -8,6 +8,8 @@
         data-id_jenis="{{ $row->id_jenis }}"
         data-me="{{ $row->me }}"
         data-ae="{{ $row->ae }}"
+        data-jam_me="{{ $row->jam_me }}"
+        data-jam_ae="{{ $row->jam_ae }}"
         data-tgl_mulai="{{ $row->tgl_mulai }}">
         Edit
     </button>

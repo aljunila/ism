@@ -9,6 +9,7 @@ use App\Models\Trip;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use DB;
+use Carbon\Carbon;
 
 class LapyearBBMExport implements FromView
 {
@@ -18,24 +19,12 @@ class LapyearBBMExport implements FromView
     public function __construct($id, $year)
     {
         $this->id = $id;
-        $this->start = $year;
+        $this->year = $year;
     }
 
-   public function view(): View
+    public function view(): View
     {
-        // 1. Ambil daftar bulan unik yang ada di database untuk tahun tersebut
-        $months = LogBBM::query()
-            ->when(isset($this->year), function ($query) {
-                return $query->whereYear('tanggal', $this->year);
-            })
-            ->where('is_delete', 0)
-            ->selectRaw("DATE_FORMAT(tanggal, '%Y-%m') as bulan")
-            ->orderBy('bulan', 'ASC')
-            ->pluck('bulan')
-            ->unique()
-            ->values();
-
-        // 2. Ambil daftar kapal (fleet) aktif
+        // Semua kapal aktif
         $fleet = Kapal::where('status', 'A')
             ->when($this->id, function ($query, $id) {
                 return $query->where('id', $id);
@@ -45,71 +34,146 @@ class LapyearBBMExport implements FromView
 
         $fleetIds = $fleet->pluck('id');
 
-        // 3. Ambil SEMUA LogBBM dan Trip dalam rentang tahun tersebut sekaligus
-        $allLogBBM = LogBBM::query()
-            ->when(isset($this->year), function ($query) {
-                return $query->whereYear('tanggal', $this->year);
-            })
+        // Ambil log BBM dalam tahun yang dipilih
+        $logs = LogBBM::whereIn('id_kapal', $fleetIds)
+            ->whereYear('tanggal', $this->year)
             ->where('is_delete', 0)
-            ->whereIn('id_kapal', $fleetIds)
-            ->get();
+            ->orderBy('tanggal')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('id_kapal');
 
-        $allTrip = Trip::query()
-            ->when(isset($this->year), function ($query) {
-                return $query->whereYear('tanggal', $this->year);
-            })
+        // Ambil seluruh trip
+        $trips = Trip::whereIn('id_kapal', $fleetIds)
+            ->whereYear('tanggal', $this->year)
             ->where('is_delete', 0)
-            ->whereIn('id_kapal', $fleetIds)
-            ->get();
+            ->get()
+            ->groupBy('id_kapal');
 
-        // 4. Mapping data per bulan (Group by Month)
-        $date = $months->map(function ($bulanVal) use ($fleet, $allLogBBM, $allTrip) {
-            
-            $dt = new \stdClass();
-            $dt->bulan = $bulanVal; // Format: "2025-10"
+        $months = collect();
 
-            $dt->kapal = $fleet->map(function ($kp) use ($bulanVal, $allLogBBM, $allTrip) {
-                
-                // Filter log khusus kapal ini dan di bulan tersebut (Y-m)
-                $logsKapalBulan = $allLogBBM->filter(function ($log) use ($kp, $bulanVal) {
-                    return $log->id_kapal == $kp->id 
-                        && \Carbon\Carbon::parse($log->tanggal)->format('Y-m') === $bulanVal;
+        for ($m = 1; $m <= 12; $m++) {
+
+            $bulan = Carbon::create($this->year, $m, 1);
+
+            $dataKapal = $fleet->map(function ($kp) use ($logs, $trips, $m) {
+
+                $logKapal = ($logs->get($kp->id) ?? collect())
+                    ->filter(function ($log) use ($m) {
+                        return Carbon::parse($log->tanggal)->month == $m;
+                    })
+                    ->sortBy('id')
+                    ->values();
+
+                $tripKapal = ($trips->get($kp->id) ?? collect())
+                    ->filter(function ($trip) use ($m) {
+                        return Carbon::parse($trip->tanggal)->month == $m;
+                    });
+
+                // Saldo awal dan akhir bulanan
+                $saldoAwal = $logKapal->first();
+                $saldoAkhir = $logKapal->last();
+
+                // Pisahkan berdasarkan status
+                $operation = $logKapal->where('status', 1);
+                $anchorage = $logKapal->where('status', 2);
+
+                // Hitung trip berdasarkan status harian
+                $tripOperation = 0;
+                $tripAnchorage = 0;
+
+                $tanggalLog = $logKapal->groupBy(function ($log) {
+                    return Carbon::parse($log->tanggal)->format('Y-m-d');
                 });
 
-                // Filter trip khusus kapal ini dan di bulan tersebut
-                $tripsKapalBulan = $allTrip->filter(function ($trip) use ($kp, $bulanVal) {
-                    return $trip->id_kapal == $kp->id 
-                        && \Carbon\Carbon::parse($trip->tanggal)->format('Y-m') === $bulanVal;
-                });
+                foreach ($tanggalLog as $tanggal => $logsTanggal) {
 
-                $clonedKp = clone $kp;
+                    $status = $logsTanggal->first()->status;
 
-                // Saldo Awal (Ambil data paling awal di bulan tersebut)
-                $clonedKp->saldo_awal = $logsKapalBulan->sortBy('id')->first();
+                    $jumlahTrip = $tripKapal->filter(function ($trip) use ($tanggal) {
+                        return Carbon::parse($trip->tanggal)->format('Y-m-d') == $tanggal;
+                    })->count();
 
-                // Saldo Akhir (Ambil data paling akhir di bulan tersebut)
-                $clonedKp->saldo_akhir = $logsKapalBulan->sortByDesc('id')->first();
+                    if ($status == 1) {
+                        $tripOperation += $jumlahTrip;
+                    } else {
+                        $tripAnchorage++;
+                    }
+                }
 
-                // Total Trip dalam sebulan
-                $clonedKp->trip = $tripsKapalBulan->count();
+                // Helper perhitungan
+                $hitung = function ($data) {
+                    $pakai = $data->where('id_jenis', 1);
+                    $tambah = $data->where('id_jenis', 2);
 
-                // SUM (Jumlahkan) ME, AE, dan Tambah (id_jenis = 2) selama sebulan
-                $clonedKp->sum_me_1 = $logsKapalBulan->where('jns_pakai', 'ME')->where('status',1)->sum('jumlah');
-                $clonedKp->sum_ae_1 = $logsKapalBulan->where('jns_pakai', 'AE')->where('status',1)->sum('jumlah');
+                    return [
+                        'me' => $pakai->sum('me'),
+                        'jam_me' => $pakai->sum('jam_me'),
+                        'ae' => $pakai->sum('ae'),
+                        'jam_ae' => $pakai->sum('jam_ae'),
+                        'pakai' => $pakai->sum('jumlah'),
+                        'tambah' => $tambah->sum('jumlah'),
+                    ];
+                };
 
-                $clonedKp->sum_me_2 = $logsKapalBulan->where('jns_pakai', 'ME')->where('status',2)->sum('jumlah');
-                $clonedKp->sum_ae_2 = $logsKapalBulan->where('jns_pakai', 'AE')->where('status',2)->sum('jumlah');
-                $clonedKp->sum_tambah = $logsKapalBulan->where('id_jenis', 2)->sum('jumlah');
-                $clonedKp->count = count($logsKapalBulan->where('status',2));
+                $op = $hitung($operation);
+                $an = $hitung($anchorage);
 
-                return $clonedKp;
+                // Rata-rata ME dan AE berdasarkan jam operasional
+                $op['rata_me'] = $op['jam_me'] > 0
+                    ? round($op['me'] / $op['jam_me'], 2)
+                    : 0;
+
+                $op['rata_ae'] = $op['jam_ae'] > 0
+                    ? round($op['ae'] / $op['jam_ae'], 2)
+                    : 0;
+
+                $an['rata_me'] = $an['jam_me'] > 0
+                    ? round($an['me'] / $an['jam_me'], 2)
+                    : 0;
+
+                $an['rata_ae'] = $an['jam_ae'] > 0
+                    ? round($an['ae'] / $an['jam_ae'], 2)
+                    : 0;
+
+                return [
+                    'id' => $kp->id,
+                    'nama' => $kp->nama,
+
+                    'saldo_awal' => $saldoAwal ? $saldoAwal->saldo_awal : 0,
+                    'saldo_akhir' => $saldoAkhir ? $saldoAkhir->saldo_akhir : 0,
+
+                    'operation' => array_merge($op, [
+                        'trip' => $tripOperation,
+                        'rata' => $tripOperation > 0
+                            ? round($op['pakai'] / $tripOperation)
+                            : 0,
+                    ]),
+
+                    'anchorage' => array_merge($an, [
+                        'trip' => $tripAnchorage,
+                        'rata' => $tripAnchorage > 0
+                            ? round($an['pakai'] / $tripAnchorage)
+                            : 0,
+                    ]),
+                ];
             });
 
-            return $dt;
-        })->filter(function ($dt) {
-            return $dt->kapal->isNotEmpty();
-        });
+            // Lewati bulan yang tidak memiliki data BBM
+            if ($logs->flatten()->contains(function ($log) use ($m) {
+                return Carbon::parse($log->tanggal)->month == $m;
+            })) {
+                $months->push([
+                    'bulan' => $bulan->translatedFormat('F Y'),
+                    'kapal' => $dataKapal,
+                ]);
+            }
+        }
 
-        return view('export.lapyearbbm', compact('date', 'fleet'));
+        return view('export.lapyearbbm', [
+            'months' => $months,
+            'fleet' => $fleet,
+            'year' => $this->year,
+        ]);
     }
 }

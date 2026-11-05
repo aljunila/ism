@@ -322,11 +322,11 @@ class DashboardController extends Controller
                         );
 
         if ((int) $roleJenis === 2) {
-            $bbm->where('k.pemilik', Session::get('id_perusahaan'))->pluck('id');
+            $bbm->where('k.pemilik', Session::get('id_perusahaan'));
         } else if ((int) $roleJenis === 3) {
-            $bbm->where('k.id', Session::get('id_kapal'))->pluck('id');
+            $bbm->where('k.id', Session::get('id_kapal'));
         } else if ((int) $roleJenis === 6) {
-            $bbm->where('k.id_cabang', Session::get('id_cabang'))->pluck('id');
+            $bbm->where('k.id_cabang', Session::get('id_cabang'));
         }
         $data['bbm'] = $bbm->groupBy('k.id', 'k.nama')->orderBy('k.nama')->get();
 
@@ -335,11 +335,11 @@ class DashboardController extends Controller
                     ->select('b.nama', 'a.saldo')
                     ->where('b.status', 'A');
         if ((int) $roleJenis === 2) {
-            $saldobbm->where('b.pemilik', Session::get('id_perusahaan'))->pluck('id');
+            $saldobbm->where('b.pemilik', Session::get('id_perusahaan'));
         } else if ((int) $roleJenis === 3) {
-            $saldobbm->where('b.id', Session::get('id_kapal'))->pluck('id');
+            $saldobbm->where('b.id', Session::get('id_kapal'));
         } else if ((int) $roleJenis === 6) {
-            $saldobbm->where('b.id_cabang', Session::get('id_cabang'))->pluck('id');
+            $saldobbm->where('b.id_cabang', Session::get('id_cabang'));
         }
         $data['saldobbm'] = $saldobbm->orderBy('b.nama')->get();
 

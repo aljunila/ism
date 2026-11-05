@@ -456,7 +456,7 @@
                                         </tbody>
                                     </table><br>
                                     @endif
-                                    <button type="button" class="btn btn-success btn-sm" id="tambah" disabled>Tambah</button>
+                                    <button type="button" class="btn btn-success btn-sm" id="tambah" {{ isset($data) ? 'enabled' : 'disabled' }}>Tambah</button>
                                 </div>
                             </div>
                             <div id="field-container"></div>

@@ -23,6 +23,7 @@
 
    <script>
         $('#cabang').show();
+        $('#kontrak').hide();
         $('#form_karyawan').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
 
@@ -82,6 +83,15 @@
                 $('#cabang').hide();
             }
         });
+
+        $(document).on('change', '#status_karyawan', function() {
+            let status = $(this).val();
+            if(status=='K'){
+                $('#kontrak').show();
+            } else {
+                $('#kontrak').hide();
+            }
+        })
     </script>
 @endsection
 
@@ -418,12 +428,20 @@
                                 <div class="col-sm-9">
                                     <select name="status_karyawan" id="status_karyawan"  class="form-control" required>
                                         <option value="">Pilih</option>
-                                        <option value="TP">Tetap Permanen</option>
-                                        <option value="TC">Tetap Percobaan</option>
-                                        <option value="K">Kontrak</option>
+                                        <option value="TP">PKWTT</option>
+                                        <option value="K">PKWT</option>
                                         <option value="F">Freelance</option>
                                         <option value="M">Magang</option>
+                                        <option value="H">Harian</option>
                                     </select>
+                                </div>
+                            </div>
+                            <div class="mb-1 row" id="kontrak">
+                                <div class="col-sm-3">
+                                    <label class="col-form-label" for="first-name">Tgl Berakhir Kontrak</label>
+                                </div>
+                                <div class="col-sm-9">
+                                    <input type="date" name="tgl_kontrak" id="tgl_kontrak" class="form-control" required>
                                 </div>
                             </div>
                             <div class="mb-1 row">

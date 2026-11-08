@@ -171,6 +171,7 @@ class KaryawanController extends Controller
             'bpjs_tk' => $request->input('bpjs_tk'),
             'tgl_mulai' => $request->input('tgl_mulai'),
             'status_karyawan' => $request->input('status_karyawan'),
+            'tgl_kontrak' => $request->input('tgl_kontrak'),
             'id_jabatan' => $request->input('id_jabatan'),
             'id_perusahaan' => $request->input('id_perusahaan'),
             'id_kapal' => $request->input('id_kapal'),

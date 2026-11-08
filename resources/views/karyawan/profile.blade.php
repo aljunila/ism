@@ -37,6 +37,8 @@
     <script src="{{ url('/vuexy/app-assets/js/scripts/pages/app-user-view.js')}}"></script>
     <script>
         $('#cabang').show();
+        $('#kontrak').hide();
+        
         $('#form_karyawan').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
             let id = $('#id').val();
@@ -110,6 +112,15 @@
             $('#file').html(file);
             $('#FormUpload').modal('show');
         });
+
+        $(document).on('change', '#status_karyawan', function() {
+            let status = $(this).val();
+            if(status=='K'){
+                $('#kontrak').show();
+            } else {
+                $('#kontrak').hide();
+            }
+        })
 
         $('#form_file').on('submit', function(e){
             e.preventDefault(); // cegah submit biasa
@@ -535,35 +546,6 @@
                                             <td>{!! ($show->id_jabatan) ? $show->jabatan : '-' !!}</td>
                                         </tr>
                                         <tr>
-                                            <td>Status Karyawan</td>
-                                            <td>:</td>
-                                            <td>@switch($show->status_karyawan)
-                                                    @case('TP')
-                                                        Tetap Permanen
-                                                        @break
-
-                                                    @case('TC')
-                                                        Tetap Percobaan
-                                                        @break
-
-                                                    @case('K')
-                                                        Kontrak
-                                                        @break
-
-                                                    @case('F')
-                                                        Freelance
-                                                        @break
-
-                                                    @case('M')
-                                                        Magang
-                                                        @break
-
-                                                    @default
-                                                        -
-                                                @endswitch
-                                            </td>
-                                        </tr>
-                                        <tr>
                                             <td> Tanggal Mulai Gabung</td>
                                             <td>:</td>
                                             <td>{{ $show->tgl_mulai ? \Carbon\Carbon::parse($show->tgl_mulai)->format('d-m-Y') : '-' }}</td>
@@ -579,6 +561,42 @@
                                                 @endif
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td>Status Karyawan</td>
+                                            <td>:</td>
+                                            <td>@switch($show->status_karyawan)
+                                                    @case('TP')
+                                                        PKWTT
+                                                        @break
+
+                                                    @case('H')
+                                                        Harian
+                                                        @break
+
+                                                    @case('K')
+                                                        PKWT
+                                                        @break
+
+                                                    @case('F')
+                                                        Freelance
+                                                        @break
+
+                                                    @case('M')
+                                                        Magang
+                                                        @break
+
+                                                    @default
+                                                        -
+                                                @endswitch
+                                            </td>
+                                        </tr>
+                                        @if($show->status_karyawan=='K')
+                                        <tr>
+                                            <td> Tanggal Berakhir Kontrak</td>
+                                            <td>:</td>
+                                            <td>{{ $show->tgl_kontrak ? \Carbon\Carbon::parse($show->tgl_kontrak)->format('d-m-Y') : '-' }}</td>
+                                        </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                                 <br><br>
@@ -750,25 +768,33 @@
                         </div>
                         <div class="mb-1 row">
                             <div class="col-sm-3">
+                                <label class="col-form-label" for="first-name">Tanggal mulai gabung</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="date" name="tgl_mulai" id="tgl_mulai" class="form-control" value="{{$show->tgl_mulai}}">
+                            </div>
+                        </div>
+                        <div class="mb-1 row">
+                            <div class="col-sm-3">
                                 <label class="col-form-label" for="first-name">Status Karyawan</label>
                             </div>
                             <div class="col-sm-9">
                                 <select name="status_karyawan" id="status_karyawan"  class="form-control">
                                     <option value="">Pilih</option>
-                                    <option value="TP" @selected ($show->status_karyawan=='TP')>Tetap Permanen</option>
-                                    <option value="TC" @selected ($show->status_karyawan=='TC')>Tetap Percobaan</option>
-                                    <option value="K" @selected ($show->status_karyawan=='K')>Kontrak</option>
+                                    <option value="TP" @selected ($show->status_karyawan=='TP')>PKWTT</option>
+                                    <option value="K" @selected ($show->status_karyawan=='K')>PKWT</option>
                                     <option value="F" @selected ($show->status_karyawan=='F')>Freelance</option>
                                     <option value="M" @selected ($show->status_karyawan=='M')>Magang</option>
+                                    <option value="H" @selected ($show->status_karyawan=='H')>Harian</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-1 row">
+                        <div class="mb-1 row" id="kontrak">
                             <div class="col-sm-3">
-                                <label class="col-form-label" for="first-name">Tanggal mulai gabung</label>
+                                <label class="col-form-label" for="first-name">Tanggal Berakhir Kontrak</label>
                             </div>
                             <div class="col-sm-9">
-                                <input type="date" name="tgl_mulai" id="tgl_mulai" class="form-control" value="{{$show->tgl_mulai}}">
+                                <input type="date" name="tgl_kontrak" id="tgl_kontrak" class="form-control" value="{{$show->tgl_kontrak}}">
                             </div>
                         </div>
                     </div>

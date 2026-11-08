@@ -44,6 +44,7 @@
             type: "POST",
             data: function(d){
                 d.id_perusahaan= $('#id_perusahaan').val(),
+                d.status= $('#status').val(),
                 d.kel= $('#kel').val(),
                 d.id_kapal= $('#id_kapal').val(),
                 d.id_cabang= $('#id_cabang').val(),
@@ -75,6 +76,22 @@
                 }
             },
             { data: 'jabatan' },
+            { 
+                data: 'status_karyawan',
+                render: function (data, type, row) {
+                        let status = '-';
+
+                        if (data == 'TP') status = 'PKWTT';
+                        if (data == 'K') status = 'PKWT';
+                        if (data == 'F') status = 'Freelance';
+                        if (data == 'M') status = 'Magang';
+                        if (data == 'H') status = 'Harian';
+                        if (row.tgl_kontrak) {
+                            status += ' (' + row.tgl_kontrak + ')';
+                        }
+                        return status;
+                    }
+            },
             { 
                 data: null, 
                 orderable: false, 
@@ -154,6 +171,10 @@
         }
     })
 
+    $(document).on('change', '#status', function() {
+        table.ajax.reload();
+    })
+
     $(document).on('change', '#id_perusahaan', function() {
         var perusahaanID = $(this).val();
         if (perusahaanID) {
@@ -231,7 +252,6 @@
                                     </select>
                                 </div>
                                 @endif
-                                @include('perusahaan')
                                 <div class="col-sm-2">
                                     <select name="id_kapal" id="id_kapal" class="form-control kapal">
                                         <option value="">Pilih Kapal</option>
@@ -244,6 +264,24 @@
                                         @foreach($cabang as $c)
                                         <option value="{{$c->id}}">{{$c->cabang}}</option>
                                         @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <select name="id_perusahaan" id="id_perusahaan" class="form-control perusahaan">
+                                        <option value="">Semua</option>
+                                        @foreach($perusahaan as $p)
+                                            <option value="{{$p->id}}">{{$p->nama}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-sm-2">
+                                    <select name="status" id="status"  class="form-control" required>
+                                        <option value="">Pilih Status</option>
+                                        <option value="TP">PKWTT</option>
+                                        <option value="K">PKWT</option>
+                                        <option value="F">Freelance</option>
+                                        <option value="M">Magang</option>
+                                        <option value="H">Harian</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
@@ -260,6 +298,7 @@
                                         <th>NIK</th>
                                         <th>Penempatan</th>
                                         <th>Jabatan</th>
+                                        <th>Status</th>
                                         <th>Dokumen</th>
                                     </tr>
                                     </thead>

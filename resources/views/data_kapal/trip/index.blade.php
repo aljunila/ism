@@ -66,10 +66,26 @@
                         </tr>
                     </thead>
                     <tbody></tbody>
-                    <tfoot>
+                     <tfoot>
                         <tr>
                             <th colspan="4" class="text-end">Grand Total</th>
-                            <th id="grandTotal">Rp 0</th>
+                            <th id="grandTotal" class="text-end">Rp 0</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Biaya Sandar</th>
+                            <th id="sandar" class="text-end">Rp 0</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Biaya Kepil</th>
+                            <th id="kepil" class="text-end">Rp 0</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Biaya Ticket</th>
+                            <th id="tiket" class="text-end">Rp 0</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="text-end">Pendapatan</th>
+                            <th id="total" class="text-end">Rp 0</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -187,9 +203,26 @@
                 url: `trip/${tripId}/amount`,
                 dataSrc: function (json) {
                     let grandTotal = 0;
-                    json.forEach(row => grandTotal += row.total);
+                    let totalJumlah = 0;
+
+                    json.data.forEach(row => {
+                        grandTotal += Number(row.total || 0);
+                        totalJumlah += Number(row.jumlah || 0);
+                    });
+
+                    let sandar = Number(json.sandar || 0);
+                    let kepil = Number(json.kepil || 0);
+                    let tiket = totalJumlah * Number(json.tiket || 0);
+
+                    let pendapatan = grandTotal - sandar - kepil - tiket;
+
                     $('#grandTotal').html(formatRupiah(grandTotal));
-                    return json;
+                    $('#sandar').html(formatRupiah(sandar));
+                    $('#kepil').html(formatRupiah(kepil));
+                    $('#tiket').html(formatRupiah(tiket));
+                    $('#total').html(formatRupiah(pendapatan));
+
+                    return json.data;
                 }
             },
             columns: [

@@ -170,10 +170,13 @@
                             </div>
                             <div class="form-group-row row">
                                 <div class="col-sm-3 col-md-2">
-                                    <label class="col-form-label field-label">Tanggal</label>
+                                    <label class="col-form-label field-label">Tanggal/Jam</label>
                                 </div>
-                                <div class="col-sm-9 col-md-10">
+                                <div class="col-sm-9 col-md-5">
                                     <input type="date" class="form-control" id="tanggal" name="tanggal" required value="{{ old('tanggal', $trip->tanggal ?? '') }}">
+                                </div>
+                                <div class="col-sm-9 col-md-5">
+                                    <input type="time" class="form-control" id="jam" name="jam"  placeholder="Jam" value="{{ old('jam', $trip->jam ?? '') }}" {{ isset($trip) ? 'disabled' : '' }}>
                                 </div>
                             </div>
                             <div class="form-group-row row">
@@ -191,9 +194,9 @@
                             </div>
                             <div class="form-group-row row">
                                 <div class="col-sm-3 col-md-2">
-                                    <label class="col-form-label field-label">Trip ke</label>
+                                    <label class="col-form-label field-label">Trip/Dermaga</label>
                                 </div>
-                                <div class="col-sm-9 col-md-10">
+                                <div class="col-sm-9 col-md-5">
                                     <select name="trip" id="trip"  class="form-control">
                                         <option value="">Pilih</option>
                                         @for($a=1; $a<=10; $a++)
@@ -201,13 +204,30 @@
                                         @endfor
                                     </select>
                                 </div>
+                                <div class="col-sm-9 col-md-5">
+                                    <input type="text" class="form-control" id="dermaga" name="dermaga" value="{{ old('dermaga', $trip->dermaga ?? '') }}">
+                                </div>
                             </div>
                             <div class="form-group-row row">
                                 <div class="col-sm-3 col-md-2">
-                                    <label class="col-form-label field-label">Jam</label>
+                                    <label class="col-form-label field-label">Biaya Sandar</label>
                                 </div>
-                                <div class="col-sm-9 col-md-10">
-                                    <input type="time" class="form-control" id="jam" name="jam" value="{{ old('jam', $trip->jam ?? '') }}" {{ isset($trip) ? 'disabled' : '' }}>
+                                <div class="col-sm-9 col-md-5">
+                                    <input type="number" class="form-control" id="call" name="call" placeholder="Call" value="{{ old('call', $trip->call ?? '') }}" >
+                                </div>
+                                <div class="col-sm-9 col-md-5">
+                                    <input type="number" class="form-control" id="sandar" name="sandar" placeholder="Sandar" value="{{ old('sandar', $trip->sandar ?? '') }}" >
+                                </div>
+                            </div>
+                            <div class="form-group-row row">
+                                <div class="col-sm-3 col-md-2">
+                                    <label class="col-form-label field-label">Biaya Lainnya</label>
+                                </div>
+                                <div class="col-sm-9 col-md-5">
+                                    <input type="number" class="form-control" id="kepil" name="kepil" placeholder="Kepil" value="{{ old('kepil', $trip->kepil ?? '') }}">
+                                </div>
+                                <div class="col-sm-9 col-md-5">
+                                    <input type="number" class="form-control" id="tiket" name="tiket" placeholder="Ticket" value="{{ old('tiket', $trip->tiket ?? '') }}">
                                 </div>
                             </div>
                             <hr class="trip-divider">

@@ -212,10 +212,14 @@ class DashboardController extends Controller
             $permintaanQuery->where('a.created_by', $userId);
         }
 
-        $data['permintaan_dashboard'] = $permintaanQuery
-            ->orderBy('a.tanggal', 'DESC')
-            ->orderBy('a.id', 'DESC')
-            ->limit(36)
+        $permintaanTerbatas = DB::query()
+            ->fromSub($permintaanQuery
+                ->orderByDesc('a.tanggal')
+                ->orderByDesc('a.id')
+                ->limit(36), 'permintaan')
+            ->select('*');
+
+        $data['permintaan_dashboard'] = $permintaanTerbatas
             ->paginate(12, ['*'], 'permintaan_page');
 
         if (Schema::hasTable('user')) {
@@ -300,8 +304,15 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        $awalBulan = Carbon::now()->startOfMonth();
-        $akhirBulan = Carbon::now()->endOfMonth();
+        $periodeGrafik = request('periode', now()->format('Y-m'));
+        try {
+            $tanggalGrafik = Carbon::createFromFormat('!Y-m', $periodeGrafik);
+        } catch (\Exception $e) {
+            $tanggalGrafik = now()->startOfMonth();
+            $periodeGrafik = now()->format('Y-m');
+        }
+        $awalBulan = $tanggalGrafik->copy()->startOfMonth();
+        $akhirBulan = $tanggalGrafik->copy()->endOfMonth();
 
         $bbm = DB::table('kapal as k')
                         ->leftJoin('t_log_bbm as l', function ($join) use ($awalBulan, $akhirBulan) {
@@ -329,6 +340,7 @@ class DashboardController extends Controller
             $bbm->where('k.id_cabang', Session::get('id_cabang'));
         }
         $data['bbm'] = $bbm->groupBy('k.id', 'k.nama')->orderBy('k.nama')->get();
+        $data['periodeGrafik'] = $periodeGrafik;
 
         $saldobbm = DB::table('t_bbm_kapal as a')
                     ->leftjoin('kapal as b', 'a.id_kapal', '=', 'b.id')

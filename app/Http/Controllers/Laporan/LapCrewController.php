@@ -52,6 +52,7 @@ class LapCrewController extends Controller
         $perusahaan = ($roleJenis == 2) ? Session::get('id_perusahaan') : $request->input('id_perusahaan');
         $kapal = ($roleJenis == 3) ? Session::get('id_kapal') : $request->input('id_kapal');
         $cabang = $request->input('id_cabang');
+        $status = $request->input('status');
         $kel = $request->input('kel');
         if(($kel==2) && ($roleJenis==6)) {
             $cabang = Session::get('id_cabang');
@@ -68,6 +69,8 @@ class LapCrewController extends Controller
                     'karyawan.nama',
                     'karyawan.nik',
                     'karyawan.nip',
+                    'karyawan.status_karyawan',
+                    'karyawan.tgl_kontrak',
                     'kapal.nama as kapal',
                     'jabatan.nama as jabatan',
                     'm_cabang.cabang'
@@ -76,6 +79,9 @@ class LapCrewController extends Controller
                 ->where('karyawan.status','A')
                 ->when($kel, function($query, $kel) {
                     return $query->where('jabatan.kel', $kel);
+                })
+                ->when($status, function($query, $status) {
+                    return $query->where('karyawan.status_karyawan', $status);
                 })
                 ->when($perusahaan, function($query, $perusahaan) {
                     return $query->where('perusahaan.id', $perusahaan);

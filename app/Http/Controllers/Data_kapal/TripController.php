@@ -112,6 +112,11 @@ class TripController extends Controller
               'tanggal' => $request->input('tanggal'),
               'trip' => $request->input('trip'),
               'jam' => $request->input('jam'),
+              'call' => $request->input('call'),
+              'sandar' => $request->input('sandar'),
+              'dermaga' => $request->input('dermaga'),
+              'kepil' => $request->input('kepil'),
+              'tiket' => $request->input('tiket'),
               'data' => $data,
               'created_by' => Session::get('userid'),
               'created_date' => date('Y-m-d H:i:s'),
@@ -147,6 +152,11 @@ class TripController extends Controller
             $up->update([
                 'data' => $data,
                 'tanggal' => $request->post('tanggal'),
+                'call' => $request->input('call'),
+                'sandar' => $request->input('sandar'),
+                'dermaga' => $request->input('dermaga'),
+                'kepil' => $request->input('kepil'),
+                'tiket' => $request->input('tiket'),
                 'trip' => $request->post('trip'),
                 'changed_by' => Session::get('userid'),
             ]);
@@ -206,6 +216,13 @@ class TripController extends Controller
                 'total'        => $row['total']
             ];
         }
+
+        return response()->json([
+            'data'        => $result,
+            'sandar'      => $trip->sandar,
+            'kepil'       => $trip->kepil,
+            'tiket' => $trip->tiket,
+        ]);
 
         return response()->json($result);
     }

@@ -1164,8 +1164,12 @@
             <div class="card-header">
                 <h5 class="mb-0">Grafik Pemakaian BBM</h5>
                 <small class="text-muted">
-                    {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                    {{ \Carbon\Carbon::parse($periodeGrafik)->translatedFormat('F Y') }}
                 </small>
+
+                <form method="GET" action="{{ url()->current() }}" class="d-flex align-items-center gap-2">
+                    <input type="month" id="month" name="periode" class="form-control"  value="{{ $periodeGrafik }}" onchange="this.form.submit()">
+                </form>
             </div>
 
             <div class="card-body">

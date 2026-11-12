@@ -1635,7 +1635,7 @@ class PermintaanController extends Controller
                         'created_date' => date('Y-m-d H:i:s')
                     ]);
 
-                    if ($jumlah <= $tot) {
+                    if ($jumlah >= $tot) {
                         DetailPermintaan::where('id', $id)->update([
                             'flow_stage' => "selesai",
                             'status'    => 3,
@@ -1649,6 +1649,12 @@ class PermintaanController extends Controller
                         $statusId = 2;
                         $eventCode = "flow_workshop";
                         $logKet = "Barang dikirim sebagian";
+                        $sisa = $tot-$jumlah;
+                        DetailPermintaan::where('id', $id)->update([
+                            'jumlah' => $sisa,
+                            'changed_by' => Session::get('userid'),
+                            'changed_date' => date('Y-m-d H:i:s')
+                        ]);
                     }
 
                     $cek = Gudang::where('id_kapal', $save->id_kapal)

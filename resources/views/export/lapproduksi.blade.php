@@ -20,6 +20,11 @@
         @endforeach
         <th style="{{ $styleTh }}">Total Tiket</th>
         <th style="{{ $styleTh }}">Gross (Rp)</th>
+        <th style="{{ $styleTh }}">Ticket</th>
+        <th style="{{ $styleTh }}">Call</th>
+        <th style="{{ $styleTh }}">Sandar</th>
+        <th style="{{ $styleTh }}">Kepil</th>
+        <th style="{{ $styleTh }}">Pendapatan</th>
     </tr>
     @foreach($data as $show)
     @php
@@ -36,11 +41,18 @@
         @php 
             $jml = $jml+$json[$k->id]['jumlah'];
             $total= $total+$json[$k->id]['total']; 
+            $tiket = $jml*$show->tiket;
+            $pend = $total - $tiket - $show->sandar - $show->kepil;
         @endphp
         <td style="{{ $styleTd }}">{{ $json[$k->id]['jumlah'] ?? 0 }}</td>
         @endforeach
         <td style="{{ $styleTd }}">{{ $jml }}</td>
         <td style="{{ $styleTd }}">{{ $total }}</td>
+        <td style="{{ $styleTd }}">{{ $tiket }}</td>
+        <td style="{{ $styleTd }}">{{ $show->call }}</td>
+        <td style="{{ $styleTd }}">{{ $show->sandar }}</td>
+        <td style="{{ $styleTd }}">{{ $show->kepil }}</td>
+        <td style="{{ $styleTd }}">{{ $pend }}</td>
     </tr>
     @endforeach
 </table>

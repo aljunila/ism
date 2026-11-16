@@ -162,34 +162,59 @@
             });
         });
 
-        $('#file_dock').on('submit', function(e){
-            e.preventDefault(); // cegah submit biasa
+        $('#file_dock').on('submit', function(e) {
+            e.preventDefault();
+
             let id = $('#id_dock').val();
             let formData = new FormData(this);
 
+            formData.append('_method', 'PUT');
+
             $.ajax({
                 url: "/data_teknik/docking/file/" + id,
-                method: "PUT",
+                method: "POST",
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function(response){
+
+                success: function(response) {
+                    if (response.status === 'success') {
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
-                            text: response.message ?? 'File berhasil disimpan',
+                            text: response.message,
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
                             $('#UpDocking').modal('hide');
                             window.location.reload();
                         });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message ?? 'File gagal disimpan'
+                        });
+                    }
                 },
-                error: function(xhr){
+
+                error: function(xhr) {
+                    let message = 'Gagal menyimpan file';
+
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.errors) {
+                            message = Object.values(xhr.responseJSON.errors)
+                                .flat()
+                                .join('\n');
+                        } else {
+                            message = xhr.responseJSON.message ?? message;
+                        }
+                    }
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Gagal menyimpan file'
+                        text: message
                     });
                 }
             });
@@ -205,23 +230,44 @@
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function(response){
+                 success: function(response) {
+                    if (response.status === 'success') {
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
-                            text: response.message ?? 'Data berhasil disimpan',
+                            text: response.message,
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            $('#FormDocking').modal('hide');
+                            $('#UpDocking').modal('hide');
                             window.location.reload();
                         });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: response.message ?? 'File gagal disimpan'
+                        });
+                    }
                 },
-                error: function(xhr){
+
+                error: function(xhr) {
+                    let message = 'Gagal menyimpan file';
+
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.errors) {
+                            message = Object.values(xhr.responseJSON.errors)
+                                .flat()
+                                .join('\n');
+                        } else {
+                            message = xhr.responseJSON.message ?? message;
+                        }
+                    }
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Gagal menyimpan data'
+                        text: message
                     });
                 }
             });
@@ -616,7 +662,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="hidden" name="id_dock" id="id_dock">
+                    <input type="text" name="id_dock" id="id_dock">
                     <button type="submit" class="btn btn-primary" id="save_docking">Simpan</button>
                 </div>
             </form>

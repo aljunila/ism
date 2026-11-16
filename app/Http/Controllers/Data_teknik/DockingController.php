@@ -219,20 +219,58 @@ class DockingController extends Controller
 
      public function updatefile(Request $request, $id)
     {
-        
-        if($request->hasFile('docking')) {
-            $request->validate([
+        $request->validate([
             'docking' => 'required|file|mimes:pdf|max:20480',
-            ]);
-            $file = $request->file('docking');
-            $nama_file = time()."_".str_replace(" ","_",$file->getClientOriginalName());
-        
-            // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = public_path('file_docking');
-            $file->move($tujuan_upload,$nama_file);
-            $save = Docking::find($id)->update(['file' => $nama_file]); 
+        ]);
+
+        $docking = Docking::find($id);
+
+        if (!$docking) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data docking tidak ditemukan'
+            ], 404);
         }
-        return response()->json(['status' => 'success', 'message' => 'Data docking berhasil diubah'],200);
+
+        if (!$request->hasFile('docking')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'File belum dipilih'
+            ], 422);
+        }
+
+        try {
+            $file = $request->file('docking');
+
+            $nama_file = time() . '_' .
+                str_replace(' ', '_', $file->getClientOriginalName());
+
+            $tujuan_upload = public_path('file_docking');
+
+            // Pastikan folder tersedia
+            if (!file_exists($tujuan_upload)) {
+                mkdir($tujuan_upload, 0755, true);
+            }
+
+            // Upload file
+            $file->move($tujuan_upload, $nama_file);
+
+            // Update database
+            $docking->update([
+                'file' => $nama_file
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'File docking berhasil disimpan'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menyimpan file: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
 }

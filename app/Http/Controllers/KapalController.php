@@ -187,7 +187,7 @@ class KapalController extends Controller
         $id_kapal = $show->id;
         $data['show'] = $show;
         $data['active'] = "kapal";
-        $data['docking'] = Docking::where('id_kapal', $id_kapal)->where('is_delete', 0)->get();
+        $data['docking'] = Docking::where('id_kapal', $id_kapal)->where('is_delete', 0)->orderBY('tahun', 'DESC')->get();
         return view('kapal.profile',$data);
     }
 
@@ -246,28 +246,72 @@ class KapalController extends Controller
         return $pdf->stream($nama.'.pdf');
     }
 
-    public function docking_store(Request $request, $id) {
+    public function docking_store(Request $request, $id)
+    {
         $request->validate([
+            'tgl_mulai' => 'required|date',
+            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
             'file' => 'nullable|file|mimes:pdf|max:20480',
         ]);
+        $bulan = Carbon::parse($request->input('tgl_mulai'))->format('m');
+        $tahun = Carbon::parse($request->input('tgl_mulai'))->format('Y');
 
-        if ($request->hasFile('file')) {
-            // upload file baru
-            $file = $request->file('file');
-            $nama_file = time() . "_" . str_replace(" ", "_", $file->getClientOriginalName());
-            $file->move(public_path('file_docking'), $nama_file);
+        try {
+            $nama_file = null;
 
-            $save = Docking::insert([
-                'uid' => Str::uuid()->toString(),
-                'id_kapal' => $id,
-                'tgl_mulai' => $request->input('tgl_mulai'),
-                'tgl_selesai' => $request->input('tgl_selesai'),
-                'file' => $nama_file,
-                'is_delete' => 0,
-                'created_by' => Session::get('userid'),
-                'created_date' => date('Y-m-d')
-            ]); 
-            return response()->json($save);
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+
+                $nama_file = time() . '_' .
+                    str_replace(' ', '_', $file->getClientOriginalName());
+
+                $tujuan_upload = public_path('file_docking');
+
+                // Buat folder jika belum tersedia
+                if (!file_exists($tujuan_upload)) {
+                    mkdir($tujuan_upload, 0755, true);
+                }
+
+                $file->move($tujuan_upload, $nama_file);
+            }
+
+            $cek = Docking::where('id_kapal', $id)->where('tahun', $tahun)->exists();
+            if(!$cek){
+                $save = Docking::insert([
+                    'uid' => Str::uuid()->toString(),
+                    'id_kapal' => $id,
+                    'tgl_mulai' => $request->input('tgl_mulai'),
+                    'tgl_selesai' => $request->input('tgl_selesai'),
+                    'file' => $nama_file,
+                    'bulan' => $bulan,
+                    'tahun' => $tahun,
+                    'is_delete' => 0,
+                    'created_by' => Session::get('userid'),
+                    'created_date' => date('Y-m-d')
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data sudah ada'
+                ], 500); 
+            }
+            if (!$save) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data docking gagal disimpan'
+                ], 500);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data docking berhasil disimpan'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 

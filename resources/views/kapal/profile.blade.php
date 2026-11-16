@@ -662,7 +662,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="text" name="id_dock" id="id_dock">
+                    <input type="hidden" name="id_dock" id="id_dock">
                     <button type="submit" class="btn btn-primary" id="save_docking">Simpan</button>
                 </div>
             </form>

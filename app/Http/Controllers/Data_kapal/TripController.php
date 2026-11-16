@@ -145,13 +145,14 @@ class TripController extends Controller
                 'total'        => $value * $nominal
             ];
         }
-         $cek = Trip::where('id_kapal',$up->id_kapal)->where('tanggal',$request->input('tanggal'))->where('is_delete', 0)->where('jam', $up->jam)->exists();
-        if($cek) {
+         $cek = Trip::where('id_kapal',$up->id_kapal)->where('tanggal',$request->input('tanggal'))->where('is_delete', 0)->where('jam', $request->input('jam'))->first();
+        if($cek && $cek->id!=$id) {
             return response()->json(['status' => 'error', 'message' => 'Maaf, data trip sudah ada'],422);
         } else {
             $up->update([
                 'data' => $data,
                 'tanggal' => $request->post('tanggal'),
+                'jam' => $request->post('jam'),
                 'call' => $request->input('call'),
                 'sandar' => $request->input('sandar'),
                 'dermaga' => $request->input('dermaga'),

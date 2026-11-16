@@ -140,7 +140,13 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'kapal', name: 'kapal' },
-                { data: 'tanggal', name: 'tanggal' },
+                { data: 'tanggal',
+                    render: function(data) {
+                        if (!data) return '';
+                        let parts = data.split(' ')[0].split('-'); 
+                        return parts[2] + '-' + parts[1] + '-' + parts[0]; 
+                    }
+                },
                 { data: 'pelabuhan', name: 'pelabuhan' },
                 { data: 'trip', name: 'trip' },
                 { data: 'jam', name: 'jam' },

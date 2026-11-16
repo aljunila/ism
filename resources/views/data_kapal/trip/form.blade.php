@@ -176,7 +176,7 @@
                                     <input type="date" class="form-control" id="tanggal" name="tanggal" required value="{{ old('tanggal', $trip->tanggal ?? '') }}">
                                 </div>
                                 <div class="col-sm-9 col-md-5">
-                                    <input type="time" class="form-control" id="jam" name="jam"  placeholder="Jam" value="{{ old('jam', $trip->jam ?? '') }}" {{ isset($trip) ? 'disabled' : '' }}>
+                                    <input type="time" class="form-control" id="jam" name="jam"  placeholder="Jam" value="{{ old('jam', $trip->jam ?? '') }}">
                                 </div>
                             </div>
                             <div class="form-group-row row">
@@ -184,7 +184,7 @@
                                     <label class="col-form-label field-label">Pelabuhan</label>
                                 </div>
                                 <div class="col-sm-9 col-md-10">
-                                    <select name="id_pelabuhan" id="id_pelabuhan" required class="form-control"  {{ isset($trip) ? 'disabled' : '' }}>
+                                    <select name="id_pelabuhan" id="id_pelabuhan" required class="form-control" >
                                         <option value="">Pilih Pelabuhan</option>
                                             @foreach($pelabuhan as $p)
                                                 <option value="{{$p->id}}"  @selected (isset($trip) && $p->id==$trip->id_pelabuhan)>{{$p->nama}}</option>

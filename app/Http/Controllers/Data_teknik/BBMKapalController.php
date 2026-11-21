@@ -106,8 +106,10 @@ class BBMKapalController extends Controller
         if($cek>1){
              return response()->json(['status' => 'error', 'message' => 'Maaf, data sudah ada'],422);
         } else {
-            $get = LogBBM::findorFail($id);
-            $saldo_awal = $get->saldo_awal;
+            // $get = LogBBM::findorFail($id);
+            // $saldo_awal = $get->saldo_awal;
+            $rob_awal = BBMKapal::where('id_kapal', $request->post('id_kapal'))->first();
+            $saldo_awal = $rob_awal->saldo;
             if($request->post('id_jenis')==1) {
                 $jml = $request->post('me') + $request->post('ae');
                 $saldo_akhir = $saldo_awal - $jml;

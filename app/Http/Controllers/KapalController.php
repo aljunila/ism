@@ -341,7 +341,7 @@ class KapalController extends Controller
 
     public function delfile($id)
     {
-       $post = FileUpload::where('id',$id)->update(['status' => 'D']);;
+       $post = FileUpload::where('id',$id)->update(['status' => 'D']);
     }
 
     public function doclist($uid)

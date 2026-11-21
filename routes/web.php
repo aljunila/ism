@@ -70,6 +70,7 @@ use App\Http\Controllers\Laporan\LapKapalController;
 use App\Http\Controllers\Laporan\LapDockingController;
 use App\Http\Controllers\Laporan\LapProduksiController;
 use App\Http\Controllers\Laporan\LapBBMController;
+use App\Http\Controllers\Data_logistik\PermintaanBBMController;
 
 Route::get('/', function () {
     if (Session::get('login') || Auth::check()) {
@@ -95,6 +96,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('active-context/options', [\App\Http\Controllers\ActiveContextController::class, 'options']);
     Route::post('active-context/set', [\App\Http\Controllers\ActiveContextController::class, 'set']);
 });
+
+Route::get('/language/{locale}', function ($locale) { if (!in_array($locale, ['id', 'en'])) { abort(404); } session(['locale' => $locale]);return redirect()->back(); })->name('language.switch');
 
 Route::middleware(['auth', 'active.role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('show');
@@ -488,6 +491,18 @@ Route::middleware(['auth', 'active.role'])->group(function () {
         Route::post('kriteria', [KriteriaController::class, 'store'])->name('kriteria.store');
         Route::put('kriteria/{id}', [KriteriaController::class, 'update'])->name('kriteria.update');
         Route::delete('kriteria/{id}', [KriteriaController::class, 'destroy'])->name('kriteria.destroy');
+    });
+
+    Route::prefix('data_logistik')->group(function () {
+        Route::get('bbm', [PermintaanBBMController::class, 'index']);
+        Route::post('bbm/data', [PermintaanBBMController::class, 'data'])->name('reqbbm.data');
+        Route::post('bbm', [PermintaanBBMController::class, 'store'])->name('reqbbm.store');
+        Route::put('bbm/{id}', [PermintaanBBMController::class, 'update'])->name('reqbbm.update');
+        Route::get('bbm/pdf/{id}', [PermintaanBBMController::class, 'pdf'])->name('reqbbm.pdf');
+        Route::delete('bbm/{id}', [PermintaanBBMController::class, 'destroy'])->name('reqbbm.destroy');
+        Route::post('bbm/proses/{id}', [PermintaanBBMController::class, 'proses'])->name('reqbbm.proses');
+        Route::get('bbm/{id}', [PermintaanBBMController::class, 'elemen'])->name('reqbbm.elemen');
+        Route::post('bbm/dataByIdp', [PermintaanBBMController::class, 'dataByIdp'])->name('reqbbm.dataByIdp');
     });
 
     Route::prefix('permintaan')->group(function () {

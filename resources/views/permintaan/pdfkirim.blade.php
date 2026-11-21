@@ -84,10 +84,10 @@
             <?php $sisa = $row->jml_minta-$row->jumlah; ?>
             <tr>
                 <td>{{$loop->iteration}}</td>
-                <td>{{$row->barang}}</td>
+                <td>{!! ($row->id_detail_permintaan) ? $row->barang : 'BBM' !!}</td>
                 <td>{{$row->satuan}}</td>
                 <td>{{$row->jumlah}}</td>
-                <td>{{$sisa}}</td>
+                <td>{!! ($row->jml_minta) ? $sisa : '0' !!}</td>
                 <td></td>
             </tr>
             @endforeach
